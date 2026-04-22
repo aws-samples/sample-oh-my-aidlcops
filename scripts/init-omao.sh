@@ -4,7 +4,7 @@
 # Idempotent. Refuses to overwrite an existing .omao/ unless --force is given.
 
 set -euo pipefail
-IFS=$'\n\t'
+# IFS is left at the default; the script does not rely on word-splitting.
 
 # ---------------------------------------------------------------------------
 # Globals

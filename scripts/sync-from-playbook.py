@@ -40,7 +40,7 @@ from __future__ import annotations
 import argparse
 import os
 import re
-import subprocess
+import subprocess  # nosec B404 - only used to invoke hardcoded `git` with no untrusted input
 import sys
 from dataclasses import dataclass
 from pathlib import Path
@@ -124,14 +124,14 @@ def git_metadata(repo: Path) -> Tuple[Optional[str], Optional[str], Optional[str
     if not (repo / ".git").exists():
         return None, None, None
     try:
-        url = subprocess.check_output(
+        url = subprocess.check_output(  # nosec B603,B607 - hardcoded `git` binary, no shell, no user-controlled argv
             ["git", "-C", str(repo), "config", "--get", "remote.origin.url"],
             text=True,
         ).strip()
     except (subprocess.CalledProcessError, FileNotFoundError):
         return None, None, None
     try:
-        branch = subprocess.check_output(
+        branch = subprocess.check_output(  # nosec B603,B607 - hardcoded `git` binary, no shell, no user-controlled argv
             ["git", "-C", str(repo), "rev-parse", "--abbrev-ref", "HEAD"],
             text=True,
         ).strip()

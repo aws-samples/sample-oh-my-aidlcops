@@ -1,5 +1,8 @@
 name: Evaluate Skills
 
+permissions:
+  contents: read
+
 on:
   push:
     branches:

@@ -8,7 +8,7 @@
 # into place and surfaces any Kiro-specific sidecar metadata (kiro.meta.yaml).
 
 set -euo pipefail
-IFS=$'\n\t'
+# IFS kept at default; local `IFS=` is set per `read` loop below.
 
 # ---------------------------------------------------------------------------
 # Globals

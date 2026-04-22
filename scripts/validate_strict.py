@@ -13,7 +13,7 @@ from typing import Dict, List, Tuple
 
 def load_schema(schema_path: Path) -> dict:
     """Load a JSON schema from file."""
-    with open(schema_path, 'r') as f:
+    with open(schema_path, 'r', encoding='utf-8') as f:
         return json.load(f)
 
 def extract_yaml_frontmatter(content: str) -> dict:

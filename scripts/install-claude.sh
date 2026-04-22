@@ -8,7 +8,7 @@
 # the OMA UserPromptSubmit / SessionStart hooks.
 
 set -euo pipefail
-IFS=$'\n\t'
+# IFS kept at default; local `IFS=` is set per `read` loop below.
 
 # ---------------------------------------------------------------------------
 # Globals

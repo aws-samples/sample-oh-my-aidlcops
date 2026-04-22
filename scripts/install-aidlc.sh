@@ -5,7 +5,7 @@
 # Idempotent; safe to re-run.
 
 set -euo pipefail
-IFS=$'\n\t'
+# Note: IFS is kept at its default here; `while IFS= read -r` below sets it locally per-loop.
 
 # ---------------------------------------------------------------------------
 # Globals
