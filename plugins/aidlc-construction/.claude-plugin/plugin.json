@@ -1,0 +1,20 @@
+{
+  "$schema": "../../../schemas/plugin.schema.json",
+  "name": "aidlc-construction",
+  "description": "AIDLC Phase 2 Construction extensions for agentic systems — opt-in component design, code generation with human-gated review, and TDD-for-agentic test strategy. Composes with awslabs/aidlc-workflows core-workflow and depends on Phase 1 (aidlc-inception) artifacts (requirements.md, user-stories.md, workflow-plan.md).",
+  "version": "0.1.0",
+  "author": {
+    "name": "devfloor9"
+  },
+  "keywords": [
+    "aidlc",
+    "construction",
+    "component-design",
+    "code-generation",
+    "tdd",
+    "agentic-testing"
+  ],
+  "license": "Apache-2.0",
+  "homepage": "https://github.com/devfloor9/oh-my-aidlcops",
+  "repository": "https://github.com/devfloor9/oh-my-aidlcops"
+}

@@ -1,0 +1,102 @@
+oh-my-aidlcops
+Copyright 2026 devfloor9
+
+Licensed under the Apache License, Version 2.0 (the "License"). You may obtain
+a copy of the License at http://www.apache.org/licenses/LICENSE-2.0.
+
+This product includes, adapts, or references work from the following projects.
+Each is listed with its upstream license and the scope of reuse in this
+repository. No copied work is relicensed; original licenses remain in effect
+for derivative files.
+
+================================================================================
+1. awslabs/agent-plugins  —  Apache License 2.0
+   https://github.com/awslabs/agent-plugins
+   Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
+
+Files adapted:
+  schemas/plugin.schema.json            (derived from schemas/plugin.schema.json)
+  schemas/skill-frontmatter.schema.json (derived from schemas/skill-frontmatter.schema.json)
+  schemas/mcp.schema.json               (derived from schemas/mcp.schema.json)
+  schemas/marketplace.schema.json       (derived from schemas/marketplace.schema.json)
+
+Reuse pattern:
+  - JSON Schema contracts are adopted as-is to stay binary-compatible with the
+    official marketplace ecosystem.
+  - Plugin, SKILL.md, and .mcp.json file layouts follow agent-plugins
+    conventions for forward-compatibility with AWS agent tooling.
+
+================================================================================
+2. awslabs/aidlc-workflows  —  MIT No Attribution (MIT-0)
+   https://github.com/awslabs/aidlc-workflows
+   Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
+
+Reuse pattern:
+  - OMA does NOT copy or fork aidlc-workflows core-workflow content.
+  - scripts/install-aidlc.sh clones the upstream repository at runtime and
+    symlinks OMA-authored *.opt-in.md extension files into its extension
+    directory.
+  - Extension file format follows the aidlc-workflows opt-in convention.
+
+================================================================================
+3. awslabs/mcp  —  Apache License 2.0
+   https://github.com/awslabs/mcp
+   Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
+
+Reuse pattern:
+  - plugins/*/.mcp.json references 11 hosted MCP servers via uvx stdio.
+  - No source code from awslabs/mcp is copied into this repository.
+
+Referenced servers:
+  aws-documentation-mcp-server
+  eks-mcp-server
+  amazon-bedrock-agentcore-mcp-server
+  bedrock-kb-retrieval-mcp-server
+  sagemaker-ai-mcp-server
+  cloudwatch-mcp-server
+  prometheus-mcp-server
+  aws-iac-mcp-server
+  aws-pricing-mcp-server
+  well-architected-security-mcp-server
+  aws-knowledge-mcp-server
+
+================================================================================
+4. aws-samples/sample-apex-skills  —  MIT No Attribution (MIT-0)
+   https://github.com/aws-samples/sample-apex-skills
+   Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
+
+Reuse pattern:
+  - The 5-checkpoint workflow template (Gather Context → Pre-flight → Plan →
+    Execute → Validate) is adapted for steering/workflows/*.md.
+  - No SKILL.md or steering file is copied verbatim; structural patterns only.
+
+================================================================================
+5. Atom-oh/oh-my-cloud-skills  —  MIT License
+   https://github.com/Atom-oh/oh-my-cloud-skills
+   Copyright (c) 2025 oh-my-cloud-skills
+
+Reuse pattern:
+  - scripts/eval-skills.py takes structural inspiration from the upstream
+    eval-skills.py. Where substantive code is reused, it is annotated in-file
+    with an "Adapted from" comment and the MIT copyright notice.
+  - scripts/install-kiro.sh references the kiro-power-converter plugin's
+    conversion logic pattern.
+
+================================================================================
+6. oh-my-claudecode (OMC)  —  (upstream license TBD; treated as reference only)
+   https://github.com/Atom-oh/oh-my-claudecode
+
+Reuse pattern:
+  - Orchestration philosophy (Tier-0 signature workflows, keyword-trigger
+    system, `.omc/` state directory layout) is inherited as a design pattern.
+  - No source code or prompt text is copied; OMA authors equivalent content
+    from scratch for the AIDLC × AgenticOps domain.
+  - OMA's state directory is named `.omao/` as a sibling companion.
+
+================================================================================
+
+If you believe a file in this repository infringes your copyright or is
+misattributed, please open an issue at:
+https://github.com/devfloor9/oh-my-aidlcops/issues
+
+Last reviewed: 2026-04-21

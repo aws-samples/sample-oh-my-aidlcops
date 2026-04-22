@@ -1,0 +1,83 @@
+{
+  "$schema": "../schemas/marketplace.schema.json",
+  "name": "oh-my-aidlcops",
+  "metadata": {
+    "description": "AIDLC × AgenticOps — plugin marketplace that automates the full AI-Driven Development Lifecycle with agent-based operations on AWS.",
+    "version": "0.1.0"
+  },
+  "owner": {
+    "name": "devfloor9",
+    "email": "youngjoon.jeong@example.com"
+  },
+  "plugins": [
+    {
+      "name": "agentic-platform",
+      "description": "Build and operate agentic AI workloads on EKS with vLLM, Inference Gateway, Langfuse, and Kagent. Covers GPU planning, model serving, routing, observability, and guardrails.",
+      "source": "./plugins/agentic-platform",
+      "version": "0.1.0",
+      "category": "ai-platform",
+      "keywords": [
+        "eks",
+        "vllm",
+        "inference-gateway",
+        "langfuse",
+        "kagent",
+        "agentic-ai",
+        "kubernetes",
+        "gpu",
+        "karpenter"
+      ],
+      "tags": ["aws", "eks", "agentic-ai", "build", "operate"]
+    },
+    {
+      "name": "agenticops",
+      "description": "Agentic operations layer for AIDLC — self-improving loops, autonomous deploys, continuous evaluation, incident response, and cost governance.",
+      "source": "./plugins/agenticops",
+      "version": "0.1.0",
+      "category": "operations",
+      "keywords": [
+        "aidlc",
+        "agenticops",
+        "self-improving",
+        "observability",
+        "continuous-evaluation",
+        "autonomous-deploy",
+        "incident-response",
+        "cost-governance"
+      ],
+      "tags": ["operate", "automation", "feedback-loop"]
+    },
+    {
+      "name": "aidlc-inception",
+      "description": "AIDLC Phase 1 — Inception. Workspace detection, requirements analysis, user stories, and workflow planning as opt-in extensions to awslabs/aidlc-workflows.",
+      "source": "./plugins/aidlc-inception",
+      "version": "0.1.0",
+      "category": "aidlc",
+      "keywords": [
+        "aidlc",
+        "inception",
+        "requirements",
+        "user-stories",
+        "workflow-planning",
+        "awslabs-aidlc"
+      ],
+      "tags": ["aidlc", "phase-1", "design"]
+    },
+    {
+      "name": "aidlc-construction",
+      "description": "AIDLC Phase 2 — Construction. Component design, code generation, and test strategy for agentic systems as opt-in extensions to awslabs/aidlc-workflows.",
+      "source": "./plugins/aidlc-construction",
+      "version": "0.1.0",
+      "category": "aidlc",
+      "keywords": [
+        "aidlc",
+        "construction",
+        "component-design",
+        "code-generation",
+        "tdd",
+        "agentic-testing"
+      ],
+      "tags": ["aidlc", "phase-2", "build"]
+    }
+  ]
+}

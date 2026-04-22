@@ -1,0 +1,58 @@
+{
+  "$id": "https://awslabs.github.io/agent-plugins/schemas/plugin.schema.json",
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "additionalProperties": true,
+  "description": "Schema for plugin.json files in Agent Plugins for AWS",
+  "properties": {
+    "author": {
+      "properties": {
+        "email": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        }
+      },
+      "type": "object"
+    },
+    "description": {
+      "description": "Brief plugin description",
+      "maxLength": 500,
+      "type": "string"
+    },
+    "homepage": {
+      "type": "string"
+    },
+    "keywords": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array",
+      "uniqueItems": true
+    },
+    "license": {
+      "description": "SPDX license identifier",
+      "type": "string"
+    },
+    "name": {
+      "description": "Plugin identifier (kebab-case)",
+      "maxLength": 64,
+      "minLength": 1,
+      "pattern": "^[a-z][a-z0-9-]*$",
+      "type": "string"
+    },
+    "repository": {
+      "type": "string"
+    },
+    "version": {
+      "description": "Semantic version",
+      "pattern": "^(0|[1-9]\\d*)\\.(0|[1-9]\\d*)\\.(0|[1-9]\\d*)(-[a-zA-Z0-9.-]+)?$",
+      "type": "string"
+    }
+  },
+  "required": [
+    "name"
+  ],
+  "title": "Plugin Manifest",
+  "type": "object"
+}
