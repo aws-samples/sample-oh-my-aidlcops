@@ -42,3 +42,9 @@ Thumbs.db
 
 # Test fixtures
 evals/_runs/
+
+# Claude Code plugin manifest (local only)
+.claude-plugin/
+
+# GitHub Actions workflows (not pushed to GitLab mirror)
+.github/workflows/
