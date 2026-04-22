@@ -84,7 +84,7 @@ Reuse pattern:
 
 ================================================================================
 6. oh-my-claudecode (OMC)  —  (upstream license TBD; treated as reference only)
-   https://github.com/Atom-oh/oh-my-claudecode
+   https://github.com/Yeachan-Heo/oh-my-claudecode
 
 Reuse pattern:
   - Orchestration philosophy (Tier-0 signature workflows, keyword-trigger
@@ -94,9 +94,26 @@ Reuse pattern:
   - OMA's state directory is named `.omao/` as a sibling companion.
 
 ================================================================================
+7. aws-samples/sample-ai-driven-modernization-with-kiro  —  MIT No Attribution (MIT-0)
+   https://github.com/aws-samples/sample-ai-driven-modernization-with-kiro
+   Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
+
+Reuse pattern:
+  - OMA adopts the risk-discovery-methodology (12 categories), audit-rules
+    (ISO timestamps + verbatim input logging), quality-gates framework,
+    and structured intake template patterns as cross-cutting methodology
+    applied across multiple plugins.
+  - The 6-stage modernization workflow and 6R strategy inform the
+    standalone `plugins/modernization/` plugin.
+  - No verbatim copy of source files; content is adapted to OMA's Korean
+    경어체 style and integrated with AIDLC × AgenticOps philosophy.
+  - Kiro-native directory conventions (.kiro/steering/, .kiro/guides/,
+    .kiro/agents/) are supported by scripts/install-kiro.sh.
+
+================================================================================
 
 If you believe a file in this repository infringes your copyright or is
 misattributed, please open an issue at:
 https://github.com/devfloor9/oh-my-aidlcops/issues
 
-Last reviewed: 2026-04-21
+Last reviewed: 2026-04-22

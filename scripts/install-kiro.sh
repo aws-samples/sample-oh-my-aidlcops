@@ -20,6 +20,9 @@ MARKETPLACE_JSON="$OMA_REPO_DIR/.claude-plugin/marketplace.json"
 
 SKILLS_LINKED=0
 KIRO_META_FOUND=0
+GUIDES_LINKED=0
+AGENTS_LINKED=0
+SETTINGS_INSTALLED=0
 
 # ---------------------------------------------------------------------------
 # Usage
@@ -39,7 +42,10 @@ What it does:
     1. Create ~/.kiro/skills/<plugin>/<skill>/ symlinks for every skill in every
        plugin listed in .claude-plugin/marketplace.json.
     2. Symlink steering/ -> ~/.kiro/steering/.
-    3. Emit a note for any SKILL.md that has a kiro.meta.yaml sidecar — Kiro
+    3. Symlink plugin guides/ -> ~/.kiro/guides/<plugin>/ (stage-gated safety-critical content).
+    4. Symlink plugin kiro-agents/*.json -> ~/.kiro/agents/ (Kiro agent configurations).
+    5. Install default settings/cli.json template if not present.
+    6. Emit a note for any SKILL.md that has a kiro.meta.yaml sidecar — Kiro
        reads those for trigger and context hints.
 
 Dependencies: jq, bash 4+.
@@ -124,18 +130,97 @@ install_steering() {
     fi
 }
 
+install_guides() {
+    [ -f "$MARKETPLACE_JSON" ] || die "marketplace.json not found at $MARKETPLACE_JSON"
+    guides_target="$KIRO_HOME/guides"
+    ensure_dir "$guides_target"
+
+    while IFS= read -r plugin; do
+        [ -n "$plugin" ] || continue
+        plugin_guides="$OMA_REPO_DIR/plugins/$plugin/guides"
+        if [ ! -d "$plugin_guides" ]; then
+            continue
+        fi
+        plugin_guides_target="$guides_target/$plugin"
+        if link_or_refresh "$plugin_guides" "$plugin_guides_target"; then
+            GUIDES_LINKED=$((GUIDES_LINKED + 1))
+            log "guides linked: $plugin"
+        fi
+    done < <(jq -r '.plugins[].name' "$MARKETPLACE_JSON")
+}
+
+install_agents() {
+    [ -f "$MARKETPLACE_JSON" ] || die "marketplace.json not found at $MARKETPLACE_JSON"
+    agents_target="$KIRO_HOME/agents"
+    ensure_dir "$agents_target"
+
+    while IFS= read -r plugin; do
+        [ -n "$plugin" ] || continue
+        plugin_agents="$OMA_REPO_DIR/plugins/$plugin/kiro-agents"
+        if [ ! -d "$plugin_agents" ]; then
+            continue
+        fi
+        for agent_file in "$plugin_agents"/*.json; do
+            [ -f "$agent_file" ] || continue
+            agent_name="$(basename "$agent_file")"
+            dst="$agents_target/$agent_name"
+            if link_or_refresh "$agent_file" "$dst"; then
+                AGENTS_LINKED=$((AGENTS_LINKED + 1))
+                log "agent linked: $agent_name"
+            fi
+        done
+    done < <(jq -r '.plugins[].name' "$MARKETPLACE_JSON")
+}
+
+install_settings() {
+    settings_target="$KIRO_HOME/settings"
+    cli_json="$settings_target/cli.json"
+    template="$OMA_REPO_DIR/scripts/kiro-cli.template.json"
+
+    if [ -f "$cli_json" ]; then
+        return 0
+    fi
+
+    if [ ! -f "$template" ]; then
+        warn "settings template not found at $template, skipping"
+        return 0
+    fi
+
+    ensure_dir "$settings_target"
+    cp "$template" "$cli_json"
+    SETTINGS_INSTALLED=1
+    log "settings installed: $cli_json"
+}
+
 summary() {
     cat <<EOF
 
 Installation complete.
     skills linked         : $SKILLS_LINKED
     kiro.meta.yaml found  : $KIRO_META_FOUND
+    guides linked         : $GUIDES_LINKED
+    agents linked         : $AGENTS_LINKED
+    settings installed    : $SETTINGS_INSTALLED
 EOF
     if [ "$KIRO_META_FOUND" -gt 0 ]; then
         cat <<'NOTE'
 
 Note: kiro.meta.yaml sidecars contain Kiro-specific trigger and context hints.
 Kiro will load them automatically alongside each SKILL.md.
+NOTE
+    fi
+    if [ "$GUIDES_LINKED" -gt 0 ]; then
+        cat <<'NOTE'
+
+Note: guides/ directories contain stage-gated safety-critical content loaded per-stage.
+Kiro will load them based on workflow context.
+NOTE
+    fi
+    if [ "$AGENTS_LINKED" -gt 0 ]; then
+        cat <<'NOTE'
+
+Note: Kiro agent configurations include MCP server configs and auto-approval rules.
+Use these agent profiles for specialized workflows.
 NOTE
     fi
 }
@@ -153,6 +238,9 @@ main() {
     log "OMA_OWNER: $OMA_OWNER"
     install_skills
     install_steering
+    install_guides
+    install_agents
+    install_settings
     summary
 }
 

@@ -234,7 +234,7 @@ claude
 ### 공식 문서
 - [Claude Code Hooks](https://docs.anthropic.com/claude/docs/claude-code-hooks) — UserPromptSubmit·SessionStart 훅 표준
 - [jq Manual](https://jqlang.github.io/jq/manual/) — triggers.json 편집
-- [oh-my-claudecode Keyword Triggers](https://github.com/Atom-oh/oh-my-claudecode) — 참조 구현 (OMC)
+- [oh-my-claudecode Keyword Triggers](https://github.com/Yeachan-Heo/oh-my-claudecode) — 참조 구현 (OMC)
 
 ### OMA 내부 문서
 - [Tier-0 Workflows](./tier-0-workflows.md) — 트리거가 매핑하는 커맨드의 상세

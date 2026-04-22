@@ -76,7 +76,13 @@ Installation complete.
 │   │   └── cost-governance             -> ...
 │   ├── aidlc-inception/
 │   └── aidlc-construction/
-└── steering                             -> <repo>/steering
+├── steering                             -> <repo>/steering
+├── guides/                              # NEW: 단계별 가이드 (플러그인별 디렉터리)
+│   └── agentic-platform/                -> <repo>/plugins/agentic-platform/guides
+├── agents/                              # NEW: Kiro 에이전트 설정
+│   └── agentic-platform.agent.json      -> <repo>/plugins/agentic-platform/kiro-agents/agentic-platform.agent.json
+└── settings/                            # NEW: CLI 설정
+    └── cli.json                         # 기본 템플릿 (사용자 편집 가능)
 ```
 
 각 심링크는 OMA 리포지터리의 원본 디렉터리를 가리킵니다. 따라서 `git pull`로 리포지터리를 업데이트하면 Kiro가 즉시 최신 스킬을 사용합니다.
@@ -127,9 +133,17 @@ Kiro는 이 메타데이터를 읽어 다음을 수행합니다.
 
 사이드카가 없는 스킬은 `SKILL.md` frontmatter만으로 동작합니다.
 
-## Steering 통합
+## Full Kiro Layout Support
 
-`steering/` 디렉터리는 두 하네스 모두에서 로드됩니다. Kiro는 이 디렉터리를 `~/.kiro/steering/`에 심링크합니다.
+OMA는 AWS Kiro 모더나이제이션 샘플에서 사용하는 전체 디렉터리 레이아웃을 지원합니다. 설치 스크립트는 다음 5개 디렉터리를 자동으로 구성합니다.
+
+### 1. skills/ — 실행 가능한 스킬
+
+모든 플러그인의 `skills/` 하위 디렉터리를 `~/.kiro/skills/<plugin>/<skill>/` 형태로 심링크합니다. 각 스킬은 `SKILL.md` + 선택적 `kiro.meta.yaml` 사이드카로 구성됩니다.
+
+### 2. steering/ — 전역 오리엔테이션
+
+`steering/` 디렉터리를 `~/.kiro/steering/`에 심링크합니다.
 
 ```
 steering/
@@ -140,6 +154,69 @@ steering/
 ```
 
 Kiro는 `commands/oma/`를 슬래시 커맨드로 해석하지 않지만, 파일 내용을 스킬 orchestration 참고 자료로 활용합니다. `workflows/` 디렉터리의 5-체크포인트 템플릿은 두 하네스에서 동일하게 동작합니다.
+
+### 3. guides/ — 단계별 안전 가이드 (Stage-Gated)
+
+플러그인의 `guides/` 디렉터리를 `~/.kiro/guides/<plugin>/` 형태로 심링크합니다. guides는 워크플로우 단계별로 로드되는 안전 기준 문서(safety-critical content)입니다.
+
+```
+~/.kiro/guides/
+└── agentic-platform/       -> <repo>/plugins/agentic-platform/guides
+    ├── aws-practices/      # AWS Well-Architected 기반 가이드
+    ├── common/             # 공통 안전 기준
+    └── stages/             # 단계별 체크포인트 가이드
+        ├── stage-1-analysis.md
+        ├── stage-2-requirements.md
+        └── ...
+```
+
+Kiro는 워크플로우 컨텍스트에 따라 해당 단계의 가이드를 자동으로 로드합니다. 예를 들어 `stage-2-requirements` 단계에서는 `stages/stage-2-requirements.md`가 context로 주입됩니다.
+
+### 4. agents/ — Kiro 에이전트 프로필
+
+플러그인의 `kiro-agents/*.json` 파일을 `~/.kiro/agents/` 디렉터리로 심링크합니다. 각 에이전트 프로필은 다음을 정의합니다.
+
+- **MCP 서버 구성(MCP Server Configuration)** — 필요한 MCP 서버 목록과 환경 변수
+- **자동 승인 규칙(Auto-approval Rules)** — 읽기 전용 / 파일 쓰기 / bash 명령 승인 정책
+- **리소스 로딩(Resource Loading)** — 에이전트 시작 시 로드할 steering 파일 및 스킬 경로
+
+예시: `agentic-platform.agent.json`
+
+```json
+{
+  "name": "agentic-platform",
+  "description": "Agentic AI Platform architect for EKS + vLLM + Inference Gateway + Langfuse on AWS.",
+  "mcpServers": {
+    "awslabs.eks-mcp-server": { "command": "uvx", "args": ["awslabs.eks-mcp-server@latest"] },
+    "awslabs.aws-documentation-mcp-server": { ... }
+  },
+  "autoApprove": {
+    "readOnly": true
+  }
+}
+```
+
+Kiro 런타임에서 `@agentic-platform` 형태로 해당 프로필을 활성화할 수 있습니다.
+
+### 5. settings/ — CLI 기본 설정
+
+`scripts/kiro-cli.template.json` 템플릿을 `~/.kiro/settings/cli.json`으로 복사합니다 (기존 파일이 없는 경우에만). 이 파일은 Kiro CLI의 기본 동작을 정의합니다.
+
+```json
+{
+  "defaultModel": "claude-sonnet-4-6",
+  "autoApprove": {
+    "readOnly": true,
+    "fileWrites": false,
+    "bashCommands": false
+  },
+  "steering": {
+    "alwaysLoad": ["oma-hub.md"]
+  }
+}
+```
+
+설치 후 사용자가 직접 편집해 기본 모델, 자동 승인 정책, 항상 로드할 steering 파일을 조정할 수 있습니다.
 
 ## 프로젝트 초기화
 

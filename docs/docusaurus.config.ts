@@ -147,7 +147,7 @@ const config: Config = {
             },
             {
               label: 'oh-my-claudecode',
-              href: 'https://github.com/Atom-oh/oh-my-claudecode',
+              href: 'https://github.com/Yeachan-Heo/oh-my-claudecode',
             },
           ],
         },

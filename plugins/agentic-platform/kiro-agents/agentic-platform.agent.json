@@ -1,0 +1,54 @@
+{
+  "name": "agentic-platform",
+  "description": "Agentic AI Platform architect for EKS + vLLM + Inference Gateway + Langfuse on AWS.",
+  "tools": ["*"],
+  "resources": [
+    "file://.kiro/steering/oma-hub.md",
+    "skill://.kiro/skills/agentic-platform/**/*.md"
+  ],
+  "welcomeMessage": "Hello! I'm the Agentic Platform Agent 🚀\n\n📌 **Capabilities**\n  • Design and architect agentic AI platforms on EKS\n  • Deploy vLLM model serving with GPU optimization\n  • Configure inference gateways (LiteLLM, Bifrost, Helicone)\n  • Set up observability stack (Langfuse, Prometheus, Grafana)\n  • Implement MLOps pipelines and cost governance\n\n📋 **Common Workflows**\n  • Platform Bootstrap: Full EKS + GPU + Karpenter + vLLM stack\n  • Model Deployment: Custom model serving with LoRA/MoE support\n  • Gateway Setup: 2-tier routing with semantic caching\n  • Monitoring: Langfuse + OpenTelemetry integration\n\nLet's build your agentic platform. What would you like to start with?",
+  "mcpServers": {
+    "awslabs.eks-mcp-server": {
+      "command": "uvx",
+      "args": [
+        "awslabs.eks-mcp-server@latest",
+        "--allow-write",
+        "--allow-sensitive-data-access"
+      ],
+      "env": {
+        "FASTMCP_LOG_LEVEL": "ERROR"
+      },
+      "disabled": false
+    },
+    "awslabs.aws-documentation-mcp-server": {
+      "command": "uvx",
+      "args": ["awslabs.aws-documentation-mcp-server@latest"],
+      "env": {
+        "FASTMCP_LOG_LEVEL": "ERROR",
+        "AWS_DOCUMENTATION_PARTITION": "aws"
+      },
+      "disabled": false
+    },
+    "awslabs.aws-pricing-mcp-server": {
+      "command": "uvx",
+      "args": ["awslabs.aws-pricing-mcp-server@latest"],
+      "env": {
+        "FASTMCP_LOG_LEVEL": "ERROR"
+      },
+      "disabled": false
+    },
+    "awslabs.cloudwatch-mcp-server": {
+      "command": "uvx",
+      "args": ["awslabs.cloudwatch-mcp-server@latest"],
+      "env": {
+        "FASTMCP_LOG_LEVEL": "ERROR"
+      },
+      "disabled": false
+    }
+  },
+  "autoApprove": {
+    "readOnly": true,
+    "fileWrites": false,
+    "bashCommands": false
+  }
+}

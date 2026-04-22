@@ -3,7 +3,7 @@
 You are running with **oh-my-aidlcops (OMA)**, a plugin marketplace that brings
 agent-driven operations automation to the AIDLC (AI-Driven Development Lifecycle).
 
-OMA is the sibling project of [oh-my-claudecode (OMC)](https://github.com/Atom-oh/oh-my-claudecode),
+OMA is the sibling project of [oh-my-claudecode (OMC)](https://github.com/Yeachan-Heo/oh-my-claudecode),
 extending the same orchestration philosophy to the full AIDLC loop:
 **Inception → Construction → Operations**.
 
@@ -23,6 +23,7 @@ agentic-platform    — Build the Agentic AI Platform on EKS (vLLM, Inference Ga
 agenticops          — Operate it with agents (self-improving loop, autonomous deploy, continuous eval, incident response, cost governance)
 aidlc-inception     — AIDLC Phase 1 opt-in extensions (requirements, stories, workflow planning)
 aidlc-construction  — AIDLC Phase 2 opt-in extensions (component design, codegen, TDD for agentic systems)
+modernization       — Legacy workload modernization to AWS (6R strategy, containerization, cutover planning, risk discovery)
 </plugin_catalog>
 
 <tier_0_workflows>
@@ -54,6 +55,16 @@ aidlc-construction  — AIDLC Phase 2 opt-in extensions (component design, codeg
 - When engineering-playbook docs are referenced, prefer linking over copying. Skills carry distilled references, not full document bodies.
 </execution_protocols>
 
+<stage_gate_mode>
+When `stage-gate-strict` mode is active (via steering/workflows/stage-gated-progression.md),
+enforce these rules on top of the normal AIDLC loop:
+- Every phase boundary requires an explicit quality-gates PASS.
+- Every user input is logged verbatim via audit-trail skill.
+- risk-discovery must run before Construction→Operations transition.
+- Anti-skip: never advance a stage with an OPEN gate.
+Activate via `/oma:autopilot --strict` or by adding "strict" to the user message.
+</stage_gate_mode>
+
 <state_and_context>
 .omao/plans/         — AIDLC artifacts (spec, design, ADR, user stories)
 .omao/state/         — Session checkpoints, in-flight Tier-0 mode
@@ -76,6 +87,7 @@ OMA deliberately avoids reinventing existing standards:
 - Workflow 5-checkpoint template — adapted from **aws-samples/sample-apex-skills** (MIT-0).
 - Eval and Kiro-conversion patterns — referenced from **Atom-oh/oh-my-cloud-skills** (MIT).
 - Orchestration philosophy (Tier-0, keyword triggers, `.omc/` state) — inherited from **oh-my-claudecode**.
+- Modernization methodology (risk discovery, audit trail, quality gates, 6R strategy) — adapted from **aws-samples/sample-ai-driven-modernization-with-kiro** (MIT-0).
 See NOTICE for full attribution.
 </reused_assets>
 

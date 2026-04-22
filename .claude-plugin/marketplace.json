@@ -78,6 +78,25 @@
         "agentic-testing"
       ],
       "tags": ["aidlc", "phase-2", "build"]
+    },
+    {
+      "name": "modernization",
+      "description": "Legacy workload modernization to AWS — 6R strategy, workload assessment, to-be architecture, containerization, and cutover planning. Adapted from aws-samples/sample-ai-driven-modernization-with-kiro (MIT-0).",
+      "source": "./plugins/modernization",
+      "version": "0.1.0",
+      "category": "modernization",
+      "keywords": [
+        "modernization",
+        "legacy-migration",
+        "6r-strategy",
+        "ecs",
+        "eks",
+        "aws-migration",
+        "containerization",
+        "cutover",
+        "brownfield"
+      ],
+      "tags": ["aws", "modernization", "brownfield"]
     }
   ]
 }
