@@ -54,10 +54,30 @@ ADDITIONAL_CONTEXT+="Available OMA Tier-0 Commands:
 
 Keyword triggers are active. Type keywords like 'autopilot', 'agenticops', 'inception', etc. to invoke workflows."
 
-# Emit JSON output
-if command -v jq &>/dev/null; then
+# Emit JSON output.
+#
+# CRITICAL: ADDITIONAL_CONTEXT is built from files on disk
+# (.omao/state/active-mode, .omao/project-memory.json) that may contain double
+# quotes, backslashes, newlines, or control characters. Naive
+# `echo "{\"additionalContext\": \"$VAR\"}"` would break the emitted JSON and,
+# worse, let a crafted state file inject arbitrary keys into the session
+# context. We REQUIRE a real JSON encoder: jq is preferred, Python 3 is an
+# acceptable fallback. We never fall back to shell-string interpolation.
+if command -v jq >/dev/null 2>&1; then
   jq -n --arg ctx "$ADDITIONAL_CONTEXT" '{"additionalContext": $ctx}'
+elif command -v python3 >/dev/null 2>&1; then
+  ADDITIONAL_CONTEXT="$ADDITIONAL_CONTEXT" python3 -c '
+import json, os, sys
+sys.stdout.write(json.dumps({"additionalContext": os.environ["ADDITIONAL_CONTEXT"]}))
+sys.stdout.write("\n")
+'
+elif command -v python >/dev/null 2>&1; then
+  ADDITIONAL_CONTEXT="$ADDITIONAL_CONTEXT" python -c '
+import json, os, sys
+sys.stdout.write(json.dumps({"additionalContext": os.environ["ADDITIONAL_CONTEXT"]}))
+sys.stdout.write("\n")
+'
 else
-  # Fallback if jq not available
-  echo "{\"additionalContext\": \"$ADDITIONAL_CONTEXT\"}"
+  echo "session-start.sh: neither jq nor python is available; refusing to emit unsafe JSON" >&2
+  exit 1
 fi

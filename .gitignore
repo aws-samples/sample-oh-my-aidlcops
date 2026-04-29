@@ -36,6 +36,22 @@ Thumbs.db
 .omao-local/
 .claude/settings.local.json
 
+# OMA runtime state — PII, verbatim prompts, approval logs, cost data.
+# audit-trail captures user input verbatim (SOC2/ISMS-P retention);
+# incident-response stores alarm payloads (may include account IDs, ARNs);
+# cost dirs hold per-agent Cost Explorer exports and override overrides.
+# Never commit. `.omao/triggers.json` is intentionally tracked as a
+# distributable asset, so we ignore subdirs selectively rather than all of .omao/.
+.omao/state/
+.omao/plans/
+.omao/logs/
+.omao/notepad.md
+.omao/project-memory.json
+.omao/research/
+**/.omao/state/
+**/.omao/plans/
+**/.omao/logs/
+
 # OMC runtime state (session-specific, never committed)
 .omc/
 **/.omc/
