@@ -48,3 +48,7 @@ evals/_runs/
 
 # GitHub Actions workflows (not pushed to GitLab mirror)
 .github/workflows/
+
+# CLAUDE.md is local-only per top-level rule in CLAUDE.md; never tracked
+CLAUDE.md
+**/CLAUDE.md

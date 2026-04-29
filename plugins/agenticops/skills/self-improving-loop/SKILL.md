@@ -27,7 +27,7 @@ license: Apache-2.0
 - **Langfuse v3.x** self-hosted 또는 cloud 인스턴스. 최소 30일 trace retention.
 - **Prometheus** (AMP 또는 self-hosted) — latency, error_rate, token_usage 메트릭 수집.
 - **CloudWatch Logs** — Agent 실행 로그, tool invocation 로그.
-- **awslabs.cloudwatch-mcp-server@latest**, **awslabs.prometheus-mcp-server@latest** MCP 서버가 설정된 상태.
+- **awslabs.cloudwatch-mcp-server==0.0.25**, **awslabs.prometheus-mcp-server==0.2.15** MCP 서버가 설정된 상태 (공급망 보안을 위해 `@latest` 대신 PyPI 버전 pin 필수).
 - Git 저장소에 대한 write 권한 (PR draft 생성을 위함).
 - 개선 대상 agent/skill의 baseline 평가 점수가 `continuous-eval`로 최근 24시간 내 생성되어 있어야 합니다.
 

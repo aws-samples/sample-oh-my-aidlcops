@@ -24,7 +24,7 @@ license: Apache-2.0
 
 - **Kubernetes cluster** (EKS 권장) + **Argo Rollouts** 또는 **Flagger** CRD 설치.
 - **Prometheus** SLO 메트릭 수집 (`agent_request_latency_seconds`, `agent_error_rate`, `agent_tokens_total`).
-- **awslabs.eks-mcp-server@latest**, **awslabs.prometheus-mcp-server@latest** MCP 설정 완료.
+- **awslabs.eks-mcp-server==0.1.28**, **awslabs.prometheus-mcp-server==0.2.15** MCP 설정 완료 (`@latest` 금지, PyPI 버전 pin 필수).
 - 배포 대상의 최근 `continuous-eval` 리포트가 pass 상태여야 합니다.
 - SLO 정의 파일 (`.omao/plans/slo/${target}.yaml`)이 존재해야 합니다.
 

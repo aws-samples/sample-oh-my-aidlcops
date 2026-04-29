@@ -187,7 +187,7 @@ Kiro는 워크플로우 컨텍스트에 따라 해당 단계의 가이드를 자
   "name": "agentic-platform",
   "description": "Agentic AI Platform architect for EKS + vLLM + Inference Gateway + Langfuse on AWS.",
   "mcpServers": {
-    "awslabs.eks-mcp-server": { "command": "uvx", "args": ["awslabs.eks-mcp-server@latest"] },
+    "awslabs.eks-mcp-server": { "command": "uvx", "args": ["awslabs.eks-mcp-server==0.1.28"] },
     "awslabs.aws-documentation-mcp-server": { ... }
   },
   "autoApprove": {

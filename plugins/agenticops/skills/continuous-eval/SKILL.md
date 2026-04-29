@@ -26,7 +26,7 @@ license: Apache-2.0
 - **Golden dataset**: `.omao/plans/eval/golden/${target}.jsonl` (최소 100 sample, 도메인 전문가 검증 완료).
 - **Langfuse v3.x** 프로덕션 trace 수집 완료.
 - **LLM judge 모델 엔드포인트** — Ragas가 내부적으로 호출하는 평가용 LLM (Qwen3-7B 또는 Claude Sonnet 4.6 권장).
-- **awslabs.prometheus-mcp-server@latest** — 평가 결과를 Prometheus에 푸시하기 위한 경로.
+- **awslabs.prometheus-mcp-server==0.2.15** — 평가 결과를 Prometheus에 푸시하기 위한 경로 (`@latest` 금지, PyPI 버전 pin 필수).
 - Regression gate 임계값 설정 파일 (`.omao/plans/eval/thresholds.yaml`).
 
 ## 5개 핵심 지표

@@ -80,12 +80,45 @@ flowchart TB
 ## 설치 절차
 
 ### Step 1. IRSA 및 Secrets
+
+IRSA 에는 반드시 **Langfuse blob 버킷 한 개로 scope 된 customer-managed policy** 만 attach 합니다. AWS managed `AmazonS3FullAccess` (`s3:*` on `*`) 는 account-wide 접근을 허용하므로 사용하지 않습니다.
+
 ```bash
+export BUCKET=my-langfuse-blobs
+export ACCOUNT_ID=$(aws sts get-caller-identity --query Account --output text)
+
+cat > /tmp/langfuse-s3-policy.json <<EOF
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Action": ["s3:ListBucket", "s3:GetBucketLocation"],
+      "Resource": "arn:aws:s3:::${BUCKET}"
+    },
+    {
+      "Effect": "Allow",
+      "Action": [
+        "s3:GetObject",
+        "s3:PutObject",
+        "s3:DeleteObject",
+        "s3:AbortMultipartUpload"
+      ],
+      "Resource": "arn:aws:s3:::${BUCKET}/*"
+    }
+  ]
+}
+EOF
+
+aws iam create-policy \
+  --policy-name LangfuseBlobStoreRW \
+  --policy-document file:///tmp/langfuse-s3-policy.json
+
 eksctl create iamserviceaccount \
   --cluster agentic-prod \
   --namespace langfuse \
   --name langfuse \
-  --attach-policy-arn arn:aws:iam::aws:policy/AmazonS3FullAccess \
+  --attach-policy-arn "arn:aws:iam::${ACCOUNT_ID}:policy/LangfuseBlobStoreRW" \
   --approve
 ```
 
@@ -243,6 +276,7 @@ helm upgrade --install otel-collector open-telemetry/opentelemetry-collector \
 
 - Langfuse Web/API 는 사설 ALB/NLB + Cognito/OIDC 경유만 허용 (0.0.0.0/0 금지)
 - API Key 는 External Secrets Operator + Secrets Manager
+- IAM 은 Langfuse 버킷 ARN 으로 scope 된 customer-managed policy 만 사용. `AmazonS3FullAccess` 등 `s3:*` account-wide managed policy 금지
 - S3 버킷은 bucket-owner-enforced, ACL disabled
 - ClickHouse 는 VPC 내부만 접근, TLS 적용
 - OTel Collector 는 ServiceAccount `otel-collector` 전용, 최소권한

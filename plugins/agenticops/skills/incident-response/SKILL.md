@@ -23,7 +23,7 @@ license: Apache-2.0
 ## Prerequisites
 
 - **CloudWatch Alarms** + **Prometheus AlertManager** 알람 소스 설정.
-- **awslabs.cloudwatch-mcp-server@latest**, **awslabs.prometheus-mcp-server@latest** MCP 접근.
+- **awslabs.cloudwatch-mcp-server==0.0.25**, **awslabs.prometheus-mcp-server==0.2.15** MCP 접근 (`@latest` 금지, PyPI 버전 pin 필수).
 - Runbook 저장소: `.omao/plans/runbooks/` 에 `${symptom}.md` 형식으로 보관.
 - PagerDuty / Opsgenie / Slack 등 on-call 라우팅 통합 (SEV1 자동 호출용).
 - `autopilot-deploy`의 상태 파일 (`.omao/state/autopilot-deploy/`) 접근 권한 — 배포 freeze에 사용.

@@ -11,7 +11,7 @@
     "awslabs.eks-mcp-server": {
       "command": "uvx",
       "args": [
-        "awslabs.eks-mcp-server@latest",
+        "awslabs.eks-mcp-server==0.1.28",
         "--allow-write",
         "--allow-sensitive-data-access"
       ],
@@ -22,7 +22,7 @@
     },
     "awslabs.aws-documentation-mcp-server": {
       "command": "uvx",
-      "args": ["awslabs.aws-documentation-mcp-server@latest"],
+      "args": ["awslabs.aws-documentation-mcp-server==1.1.21"],
       "env": {
         "FASTMCP_LOG_LEVEL": "ERROR",
         "AWS_DOCUMENTATION_PARTITION": "aws"
@@ -31,7 +31,7 @@
     },
     "awslabs.aws-pricing-mcp-server": {
       "command": "uvx",
-      "args": ["awslabs.aws-pricing-mcp-server@latest"],
+      "args": ["awslabs.aws-pricing-mcp-server==1.0.28"],
       "env": {
         "FASTMCP_LOG_LEVEL": "ERROR"
       },
@@ -39,7 +39,7 @@
     },
     "awslabs.cloudwatch-mcp-server": {
       "command": "uvx",
-      "args": ["awslabs.cloudwatch-mcp-server@latest"],
+      "args": ["awslabs.cloudwatch-mcp-server==0.0.25"],
       "env": {
         "FASTMCP_LOG_LEVEL": "ERROR"
       },

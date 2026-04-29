@@ -29,15 +29,61 @@ allowed-tools: "Read,Write,Edit,Bash,Grep,Glob,mcp__eks,mcp__aws-documentation,m
 ## Procedure
 
 ### Step 1. S3 버킷 + IRSA 생성
+
+`AmazonS3FullAccess` 같은 account-wide `s3:*` managed policy 는 **절대 attach 하지 않습니다**. Langfuse 버킷 한 개로 scope 한 최소권한 customer-managed policy 만 사용합니다.
+
 ```bash
-aws s3 mb s3://my-langfuse-blobs --region ap-northeast-2
+export BUCKET=my-langfuse-blobs
+export REGION=ap-northeast-2
+export ACCOUNT_ID=$(aws sts get-caller-identity --query Account --output text)
+
+aws s3api create-bucket \
+  --bucket "$BUCKET" \
+  --region "$REGION" \
+  --create-bucket-configuration LocationConstraint="$REGION"
+
+# Langfuse 버킷 하나로 scope 된 policy 작성 (bucket ARN + object ARN).
+cat > /tmp/langfuse-s3-policy.json <<EOF
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "LangfuseBucketListAndMeta",
+      "Effect": "Allow",
+      "Action": [
+        "s3:ListBucket",
+        "s3:GetBucketLocation"
+      ],
+      "Resource": "arn:aws:s3:::${BUCKET}"
+    },
+    {
+      "Sid": "LangfuseBucketObjectRW",
+      "Effect": "Allow",
+      "Action": [
+        "s3:GetObject",
+        "s3:PutObject",
+        "s3:DeleteObject",
+        "s3:AbortMultipartUpload"
+      ],
+      "Resource": "arn:aws:s3:::${BUCKET}/*"
+    }
+  ]
+}
+EOF
+
+aws iam create-policy \
+  --policy-name LangfuseBlobStoreRW \
+  --policy-document file:///tmp/langfuse-s3-policy.json
+
 eksctl create iamserviceaccount \
   --cluster agentic-prod \
   --namespace langfuse \
   --name langfuse \
-  --attach-policy-arn arn:aws:iam::aws:policy/AmazonS3FullAccess \
+  --attach-policy-arn "arn:aws:iam::${ACCOUNT_ID}:policy/LangfuseBlobStoreRW" \
   --approve
 ```
+
+> **금지**: `arn:aws:iam::aws:policy/AmazonS3FullAccess` 는 `s3:*` 를 account-wide 로 허용하므로 다른 버킷의 blob 도 열람·삭제 가능합니다. IRSA 가 탈취되면 데이터 전체가 노출되는 벡터이므로 사용하지 않습니다.
 
 ### Step 2. Langfuse v3 Helm 배포
 ```bash
