@@ -1,0 +1,45 @@
+name: Evaluate Skills
+
+permissions:
+  contents: read
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+
+jobs:
+  static-quality:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      - name: Install dependencies
+        run: |
+          pip install pyyaml
+
+      - name: Run skill quality checks
+        run: |
+          python scripts/eval-skills.py --strict
+
+  matrix-harness:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: true
+      matrix:
+        harness: [claude-code, kiro]
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Syntax check install script for ${{ matrix.harness }}
+        run: |
+          bash -n scripts/install-${{ matrix.harness }}.sh

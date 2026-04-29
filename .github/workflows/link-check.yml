@@ -1,0 +1,35 @@
+name: Link Check
+
+permissions:
+  contents: read
+
+on:
+  push:
+    branches:
+      - main
+  schedule:
+    - cron: '0 9 * * 1'  # Every Monday at 09:00 UTC
+
+jobs:
+  link-check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Link Checker
+        uses: lycheeverse/lychee-action@8646ba30535128ac92d33dfc9133794bfdd9b411 # v2
+        with:
+          args: |
+            --verbose
+            --no-progress
+            --exclude-path node_modules
+            --exclude-path build
+            --exclude-path .docusaurus
+            --exclude 'file://'
+            --exclude 'github\.com/[^/]+/[^/]+/(pull|issues|commit)'
+            --accept 200,204,206,301,302,307,308,429
+            --timeout 15
+            '**/*.md'
+          format: markdown
+          fail: true

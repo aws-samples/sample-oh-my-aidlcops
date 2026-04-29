@@ -62,8 +62,8 @@ evals/_runs/
 # Claude Code plugin manifest (local only)
 .claude-plugin/
 
-# GitHub Actions workflows (not pushed to GitLab mirror)
-.github/workflows/
+# (Previously ignored .github/workflows/ while mirroring to GitLab.
+# Now published via aws-samples on GitHub — workflows are tracked.)
 
 # CLAUDE.md is local-only per top-level rule in CLAUDE.md; never tracked
 CLAUDE.md
