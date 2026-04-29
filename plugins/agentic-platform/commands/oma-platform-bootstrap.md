@@ -66,4 +66,4 @@ argument-hint: "[cluster-name] [region] [model] [optional: --dry-run]"
 - `references/vllm-performance-tuning.md`: 성능 튜닝 체크리스트
 - `references/inference-gateway-cascade-pattern.md`: 라우팅 패턴
 - `references/langfuse-self-hosted-setup.md`: Langfuse 설치
-- [engineering-playbook 메인](https://github.com/devfloor9/engineering-playbook/tree/main/docs/agentic-ai-platform)
+- engineering-playbook 메인 (community resource)

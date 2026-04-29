@@ -5,7 +5,6 @@ argument-hint: "[phase: inception|construction|operations]"
 user-invocable: true
 model: claude-sonnet-4-6
 allowed-tools: "Read,Write,Bash,Grep"
-license: Apache-2.0
 ---
 
 ## 언제 사용하나요

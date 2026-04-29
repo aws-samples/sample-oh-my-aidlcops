@@ -46,4 +46,4 @@ This starts a local development server at `http://localhost:3000/oh-my-aidlcops/
 
 The site is automatically deployed to GitHub Pages when changes are pushed to `main`.
 
-Production URL: https://devfloor9.github.io/oh-my-aidlcops/
+Production URL: https://aws-samples.github.io/sample-oh-my-aidlcops/

@@ -4,7 +4,7 @@
   "description": "AIDLC Operations phase automation — self-improving loops, autonomous deploys, continuous evaluation, incident response, and cost governance on AWS. Humans approve at checkpoints; agents execute diagnosis, proposal, and remediation between gates.",
   "version": "0.1.0",
   "author": {
-    "name": "devfloor9"
+    "name": "aws-samples"
   },
   "keywords": [
     "aidlc",
@@ -17,6 +17,6 @@
     "cost-governance"
   ],
   "license": "Apache-2.0",
-  "homepage": "https://github.com/devfloor9/oh-my-aidlcops",
-  "repository": "https://github.com/devfloor9/oh-my-aidlcops"
+  "homepage": "https://github.com/aws-samples/sample-oh-my-aidlcops",
+  "repository": "https://github.com/aws-samples/sample-oh-my-aidlcops"
 }

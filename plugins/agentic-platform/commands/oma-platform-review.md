@@ -95,7 +95,7 @@ argument-hint: "[cluster-name] [optional: --scope=gpu|observability|guardrails|c
 
 ## 참고 자료
 
-- [engineering-playbook: Well-Architected ML Lens 매핑](https://github.com/devfloor9/engineering-playbook/blob/main/docs/agentic-ai-platform/operations-mlops/governance/compliance-framework.md)
+- engineering-playbook: Well-Architected ML Lens 매핑 (community resource)
 - `references/vllm-performance-tuning.md` — 성능 점검 체크리스트
 - `references/inference-gateway-cascade-pattern.md` — 라우팅 최적화
 - `references/langfuse-self-hosted-setup.md` — 관측성 점검 항목

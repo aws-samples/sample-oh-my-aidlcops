@@ -125,9 +125,9 @@ spec:
 
 ## References
 
-- [Inference Gateway 라우팅 전략](https://github.com/devfloor9/engineering-playbook/blob/main/docs/agentic-ai-platform/reference-architecture/inference-gateway/routing-strategy.md)
-- [Cascade Routing 튜닝](https://github.com/devfloor9/engineering-playbook/blob/main/docs/agentic-ai-platform/reference-architecture/inference-gateway/cascade-routing-tuning.md)
-- [Inference Gateway 배포 가이드](https://github.com/devfloor9/engineering-playbook/blob/main/docs/agentic-ai-platform/reference-architecture/inference-gateway/setup/)
+- Inference Gateway 라우팅 전략 (community resource)
+- Cascade Routing 튜닝 (community resource)
+- Inference Gateway 배포 가이드 (community resource)
 - [kgateway 공식 문서](https://kgateway.dev/docs/)
 - [Kubernetes Gateway API](https://gateway-api.sigs.k8s.io/)
 - [Bifrost](https://github.com/maximhq/bifrost)

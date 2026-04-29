@@ -58,21 +58,21 @@ Full command list in [CLAUDE.md](./CLAUDE.md).
 
 ```bash
 claude
-> /plugin marketplace add https://github.com/devfloor9/oh-my-aidlcops
+> /plugin marketplace add https://github.com/aws-samples/sample-oh-my-aidlcops
 > /plugin install agentic-platform agenticops aidlc-inception aidlc-construction
 ```
 
 ### Claude Code (manual)
 
 ```bash
-git clone https://github.com/devfloor9/oh-my-aidlcops
+git clone https://github.com/aws-samples/sample-oh-my-aidlcops
 bash oh-my-aidlcops/scripts/install-claude.sh
 ```
 
 ### Kiro
 
 ```bash
-git clone https://github.com/devfloor9/oh-my-aidlcops
+git clone https://github.com/aws-samples/sample-oh-my-aidlcops
 bash oh-my-aidlcops/scripts/install-kiro.sh
 ```
 

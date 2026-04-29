@@ -12,7 +12,7 @@ Keyword Trigger는 `UserPromptSubmit` 훅이 사용자 입력을 가로채서 `.
 
 ## 기본 매핑 테이블
 
-OMA 설치 직후 기본 트리거는 다음과 같습니다(출처: [CLAUDE.md](https://github.com/devfloor9/oh-my-aidlcops/blob/main/CLAUDE.md) `<keyword_triggers>`).
+OMA 설치 직후 기본 트리거는 다음과 같습니다(출처: [CLAUDE.md](https://github.com/aws-samples/sample-oh-my-aidlcops/blob/main/CLAUDE.md) `<keyword_triggers>`).
 
 | 키워드 | 매핑 커맨드 | 예시 입력 |
 |---|---|---|

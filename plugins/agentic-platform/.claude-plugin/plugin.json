@@ -4,8 +4,8 @@
   "description": "Build and operate Agentic AI workloads on AWS EKS with vLLM, Inference Gateway (kgateway + Bifrost/LiteLLM), Langfuse, and Kagent. Covers GPU planning, PagedAttention-based model serving, Cascade/Semantic routing, Self-hosted observability, and Guardrails.",
   "version": "0.1.0",
   "author": {
-    "name": "devfloor9",
-    "email": "youngjoon.jeong@example.com"
+    "name": "aws-samples",
+    "email": "aws-samples.com"
   },
   "keywords": [
     "eks",
@@ -19,6 +19,6 @@
     "karpenter"
   ],
   "license": "Apache-2.0",
-  "homepage": "https://github.com/devfloor9/oh-my-aidlcops",
-  "repository": "https://github.com/devfloor9/oh-my-aidlcops"
+  "homepage": "https://github.com/aws-samples/sample-oh-my-aidlcops",
+  "repository": "https://github.com/aws-samples/sample-oh-my-aidlcops"
 }

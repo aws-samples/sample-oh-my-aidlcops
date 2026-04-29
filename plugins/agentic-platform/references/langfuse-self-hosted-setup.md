@@ -4,7 +4,7 @@ description: EKS 환경에서 Langfuse v3.x 를 자체 호스팅하기 위한 �
 created: 2026-04-21
 last_update:
   date: 2026-04-21
-  author: devfloor9
+  author: aws-samples
 reading_time: 17
 tags:
   - langfuse
@@ -306,5 +306,5 @@ helm upgrade --install otel-collector open-telemetry/opentelemetry-collector \
 ### 관련 문서 (내부)
 - [langfuse-observability Skill](../skills/langfuse-observability/SKILL.md)
 - [langfuse-observer Agent](../agents/langfuse-observer.md)
-- [engineering-playbook: Agent 모니터링](https://github.com/devfloor9/engineering-playbook/blob/main/docs/agentic-ai-platform/operations-mlops/observability/agent-monitoring.md)
-- [engineering-playbook: 모니터링 셋업](https://github.com/devfloor9/engineering-playbook/blob/main/docs/agentic-ai-platform/reference-architecture/integrations/monitoring-observability-setup.md)
+- engineering-playbook: Agent 모니터링 (community resource)
+- engineering-playbook: 모니터링 셋업 (community resource)

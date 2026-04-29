@@ -5,7 +5,6 @@ argument-hint: "[which agent/skill to analyze?]"
 user-invocable: true
 model: claude-opus-4-7
 allowed-tools: "Read,Grep,Bash,mcp__cloudwatch,mcp__prometheus"
-license: Apache-2.0
 ---
 
 ## When to Use
@@ -191,8 +190,8 @@ EOF
 
 ### 관련 문서 (내부)
 
-- [ADR: Self-Improving Loop](https://github.com/devfloor9/engineering-playbook/blob/main/docs/agentic-ai-platform/design-architecture/advanced-patterns/adr-self-improving-loop.md) — 운영 원칙
-- [Self-Improving Agent Loop 설계](https://github.com/devfloor9/engineering-playbook/blob/main/docs/agentic-ai-platform/design-architecture/advanced-patterns/self-improving-agent-loop.md) — 5-Stage 아키텍처
+- ADR: Self-Improving Loop (community resource) — 운영 원칙
+- Self-Improving Agent Loop 설계 (community resource) — 5-Stage 아키텍처
 - [continuous-eval skill](../continuous-eval/SKILL.md) — Regression signal 제공자
 - [autopilot-deploy skill](../autopilot-deploy/SKILL.md) — PR 머지 후 canary rollout 실행자
 - [incident-response skill](../incident-response/SKILL.md) — 품질 regression을 SEV2/3로 격상하는 upstream

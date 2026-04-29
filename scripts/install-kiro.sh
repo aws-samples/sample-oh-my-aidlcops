@@ -14,7 +14,7 @@ set -euo pipefail
 # Globals
 # ---------------------------------------------------------------------------
 OMA_REPO_DIR="$(cd "$(dirname "$0")/.." && pwd)"
-OMA_OWNER="${OMA_OWNER:-devfloor9}"
+OMA_OWNER="${OMA_OWNER:-aws-samples}"
 KIRO_HOME="${KIRO_HOME:-$HOME/.kiro}"
 MARKETPLACE_JSON="$OMA_REPO_DIR/.claude-plugin/marketplace.json"
 
@@ -35,7 +35,7 @@ Usage:
     bash scripts/install-kiro.sh [--help]
 
 Environment:
-    OMA_OWNER    GitHub owner for the marketplace (default: devfloor9).
+    OMA_OWNER    GitHub owner for the marketplace (default: aws-samples).
     KIRO_HOME    Target Kiro directory (default: $HOME/.kiro).
 
 What it does:

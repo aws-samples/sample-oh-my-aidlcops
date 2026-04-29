@@ -5,7 +5,6 @@ argument-hint: "[slug or design.md path]"
 user-invocable: true
 model: claude-opus-4-7
 allowed-tools: "Read,Grep,Bash,mcp__aws-documentation,mcp__well-architected-security"
-license: Apache-2.0
 ---
 
 ## 언제 사용하나요

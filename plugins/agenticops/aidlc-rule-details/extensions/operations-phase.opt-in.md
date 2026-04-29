@@ -72,7 +72,7 @@ Canary 1% → 10% → 50% → 100%의 4단계 progressive rollout을 자동 실�
 
 **담당 Skill**: `self-improving-loop`
 
-프로덕션 trace에서 regression 원인을 분석하고 prompt·skill 수정안을 Draft PR 형태로 제안한다. 본 sub-phase는 engineering-playbook의 [ADR — Self-Improving Agent Loop 도입 의사결정](https://github.com/devfloor9/engineering-playbook/blob/main/docs/agentic-ai-platform/design-architecture/advanced-patterns/adr-self-improving-loop.md)을 준수하며, **Train/Deploy 단계의 자동 실행은 금지된다**.
+프로덕션 trace에서 regression 원인을 분석하고 prompt·skill 수정안을 Draft PR 형태로 제안한다. 본 sub-phase는 engineering-playbook의 ADR — Self-Improving Agent Loop 도입 의사결정 (community resource)을 준수하며, **Train/Deploy 단계의 자동 실행은 금지된다**.
 
 **Human Checkpoint Gate** (ADR §2에 따라 필수):
 - Draft PR 머지 승인 (코드 리뷰 필수)
@@ -157,5 +157,5 @@ Operations phase가 활성화되면 다음 상태 파일을 사용한다. 모든
 - [agenticops plugin — CLAUDE.md](../../CLAUDE.md) — 플러그인 전체 설명
 - [awslabs/aidlc-workflows — core-workflow.md](https://github.com/awslabs/aidlc-workflows/blob/main/aidlc-rules/aws-aidlc-rules/core-workflow.md) — Extensions Loading 규약
 - [awslabs/aidlc-workflows — operations.md placeholder](https://github.com/awslabs/aidlc-workflows/blob/main/aidlc-rules/aws-aidlc-rule-details/operations/operations.md) — 본 확장이 대체하는 placeholder
-- [ADR — Self-Improving Agent Loop](https://github.com/devfloor9/engineering-playbook/blob/main/docs/agentic-ai-platform/design-architecture/advanced-patterns/adr-self-improving-loop.md) — Improve sub-phase 운영 원칙
-- [Self-Improving Agent Loop 설계](https://github.com/devfloor9/engineering-playbook/blob/main/docs/agentic-ai-platform/design-architecture/advanced-patterns/self-improving-agent-loop.md) — 5-Stage 아키텍처
+- ADR — Self-Improving Agent Loop (community resource) — Improve sub-phase 운영 원칙
+- Self-Improving Agent Loop 설계 (community resource) — 5-Stage 아키텍처

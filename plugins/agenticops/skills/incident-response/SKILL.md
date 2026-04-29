@@ -5,7 +5,6 @@ argument-hint: "[alarm-id or incident context]"
 user-invocable: true
 model: claude-opus-4-7
 allowed-tools: "Read,Grep,Bash,mcp__cloudwatch,mcp__prometheus"
-license: Apache-2.0
 ---
 
 ## When to Use

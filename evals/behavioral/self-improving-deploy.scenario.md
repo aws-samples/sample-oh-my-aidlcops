@@ -174,6 +174,6 @@ estimated_duration: 30 minutes
 - [Langfuse API Reference](https://langfuse.com/docs/api) — trace 조회·메트릭 API
 - [Ragas Documentation](https://docs.ragas.io/) — RAG 평가 메트릭 라이브러리
 - [Argo Rollouts](https://argoproj.github.io/argo-rollouts/) — 프로그레시브 딜리버리
-- [engineering-playbook ADR: Self-Improving Loop](https://devfloor9.github.io/engineering-playbook/docs/agentic-ai-platform/design-architecture/advanced-patterns/adr-self-improving-loop) — ADR 원본
-- [engineering-playbook: Self-Improving Agent Loop](https://devfloor9.github.io/engineering-playbook/docs/agentic-ai-platform/design-architecture/advanced-patterns/self-improving-agent-loop) — 상세 설계
+- engineering-playbook ADR: Self-Improving Loop (community resource) — ADR 원본
+- engineering-playbook: Self-Improving Agent Loop (community resource) — 상세 설계
 - [OMA CLAUDE.md](../../CLAUDE.md) — 플러그인 카탈로그

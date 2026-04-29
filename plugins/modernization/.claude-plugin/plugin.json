@@ -4,8 +4,8 @@
   "description": "Legacy workload modernization to AWS — 6R strategy (Rehost/Replatform/Refactor/Repurchase/Retire/Retain), workload assessment, to-be architecture (ECS/EKS/Serverless), containerization (multi-stage, multi-arch, non-root), and cutover planning (Blue-Green, Canary, Rolling). Adapted from aws-samples/sample-ai-driven-modernization-with-kiro (MIT-0).",
   "version": "0.1.0",
   "author": {
-    "name": "devfloor9",
-    "email": "youngjoon.jeong@example.com"
+    "name": "aws-samples",
+    "email": "aws-samples.com"
   },
   "keywords": [
     "modernization",
@@ -19,6 +19,6 @@
     "brownfield"
   ],
   "license": "Apache-2.0",
-  "homepage": "https://github.com/devfloor9/oh-my-aidlcops",
-  "repository": "https://github.com/devfloor9/oh-my-aidlcops"
+  "homepage": "https://github.com/aws-samples/sample-oh-my-aidlcops",
+  "repository": "https://github.com/aws-samples/sample-oh-my-aidlcops"
 }

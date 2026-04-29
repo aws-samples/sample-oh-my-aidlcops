@@ -11,7 +11,7 @@ set -euo pipefail
 # Globals
 # ---------------------------------------------------------------------------
 OMA_REPO_DIR="$(cd "$(dirname "$0")/.." && pwd)"
-OMA_OWNER="${OMA_OWNER:-devfloor9}"
+OMA_OWNER="${OMA_OWNER:-aws-samples}"
 AIDLC_DIR="${AIDLC_DIR:-$HOME/.aidlc}"
 AIDLC_REPO_URL="${AIDLC_REPO_URL:-https://github.com/awslabs/aidlc-workflows.git}"
 MARKETPLACE_JSON="$OMA_REPO_DIR/.claude-plugin/marketplace.json"
@@ -29,7 +29,7 @@ Usage:
     bash scripts/install-aidlc.sh [--help]
 
 Environment:
-    OMA_OWNER       GitHub owner for the marketplace (default: devfloor9).
+    OMA_OWNER       GitHub owner for the marketplace (default: aws-samples).
     AIDLC_DIR       Target directory for aidlc-workflows (default: $HOME/.aidlc).
     AIDLC_REPO_URL  Upstream repo (default: awslabs/aidlc-workflows).
 

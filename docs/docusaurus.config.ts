@@ -17,12 +17,12 @@ const config: Config = {
   themes: ['@docusaurus/theme-mermaid'],
 
   // Production URL + baseUrl (GitHub Pages).
-  url: 'https://devfloor9.github.io',
-  baseUrl: '/oh-my-aidlcops/',
+  url: 'https://aws-samples.github.io',
+  baseUrl: '/sample-oh-my-aidlcops/',
 
   // GitHub Pages deployment.
-  organizationName: 'devfloor9',
-  projectName: 'oh-my-aidlcops',
+  organizationName: 'aws-samples',
+  projectName: 'sample-oh-my-aidlcops',
   deploymentBranch: 'gh-pages',
   trailingSlash: false,
 
@@ -48,7 +48,7 @@ const config: Config = {
           routeBasePath: 'docs',
           path: 'docs',
           editUrl:
-            'https://github.com/devfloor9/oh-my-aidlcops/tree/main/docs/',
+            'https://github.com/aws-samples/sample-oh-my-aidlcops/tree/main/docs/',
           showLastUpdateAuthor: false,
           showLastUpdateTime: false,
           breadcrumbs: true,
@@ -104,7 +104,7 @@ const config: Config = {
           position: 'right',
         },
         {
-          href: 'https://github.com/devfloor9/oh-my-aidlcops',
+          href: 'https://github.com/aws-samples/sample-oh-my-aidlcops',
           position: 'right',
           className: 'header-github-link',
           'aria-label': 'GitHub repository',
@@ -135,15 +135,15 @@ const config: Config = {
           items: [
             {
               label: 'GitHub',
-              href: 'https://github.com/devfloor9/oh-my-aidlcops',
+              href: 'https://github.com/aws-samples/sample-oh-my-aidlcops',
             },
             {
               label: 'LICENSE (Apache-2.0)',
-              href: 'https://github.com/devfloor9/oh-my-aidlcops/blob/main/LICENSE',
+              href: 'https://github.com/aws-samples/sample-oh-my-aidlcops/blob/main/LICENSE',
             },
             {
               label: 'NOTICE',
-              href: 'https://github.com/devfloor9/oh-my-aidlcops/blob/main/NOTICE',
+              href: 'https://github.com/aws-samples/sample-oh-my-aidlcops/blob/main/NOTICE',
             },
             {
               label: 'oh-my-claudecode',
@@ -152,7 +152,7 @@ const config: Config = {
           ],
         },
       ],
-      copyright: `Copyright © ${new Date().getFullYear()} devfloor9. Apache-2.0 licensed.`,
+      copyright: `Copyright ${new Date().getFullYear()} Amazon.com, Inc. or its affiliates. MIT-0 licensed.`,
     },
     prism: {
       theme: prismThemes.github,

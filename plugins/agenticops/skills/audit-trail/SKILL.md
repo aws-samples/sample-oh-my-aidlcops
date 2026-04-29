@@ -5,7 +5,6 @@ argument-hint: "[session-id or slug]"
 user-invocable: true
 model: claude-haiku-4-5
 allowed-tools: "Read,Write,Bash"
-license: Apache-2.0
 ---
 
 ## 언제 사용하나요

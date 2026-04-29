@@ -47,7 +47,7 @@ pip3 install jsonschema
 ### Install the marketplace for Claude Code
 
 ```bash
-git clone https://github.com/devfloor9/oh-my-aidlcops ~/src/oh-my-aidlcops
+git clone https://github.com/aws-samples/sample-oh-my-aidlcops ~/src/oh-my-aidlcops
 bash ~/src/oh-my-aidlcops/scripts/install-claude.sh
 ```
 
@@ -109,7 +109,7 @@ python3 scripts/sync-from-playbook.py --playbook-dir ~/workspace/engineering-pla
 
 | Variable | Default | Description |
 |---|---|---|
-| `OMA_OWNER`                 | `devfloor9`                     | GitHub owner used for the marketplace. Keeps organization transfers low-touch. |
+| `OMA_OWNER`                 | `aws-samples`                   | GitHub owner used for the marketplace. Keeps organization transfers low-touch. |
 | `CLAUDE_HOME`               | `$HOME/.claude`                 | Override the Claude Code target. |
 | `KIRO_HOME`                 | `$HOME/.kiro`                   | Override the Kiro target. |
 | `AIDLC_DIR`                 | `$HOME/.aidlc`                  | Target directory for the aidlc-workflows clone. |

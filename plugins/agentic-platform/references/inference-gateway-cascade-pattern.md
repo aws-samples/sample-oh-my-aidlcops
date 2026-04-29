@@ -4,7 +4,7 @@ description: 2-Tier 게이트웨이 아키텍처, Cascade Routing (Haiku→Sonne
 created: 2026-04-21
 last_update:
   date: 2026-04-21
-  author: devfloor9
+  author: aws-samples
 reading_time: 16
 tags:
   - inference-gateway
@@ -185,5 +185,5 @@ router:
 ### 관련 문서 (내부)
 - [inference-gateway-routing Skill](../skills/inference-gateway-routing/SKILL.md)
 - [inference-gateway-operator Agent](../agents/inference-gateway-operator.md)
-- [engineering-playbook: 라우팅 전략](https://github.com/devfloor9/engineering-playbook/blob/main/docs/agentic-ai-platform/reference-architecture/inference-gateway/routing-strategy.md)
-- [engineering-playbook: Cascade 튜닝](https://github.com/devfloor9/engineering-playbook/blob/main/docs/agentic-ai-platform/reference-architecture/inference-gateway/cascade-routing-tuning.md)
+- engineering-playbook: 라우팅 전략 (community resource)
+- engineering-playbook: Cascade 튜닝 (community resource)

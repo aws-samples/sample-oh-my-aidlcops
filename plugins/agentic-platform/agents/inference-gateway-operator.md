@@ -107,8 +107,8 @@ spec:
 
 ## 참고 자료
 
-- [Inference Gateway 라우팅 전략](https://github.com/devfloor9/engineering-playbook/blob/main/docs/agentic-ai-platform/reference-architecture/inference-gateway/routing-strategy.md) — 2-Tier, Cascade, Semantic Router 설계
-- [Inference Gateway 배포 가이드](https://github.com/devfloor9/engineering-playbook/blob/main/docs/agentic-ai-platform/reference-architecture/inference-gateway/setup/) — Helm, HTTPRoute, OTel
+- Inference Gateway 라우팅 전략 (community resource) — 2-Tier, Cascade, Semantic Router 설계
+- Inference Gateway 배포 가이드 (community resource) — Helm, HTTPRoute, OTel
 - [kgateway 공식 문서](https://kgateway.dev/docs/) — GatewayClass / HTTPRoute 레퍼런스
 - [Kubernetes Gateway API](https://gateway-api.sigs.k8s.io/) — 표준 스펙
 - [Bifrost GitHub](https://github.com/maximhq/bifrost) — Rust 기반 LLM Gateway

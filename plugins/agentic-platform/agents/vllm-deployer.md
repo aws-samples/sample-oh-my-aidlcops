@@ -96,7 +96,7 @@ tolerations:
 
 ## 참고 자료
 
-- [vLLM 모델 서빙](https://github.com/devfloor9/engineering-playbook/blob/main/docs/agentic-ai-platform/model-serving/inference-frameworks/vllm-model-serving.md) — 개념 및 아키텍처
+- vLLM 모델 서빙 (community resource) — 개념 및 아키텍처
 - [vLLM 공식 문서](https://docs.vllm.ai/) — CLI 옵션·배포 가이드
 - [vLLM Production Stack](https://github.com/vllm-project/production-stack) — Helm 차트 레퍼런스
 - [PagedAttention SOSP 2023](https://arxiv.org/abs/2309.06180) — 원 논문

@@ -22,7 +22,7 @@ Claude Code를 실행한 뒤 네이티브 플러그인 커맨드를 입력합니
 
 ```bash
 claude
-> /plugin marketplace add https://github.com/devfloor9/oh-my-aidlcops
+> /plugin marketplace add https://github.com/aws-samples/sample-oh-my-aidlcops
 > /plugin install agentic-platform agenticops aidlc-inception aidlc-construction
 ```
 
@@ -36,7 +36,7 @@ claude
 네이티브 마켓플레이스가 불가하거나 오프라인 환경이라면 수동 설치도 가능합니다.
 
 ```bash
-git clone https://github.com/devfloor9/oh-my-aidlcops
+git clone https://github.com/aws-samples/sample-oh-my-aidlcops
 bash oh-my-aidlcops/scripts/install-claude.sh
 ```
 

@@ -4,7 +4,7 @@
   "description": "AIDLC Phase 1 (Inception) opt-in extensions for awslabs/aidlc-workflows. Covers workspace detection (greenfield vs brownfield), adaptive-depth requirements analysis, conditional user stories, and workflow planning. Contributes only skills and extension rules; does not re-implement aidlc-workflows core.",
   "version": "0.1.0",
   "author": {
-    "name": "devfloor9"
+    "name": "aws-samples"
   },
   "keywords": [
     "aidlc",
@@ -15,6 +15,6 @@
     "awslabs-aidlc"
   ],
   "license": "Apache-2.0",
-  "homepage": "https://github.com/devfloor9/oh-my-aidlcops",
-  "repository": "https://github.com/devfloor9/oh-my-aidlcops"
+  "homepage": "https://github.com/aws-samples/sample-oh-my-aidlcops",
+  "repository": "https://github.com/aws-samples/sample-oh-my-aidlcops"
 }

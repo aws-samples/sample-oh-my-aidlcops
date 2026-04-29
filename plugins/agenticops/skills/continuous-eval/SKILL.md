@@ -5,7 +5,6 @@ argument-hint: "[target:version, e.g. rag-qa-agent:v2.3.1]"
 user-invocable: true
 model: claude-sonnet-4-6
 allowed-tools: "Read,Grep,Bash,mcp__cloudwatch,mcp__prometheus"
-license: Apache-2.0
 ---
 
 ## When to Use

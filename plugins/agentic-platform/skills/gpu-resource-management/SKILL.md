@@ -130,9 +130,9 @@ spec:
 
 ## References
 
-- [GPU Resource Management](https://github.com/devfloor9/engineering-playbook/blob/main/docs/agentic-ai-platform/model-serving/gpu-infrastructure/gpu-resource-management.md)
-- [NVIDIA GPU Stack](https://github.com/devfloor9/engineering-playbook/blob/main/docs/agentic-ai-platform/model-serving/gpu-infrastructure/nvidia-gpu-stack.md)
-- [AWS Neuron Stack](https://github.com/devfloor9/engineering-playbook/blob/main/docs/agentic-ai-platform/model-serving/gpu-infrastructure/aws-neuron-stack.md)
+- GPU Resource Management (community resource)
+- NVIDIA GPU Stack (community resource)
+- AWS Neuron Stack (community resource)
 - [Karpenter 공식 문서](https://karpenter.sh/docs/)
 - [KEDA 공식 문서](https://keda.sh/docs/)
 - [Kubernetes DRA 1.35 GA](https://kubernetes.io/docs/concepts/scheduling-eviction/dynamic-resource-allocation/)

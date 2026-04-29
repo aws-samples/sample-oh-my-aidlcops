@@ -103,9 +103,9 @@ s3:
 
 ## 참고 자료
 
-- [Agent 모니터링 개요](https://github.com/devfloor9/engineering-playbook/blob/main/docs/agentic-ai-platform/operations-mlops/observability/agent-monitoring.md) — Langfuse canonical
-- [LLMOps Observability 도구 비교](https://github.com/devfloor9/engineering-playbook/blob/main/docs/agentic-ai-platform/operations-mlops/observability/llmops-observability.md) — Langfuse vs LangSmith vs Arize
-- [모니터링 스택 구성 가이드](https://github.com/devfloor9/engineering-playbook/blob/main/docs/agentic-ai-platform/reference-architecture/integrations/monitoring-observability-setup.md)
+- Agent 모니터링 개요 (community resource) — Langfuse canonical
+- LLMOps Observability 도구 비교 (community resource) — Langfuse vs LangSmith vs Arize
+- 모니터링 스택 구성 가이드 (community resource)
 - [Langfuse 공식 문서](https://langfuse.com/docs) — self-host 가이드
 - [OpenTelemetry GenAI Semantic Conventions](https://opentelemetry.io/docs/specs/semconv/gen-ai/) — span attribute 표준
 - 플러그인 내부: `references/langfuse-self-hosted-setup.md`

@@ -5,7 +5,6 @@ argument-hint: "[component or unit name]"
 user-invocable: true
 model: claude-opus-4-7
 allowed-tools: "Read,Write,Edit,Grep,Glob,Bash"
-license: Apache-2.0
 ---
 
 ## 언제 사용하나요

@@ -35,7 +35,7 @@ OMA는 이 차이를 `install-kiro.sh`에서 흡수하며, 동일한 `plugins/<p
 Kiro는 네이티브 마켓플레이스 경로를 제공하지 않으므로 수동 설치만 지원합니다.
 
 ```bash
-git clone https://github.com/devfloor9/oh-my-aidlcops
+git clone https://github.com/aws-samples/sample-oh-my-aidlcops
 cd oh-my-aidlcops
 bash scripts/install-kiro.sh
 ```
@@ -45,7 +45,7 @@ bash scripts/install-kiro.sh
 ```
 [install-kiro] OMA repo : /.../oh-my-aidlcops
 [install-kiro] KIRO_HOME: /home/user/.kiro
-[install-kiro] OMA_OWNER: devfloor9
+[install-kiro] OMA_OWNER: aws-samples
 [install-kiro] skill linked: agentic-platform/vllm-serving-setup
 [install-kiro] skill linked: agenticops/self-improving-loop
 ...
@@ -243,7 +243,7 @@ bash scripts/install-aidlc.sh
 
 | 변수 | 기본값 | 설명 |
 |---|---|---|
-| `OMA_OWNER` | `devfloor9` | GitHub 소유자 |
+| `OMA_OWNER` | `aws-samples` | GitHub 소유자 |
 | `KIRO_HOME` | `$HOME/.kiro` | Kiro 설치 디렉터리 |
 
 CI 환경이나 다중 사용자 장비에서 `KIRO_HOME`을 재지정해 격리된 설치를 만들 수 있습니다.

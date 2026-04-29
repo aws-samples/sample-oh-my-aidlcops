@@ -116,8 +116,8 @@ tokenPolicy:
 
 ## References
 
-- [AI Gateway Guardrails](https://github.com/devfloor9/engineering-playbook/blob/main/docs/agentic-ai-platform/operations-mlops/governance/ai-gateway-guardrails.md)
-- [컴플라이언스 프레임워크](https://github.com/devfloor9/engineering-playbook/blob/main/docs/agentic-ai-platform/operations-mlops/governance/compliance-framework.md)
+- AI Gateway Guardrails (community resource)
+- 컴플라이언스 프레임워크 (community resource)
 - [Bedrock Guardrails 공식 문서](https://docs.aws.amazon.com/bedrock/latest/userguide/guardrails.html)
 - [NeMo Guardrails](https://github.com/NVIDIA/NeMo-Guardrails)
 - [Llama Guard 3 (Hugging Face)](https://huggingface.co/meta-llama/Llama-Guard-3-8B)

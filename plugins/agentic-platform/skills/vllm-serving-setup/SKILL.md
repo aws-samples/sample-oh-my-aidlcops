@@ -115,8 +115,8 @@ python benchmarks/benchmark_serving.py \
 
 ## References
 
-- [vLLM 모델 서빙](https://github.com/devfloor9/engineering-playbook/blob/main/docs/agentic-ai-platform/model-serving/inference-frameworks/vllm-model-serving.md)
-- [llm-d 분산 추론](https://github.com/devfloor9/engineering-playbook/blob/main/docs/agentic-ai-platform/model-serving/inference-frameworks/llm-d-eks-automode.md)
+- vLLM 모델 서빙 (community resource)
+- llm-d 분산 추론 (community resource)
 - [vLLM 공식 문서](https://docs.vllm.ai/)
 - [vLLM Production Stack](https://github.com/vllm-project/production-stack)
 - [PagedAttention SOSP 2023](https://arxiv.org/abs/2309.06180)

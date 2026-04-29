@@ -55,9 +55,9 @@ Q5. 모델 fine-tuning/continuous training 이 필수인가?
 
 ## References
 
-- [AI 플랫폼 선택 가이드](https://github.com/devfloor9/engineering-playbook/blob/main/docs/agentic-ai-platform/design-architecture/platform-selection/ai-platform-decision-framework.md) — 매니지드 vs 오픈소스 vs 하이브리드
-- [플랫폼 아키텍처](https://github.com/devfloor9/engineering-playbook/blob/main/docs/agentic-ai-platform/design-architecture/foundations/agentic-platform-architecture.md) — 6-레이어 청사진
-- [Agentic AI 도전과제](https://github.com/devfloor9/engineering-playbook/blob/main/docs/agentic-ai-platform/design-architecture/foundations/agentic-ai-challenges.md) — 5가지 핵심 과제
-- [AgentCore 하이브리드 전략](https://github.com/devfloor9/engineering-playbook/blob/main/docs/agentic-ai-platform/design-architecture/platform-selection/agentcore-hybrid-strategy.md) — Bedrock+EKS 패턴
+- AI 플랫폼 선택 가이드 (community resource) — 매니지드 vs 오픈소스 vs 하이브리드
+- 플랫폼 아키텍처 (community resource) — 6-레이어 청사진
+- Agentic AI 도전과제 (community resource) — 5가지 핵심 과제
+- AgentCore 하이브리드 전략 (community resource) — Bedrock+EKS 패턴
 - [AWS Well-Architected ML Lens](https://docs.aws.amazon.com/wellarchitected/latest/machine-learning-lens/) — 공식 ML 설계 원칙
 - [AWS Bedrock AgentCore](https://docs.aws.amazon.com/bedrock/latest/userguide/agents.html) — Agent 런타임 공식 문서

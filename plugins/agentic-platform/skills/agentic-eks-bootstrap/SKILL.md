@@ -97,9 +97,9 @@ kubectl get crd | grep -E 'nodepool|gpu|dra'
 
 ## References
 
-- [EKS GPU Node Strategy](https://github.com/devfloor9/engineering-playbook/blob/main/docs/agentic-ai-platform/model-serving/gpu-infrastructure/eks-gpu-node-strategy.md)
-- [GPU Resource Management](https://github.com/devfloor9/engineering-playbook/blob/main/docs/agentic-ai-platform/model-serving/gpu-infrastructure/gpu-resource-management.md)
-- [NVIDIA GPU Stack](https://github.com/devfloor9/engineering-playbook/blob/main/docs/agentic-ai-platform/model-serving/gpu-infrastructure/nvidia-gpu-stack.md)
+- EKS GPU Node Strategy (community resource)
+- GPU Resource Management (community resource)
+- NVIDIA GPU Stack (community resource)
 - [Karpenter v1 공식 문서](https://karpenter.sh/docs/)
 - [EKS Auto Mode 공식 가이드](https://docs.aws.amazon.com/eks/latest/userguide/automode.html)
 - [Kubernetes DRA](https://kubernetes.io/docs/concepts/scheduling-eviction/dynamic-resource-allocation/) — 1.35 GA

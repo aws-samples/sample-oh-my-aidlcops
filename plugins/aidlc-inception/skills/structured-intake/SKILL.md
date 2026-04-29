@@ -5,7 +5,6 @@ argument-hint: "[project slug — e.g., rag-qa, inference-gateway]"
 user-invocable: true
 model: claude-sonnet-4-6
 allowed-tools: "Read,Write,Bash"
-license: Apache-2.0
 ---
 
 ## 언제 사용하나요
