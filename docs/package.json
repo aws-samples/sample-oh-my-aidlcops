@@ -26,7 +26,8 @@
   },
   "overrides": {
     "serialize-javascript": "7.0.5",
-    "webpack-dev-server": "5.2.3"
+    "webpack-dev-server": "5.2.3",
+    "webpack": "5.105.1"
   },
   "devDependencies": {
     "@docusaurus/module-type-aliases": "3.9.2",
