@@ -3,9 +3,9 @@ import type * as Preset from '@docusaurus/preset-classic';
 import { themes as prismThemes } from 'prism-react-renderer';
 
 const config: Config = {
-  title: 'oh-my-aidlcops',
-  tagline: 'AIDLC × AgenticOps — plugin marketplace for agent-driven development lifecycle',
-  favicon: 'img/favicon.ico',
+  title: 'OMA',
+  tagline: 'Autonomous operations for the AWS AIDLC loop',
+  favicon: 'img/favicon.svg',
 
   // Enable Mermaid diagrams (Docusaurus 3.x built-in).
   markdown: {
@@ -69,9 +69,9 @@ const config: Config = {
 
   themeConfig: {
     colorMode: {
-      defaultMode: 'dark',
+      defaultMode: 'light',
       disableSwitch: false,
-      respectPrefersColorScheme: false,
+      respectPrefersColorScheme: true,
     },
     mermaid: {
       theme: {
@@ -98,6 +98,16 @@ const config: Config = {
           sidebarId: 'docs',
           position: 'left',
           label: 'Docs',
+        },
+        {
+          to: '/docs/tier-0-workflows',
+          position: 'left',
+          label: 'Workflows',
+        },
+        {
+          to: '/docs/keyword-triggers',
+          position: 'left',
+          label: 'Triggers',
         },
         {
           type: 'localeDropdown',
@@ -138,7 +148,7 @@ const config: Config = {
               href: 'https://github.com/aws-samples/sample-oh-my-aidlcops',
             },
             {
-              label: 'LICENSE (Apache-2.0)',
+              label: 'LICENSE (MIT-0)',
               href: 'https://github.com/aws-samples/sample-oh-my-aidlcops/blob/main/LICENSE',
             },
             {
