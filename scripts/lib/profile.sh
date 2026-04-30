@@ -47,27 +47,38 @@ profile_json_to_yaml() {
 }
 
 # profile_validate <yaml-file>
-# Exits 0 if valid, non-zero with message if not.
+# Exit codes:
+#   0 — profile is valid
+#   1 — profile FAILS schema (real violation)
+#   2 — validator dependencies missing (pyyaml / jsonschema / python3)
+#
+# Callers decide how to treat exit 2. `oma setup` treats it as a warning
+# (profile is still written, user can install deps later). CI should treat
+# it as a hard failure.
 profile_validate() {
     file="$1"
     schema="$(__oma_profile_repo_root)/schemas/profile/profile.schema.json"
-    [ -f "$file" ]   || die "profile not found: $file"
-    [ -f "$schema" ] || die "schema missing: $schema"
+    [ -f "$file" ]   || { warn "profile not found: $file"; return 1; }
+    [ -f "$schema" ] || { warn "schema missing: $schema"; return 2; }
 
-    if command -v python3 >/dev/null 2>&1; then
-        python3 - "$file" "$schema" <<'PY' || return 1
+    if ! command -v python3 >/dev/null 2>&1; then
+        warn "python3 missing; skipping profile schema validation"
+        return 2
+    fi
+
+    python3 - "$file" "$schema" <<'PY'
 import json
 import sys
 
 try:
     import yaml
 except ImportError:
-    print("[profile] python3 yaml module missing; install pyyaml", file=sys.stderr)
+    print("[profile] python3 yaml module missing; install with: pip3 install pyyaml", file=sys.stderr)
     sys.exit(2)
 try:
     from jsonschema import Draft7Validator
 except ImportError:
-    print("[profile] python3 jsonschema missing; install jsonschema", file=sys.stderr)
+    print("[profile] python3 jsonschema missing; install with: pip3 install jsonschema", file=sys.stderr)
     sys.exit(2)
 
 doc = yaml.safe_load(open(sys.argv[1], encoding="utf-8"))
@@ -79,9 +90,18 @@ if errors:
         print(f"[profile][invalid] {path}: {e.message}", file=sys.stderr)
     sys.exit(1)
 PY
-    else
-        die "profile_validate requires python3 with pyyaml + jsonschema"
-    fi
+    status=$?
+    return "$status"
+}
+
+# profile_install_validator_hint
+# Prints a one-line remediation when validator dependencies are missing.
+profile_install_validator_hint() {
+    cat >&2 <<'EOF'
+[hint] To enable profile schema validation on this machine:
+       pip3 install --user pyyaml jsonschema
+       # or (Ubuntu/Debian): sudo apt-get install python3-yaml python3-jsonschema
+EOF
 }
 
 # profile_read <yaml-file> <jq-expr>

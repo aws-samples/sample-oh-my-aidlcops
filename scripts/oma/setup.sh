@@ -65,6 +65,23 @@ for tool in jq git; do
 done
 if ! command -v python3 >/dev/null 2>&1; then
     warn "python3 not found — profile validation and compile will be unavailable"
+else
+    # Check whether profile validation dependencies (pyyaml + jsonschema) are
+    # available. If not, try a one-shot auto-install before the wizard runs.
+    # Never attempt to modify the system interpreter — always use --user.
+    if ! python3 -c 'import yaml, jsonschema' >/dev/null 2>&1; then
+        if [ "${OMA_SKIP_DEPS_INSTALL:-0}" != "1" ] && command -v pip3 >/dev/null 2>&1; then
+            step "installing validator deps (pyyaml, jsonschema) with pip3 --user"
+            if pip3 install --user --quiet pyyaml jsonschema 2>/dev/null; then
+                ok "installed pyyaml + jsonschema into user site-packages"
+            else
+                warn "could not auto-install pyyaml/jsonschema; profile schema validation will be skipped"
+                warn "install manually with: pip3 install --user pyyaml jsonschema"
+            fi
+        else
+            warn "pip3 missing or OMA_SKIP_DEPS_INSTALL=1 — profile schema validation will be skipped"
+        fi
+    fi
 fi
 
 # -----------------------------------------------------------------------------
@@ -141,7 +158,16 @@ else
         "OBSERVABILITY_ENDPOINT=null" \
         "STAR_CONFIRMED=false"
     if command -v python3 >/dev/null 2>&1; then
-        profile_validate "$OMAO_DIR/profile.yaml" || die "profile validation failed; aborting"
+        if profile_validate "$OMAO_DIR/profile.yaml"; then
+            ok "profile schema: OK"
+        else
+            case $? in
+                1) die "profile validation failed; aborting (edit $OMAO_DIR/profile.yaml or re-run oma setup)" ;;
+                2) warn "profile validator dependencies missing — skipping schema check"
+                   profile_install_validator_hint ;;
+                *) die "profile validation returned unexpected status" ;;
+            esac
+        fi
     fi
     ok "wrote $OMAO_DIR/profile.yaml"
 fi
