@@ -14,7 +14,12 @@
 set -euo pipefail
 
 # Resolve symlink to find the real repo root.
-__oma_self="${BASH_SOURCE[0]}"
+__oma_self="${BASH_SOURCE[0]:-$0}"
+# If still relative (some exec contexts), prefix with $PWD so readlink logic works.
+case "$__oma_self" in
+    /*) ;;
+    *)  __oma_self="$PWD/$__oma_self" ;;
+esac
 while [ -L "$__oma_self" ]; do
     __oma_target="$(readlink "$__oma_self")"
     case "$__oma_target" in
@@ -28,7 +33,16 @@ export OMA_REPO_ROOT
 # shellcheck disable=SC1091
 . "$OMA_REPO_ROOT/scripts/lib/log.sh"
 
-OMA_VERSION="$(jq -r '.metadata.version' "$OMA_REPO_ROOT/.claude-plugin/marketplace.json" 2>/dev/null || echo 'unknown')"
+# Read version from marketplace.json. If jq is missing or the file cannot be
+# parsed for any reason, emit a clear stderr hint but still print a deterministic
+# version string so automation can proceed.
+__oma_marketplace="$OMA_REPO_ROOT/.claude-plugin/marketplace.json"
+if command -v jq >/dev/null 2>&1 && [ -f "$__oma_marketplace" ]; then
+    OMA_VERSION="$(jq -r '.metadata.version // "unknown"' "$__oma_marketplace" 2>/dev/null || echo 'unknown')"
+else
+    warn "cannot read $__oma_marketplace (jq missing or file absent); using 'unknown' version"
+    OMA_VERSION="unknown"
+fi
 export OMA_VERSION
 
 usage() {

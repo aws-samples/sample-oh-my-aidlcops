@@ -29,15 +29,16 @@ setup() {
 }
 
 @test "oma version prints oma plus a semver-like string" {
-    run "$OMA_BIN" version
+    run env OMA_REPO_ROOT="$REPO_ROOT" "$OMA_BIN" version
     if [ "$status" -ne 0 ]; then
         echo "exit=$status"
         echo "output=[$output]"
     fi
     [ "$status" -eq 0 ]
-    # Accept any 'oma <something.something.something>...' shape.
     if ! echo "$output" | grep -Eq '^oma[[:space:]][0-9]+\.[0-9]+\.[0-9]+'; then
         echo "actual output: [$output]"
+        echo "marketplace.json head:"
+        head -8 "$REPO_ROOT/.claude-plugin/marketplace.json"
         return 1
     fi
 }
