@@ -126,7 +126,7 @@ const config: Config = {
         },
         {
           href: 'https://github.com/aws-samples/sample-oh-my-aidlcops',
-          position: 'left',
+          position: 'right',
           label: 'Star',
           className: 'navbar-star-button',
           'aria-label': 'Star the sample-oh-my-aidlcops repository on GitHub',
