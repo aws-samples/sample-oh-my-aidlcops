@@ -91,14 +91,14 @@ claude
 
 ```bash
 git clone https://github.com/aws-samples/sample-oh-my-aidlcops
-bash sample-oh-my-aidlcops/scripts/install-claude.sh
+bash sample-oh-my-aidlcops/scripts/install/claude.sh
 ```
 
 ### Kiro
 
 ```bash
 git clone https://github.com/aws-samples/sample-oh-my-aidlcops
-bash sample-oh-my-aidlcops/scripts/install-kiro.sh
+bash sample-oh-my-aidlcops/scripts/install/kiro.sh
 ```
 
 ### Initialize `.omao/` in your project
@@ -111,7 +111,7 @@ bash <path-to-oma>/scripts/init-omao.sh
 ### AIDLC extensions (opt-in)
 
 ```bash
-bash scripts/install-aidlc.sh
+bash scripts/install/aidlc-extensions.sh
 # Clones awslabs/aidlc-workflows into ~/.aidlc and symlinks OMA's opt-in extensions.
 ```
 
@@ -231,7 +231,7 @@ MIT No Attribution (MIT-0). See [LICENSE](./LICENSE).
 
 ## Contributing
 
-OMA is in Phase 1 MVP. See [CONTRIBUTING.md](./CONTRIBUTING.md) for the bug
+OMA is in Tech Preview (`v0.2.0-preview.1`). See [CONTRIBUTING.md](./CONTRIBUTING.md) for the bug
 report and pull request process, and [CODE_OF_CONDUCT.md](./CODE_OF_CONDUCT.md)
 for the Amazon Open Source Code of Conduct. Issues and PRs are especially
 welcome for skill quality, MCP coverage gaps, and Kiro compatibility testing.

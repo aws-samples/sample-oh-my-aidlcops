@@ -33,7 +33,7 @@ Reuse pattern:
 
 Reuse pattern:
   - OMA does NOT copy or fork aidlc-workflows core-workflow content.
-  - scripts/install-aidlc.sh clones the upstream repository at runtime and
+  - scripts/install/aidlc-extensions.sh clones the upstream repository at runtime and
     symlinks OMA-authored *.opt-in.md extension files into its extension
     directory.
   - Extension file format follows the aidlc-workflows opt-in convention.
@@ -76,10 +76,10 @@ Reuse pattern:
    Copyright (c) 2025 oh-my-cloud-skills
 
 Reuse pattern:
-  - scripts/eval-skills.py takes structural inspiration from the upstream
+  - scripts/dev/eval-skills.py takes structural inspiration from the upstream
     eval-skills.py. Where substantive code is reused, it is annotated in-file
     with an "Adapted from" comment and the MIT copyright notice.
-  - scripts/install-kiro.sh references the kiro-power-converter plugin's
+  - scripts/install/kiro.sh references the kiro-power-converter plugin's
     conversion logic pattern.
 
 ================================================================================
@@ -108,7 +108,7 @@ Reuse pattern:
   - No verbatim copy of source files; content is adapted to OMA's Korean
     경어체 style and integrated with AIDLC × AgenticOps philosophy.
   - Kiro-native directory conventions (.kiro/steering/, .kiro/guides/,
-    .kiro/agents/) are supported by scripts/install-kiro.sh.
+    .kiro/agents/) are supported by scripts/install/kiro.sh.
 
 ================================================================================
 

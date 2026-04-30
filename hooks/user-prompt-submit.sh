@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # user-prompt-submit.sh — OMA Tier-0 keyword trigger detector
-# Run: chmod +x hooks/user-prompt-submit.sh after install-claude.sh
+# Run: chmod +x hooks/user-prompt-submit.sh after scripts/install/claude.sh or `oma setup`.
 #
 # Reads user prompt from stdin, matches against .omao/triggers.json,
 # and emits additionalContext JSON if a trigger keyword is detected.

@@ -95,7 +95,7 @@ const INTEGRATIONS = [
     title: 'Kiro skills',
     icon: 'spark',
     body:
-      'install-kiro.sh symlinks every skill into ~/.kiro/skills/ and wires kiro-agents profiles with pinned MCP server versions.',
+      'install/kiro.sh symlinks every skill into ~/.kiro/skills/ and wires kiro-agents profiles with pinned MCP server versions.',
   },
   {
     title: 'Shared .omao state',

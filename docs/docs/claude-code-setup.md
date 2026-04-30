@@ -41,15 +41,15 @@ claude
 
 ## 방법 2 · 수동 설치
 
-`scripts/install-claude.sh`는 네이티브 경로와 동일한 결과를 보장하되 수동으로 실행할 수 있습니다. 오프라인 환경, GitHub Enterprise 미러, 또는 `/plugin` 커맨드를 지원하지 않는 구버전에서 이용합니다.
+`scripts/install/claude.sh` 는 네이티브 경로와 동일한 결과를 보장하되 수동으로 실행할 수 있습니다. 오프라인 환경, GitHub Enterprise 미러, 또는 `/plugin` 커맨드를 지원하지 않는 구버전에서 이용합니다.
 
 ```bash
 git clone https://github.com/aws-samples/sample-oh-my-aidlcops
 cd oh-my-aidlcops
-bash scripts/install-claude.sh
+bash scripts/install/claude.sh
 ```
 
-스크립트가 수행하는 작업은 네 단계입니다(자세한 동작은 [install-claude.sh 소스](https://github.com/aws-samples/sample-oh-my-aidlcops/blob/main/scripts/install-claude.sh)를 참조).
+스크립트가 수행하는 작업은 네 단계입니다(자세한 동작은 [install/claude.sh 소스](https://github.com/aws-samples/sample-oh-my-aidlcops/blob/main/scripts/install/claude.sh)를 참조).
 
 1. **플러그인 심링크** — `~/.claude/plugins/<plugin>/`에 각 플러그인 디렉터리를 심링크합니다.
 2. **커맨드 심링크** — `steering/commands/oma/`를 `~/.claude/commands/oma/`로 심링크해 `/oma:*` 슬래시 커맨드를 노출합니다.
@@ -139,7 +139,7 @@ bash <oma-repo>/scripts/init-omao.sh
 `aidlc-inception`·`aidlc-construction` 플러그인은 awslabs/aidlc-workflows의 opt-in 확장 구조를 따릅니다. 확장을 활성화하려면 다음을 실행합니다.
 
 ```bash
-bash scripts/install-aidlc.sh
+bash scripts/install/aidlc-extensions.sh
 ```
 
 스크립트는 `awslabs/aidlc-workflows`를 `~/.aidlc`로 clone하고, OMA가 작성한 `*.opt-in.md` 파일을 해당 리포지터리의 extension 디렉터리에 심링크합니다. OMA는 core workflow 파일을 복사·수정하지 않으며, 확장 파일만 기여합니다(상세는 [NOTICE](https://github.com/aws-samples/sample-oh-my-aidlcops/blob/main/NOTICE) 섹션 2 참조).
@@ -213,7 +213,7 @@ sudo apt-get install -y jq
 ls -la ~/.claude/commands/oma/
 # stale 심링크라면 제거 후 재설치
 rm ~/.claude/commands/oma
-bash <oma-repo>/scripts/install-claude.sh
+bash <oma-repo>/scripts/install/claude.sh
 ```
 
 ### MCP 서버 연결 실패 (`uvx not found`)

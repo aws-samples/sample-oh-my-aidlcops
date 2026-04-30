@@ -4,9 +4,9 @@ This directory contains hook scripts that enable automatic Tier-0 workflow detec
 
 ## Setup
 
-### 1. Install hooks (automated via install-claude.sh)
+### 1. Install hooks (automated via `oma setup` or `install/claude.sh`)
 
-The `install-claude.sh` script automatically:
+Either `oma setup` (preferred) or the direct `scripts/install/claude.sh` script automatically:
 - Copies `.omao/triggers.json` to user projects
 - Makes hook scripts executable
 - Provides instructions for wiring hooks in `.claude/settings.json`

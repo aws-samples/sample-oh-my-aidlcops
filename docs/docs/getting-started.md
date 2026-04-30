@@ -55,7 +55,7 @@ claude
 
 ```bash
 git clone https://github.com/aws-samples/sample-oh-my-aidlcops
-bash oh-my-aidlcops/scripts/install-claude.sh
+bash oh-my-aidlcops/scripts/install/claude.sh
 ```
 
 수동 설치 상세는 [Claude Code Setup](./claude-code-setup.md)을 참조합니다.
@@ -159,7 +159,7 @@ Quickstart 완료 후 다음 산출물이 생성됩니다.
 |---|---|---|
 | `/plugin marketplace add` 실패 | Claude Code 버전 미지원 | `claude --version` 후 업그레이드 |
 | `jq: command not found` | jq 미설치 | `brew install jq` / `apt install jq` |
-| `/oma:*` 커맨드 미노출 | `~/.claude/commands/oma/` 심링크 실패 | `bash scripts/install-claude.sh` 재실행 |
+| `/oma:*` 커맨드 미노출 | `~/.claude/commands/oma/` 심링크 실패 | `bash scripts/install/claude.sh` 재실행 |
 | MCP 서버 연결 실패 | `uvx` 미설치 또는 네트워크 이슈 | `pipx install uv` 후 재시도 |
 | Checkpoint가 무한 대기 | 훅 등록 누락 | [Claude Code Setup](./claude-code-setup.md)의 훅 섹션 참조 |
 
@@ -167,9 +167,13 @@ Quickstart 완료 후 다음 산출물이 생성됩니다.
 
 ## 다음 단계
 
+- [Easy Button](./easy-button.md) — `oma setup` 1 회 실행으로 완료되는 설치·프로파일·씨드 온톨로지 흐름
+- [Profile](./profile.md) · [Doctor](./doctor.md) — 프로젝트 설정과 환경 점검 참고
+- [Ontology](./ontology.md) · [Harness DSL](./harness-dsl.md) — 런타임 강제화되는 도메인 계약과 DSL
 - [Philosophy](./philosophy-aidlc-meets-agenticops.md) — OMA 설계 명제 이해
 - [Tier-0 Workflows](./tier-0-workflows.md) — 9개 Tier-0 커맨드 심화 학습
 - [Keyword Triggers](./keyword-triggers.md) — 키워드 기반 자동 커맨드 호출 설정
+- [Support Policy](./support-policy.md) · [Telemetry](./telemetry.md) — Tech Preview 지원 범위
 
 ## 참고 자료
 

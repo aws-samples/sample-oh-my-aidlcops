@@ -73,9 +73,10 @@ flowchart LR
 
 OMA는 두 가지 에이전트 하네스에서 동일하게 동작합니다.
 
-- **Claude Code** — 네이티브 `/plugin marketplace add` 또는 `scripts/install-claude.sh`로 설치. `.claude/plugins/`·`.claude/commands/oma/`·`.claude/settings.json`에 통합됩니다.
-- **Kiro** — `scripts/install-kiro.sh`로 설치. `SKILL.md`를 `.kiro/skills/`에, steering을 `.kiro/steering/`에 심링크합니다.
-- **공유 상태** — 프로젝트 루트의 `.omao/` 디렉터리는 harness-agnostic하며, 두 하네스 모두 같은 파일을 읽고 씁니다.
+- **Claude Code** — 네이티브 `/plugin marketplace add` 또는 `bash scripts/install/claude.sh` 로 설치 (또는 `oma setup`). `.claude/plugins/`·`.claude/commands/oma/`·`.claude/settings.json` 에 통합됩니다.
+- **Kiro** — `bash scripts/install/kiro.sh` 로 설치 (또는 `oma setup` 에서 harness=`kiro` 선택). `SKILL.md` 를 `.kiro/skills/` 에, steering 을 `.kiro/steering/` 에 심링크합니다.
+- **공유 상태** — 프로젝트 루트의 `.omao/` 디렉터리는 harness-agnostic 하며, 두 하네스 모두 같은 파일을 읽고 씁니다.
+- **권장 경로** — `oma setup` 하나로 프로파일 + 씨드 온톨로지 + 플러그인 설치까지 한 번에. 상세는 [Easy Button](./easy-button.md).
 
 각 하네스별 설치·설정은 [Claude Code Setup](./claude-code-setup.md)과 [Kiro Setup](./kiro-setup.md)을 참조합니다.
 

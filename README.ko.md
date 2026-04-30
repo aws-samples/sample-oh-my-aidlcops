@@ -80,14 +80,14 @@ claude
 
 ```bash
 git clone https://github.com/aws-samples/sample-oh-my-aidlcops
-bash sample-oh-my-aidlcops/scripts/install-claude.sh
+bash sample-oh-my-aidlcops/scripts/install/claude.sh
 ```
 
 ### Kiro
 
 ```bash
 git clone https://github.com/aws-samples/sample-oh-my-aidlcops
-bash sample-oh-my-aidlcops/scripts/install-kiro.sh
+bash sample-oh-my-aidlcops/scripts/install/kiro.sh
 ```
 
 ### 사용자 프로젝트에 `.omao/` 초기화
@@ -100,7 +100,7 @@ bash <oma-경로>/scripts/init-omao.sh
 ### AIDLC 확장 적용 (opt-in)
 
 ```bash
-bash scripts/install-aidlc.sh
+bash scripts/install/aidlc-extensions.sh
 # awslabs/aidlc-workflows를 ~/.aidlc에 clone하고 OMA opt-in 확장을 심링크합니다.
 ```
 
@@ -201,6 +201,6 @@ MIT No Attribution (MIT-0). [LICENSE](./LICENSE) 참조.
 
 ## 기여
 
-OMA는 Phase 1 MVP 단계입니다. 버그 리포트·PR 절차는 [CONTRIBUTING.md](./CONTRIBUTING.md), Amazon Open Source Code of Conduct는 [CODE_OF_CONDUCT.md](./CODE_OF_CONDUCT.md)를 참조하세요. 특히 skill 품질, MCP 커버리지, Kiro 호환성 테스트 영역 기여를 환영합니다.
+OMA 는 Tech Preview (`v0.2.0-preview.1`) 단계입니다. 버그 리포트·PR 절차는 [CONTRIBUTING.md](./CONTRIBUTING.md), Amazon Open Source Code of Conduct는 [CODE_OF_CONDUCT.md](./CODE_OF_CONDUCT.md)를 참조하세요. 특히 skill 품질, MCP 커버리지, Kiro 호환성 테스트 영역 기여를 환영합니다.
 
 보안 이슈는 공개 GitHub issue로 신고하지 **마시고**, AWS [vulnerability reporting](https://aws.amazon.com/security/vulnerability-reporting/) 절차를 따라 주세요.
