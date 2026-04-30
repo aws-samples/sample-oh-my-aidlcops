@@ -189,7 +189,7 @@ Matching is case-insensitive. The command string in systemMessage is verbatim fr
 Manually run the hook script to verify matching:
 
 ```bash
-echo "Run AIDLC with autopilot" | bash <oma-repo>/hooks/user-prompt-submit.sh
+echo "Run AIDLC with autopilot" | bash ~/.oma/hooks/user-prompt-submit.sh
 # Expected output: {"systemMessage":"Trigger match: /oma:autopilot"}
 ```
 

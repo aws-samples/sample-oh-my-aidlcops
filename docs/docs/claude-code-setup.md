@@ -162,11 +162,17 @@ OMA의 설치 스크립트는 **기존 `settings.json`을 덮어쓰지 않습니
 
 ## 프로젝트 초기화
 
-설치는 사용자 홈 디렉터리 기준으로 진행되지만, 실제 작업은 프로젝트 루트의 `.omao/`에서 일어납니다.
+설치는 사용자 홈 디렉터리 기준으로 진행되지만, 실제 작업은 프로젝트 루트의 `.omao/` 에서 일어납니다. **`oma setup` 을 실행했다면 이 단계는 자동 수행** 되며, 별도 호출은 필요 없습니다.
+
+`oma setup` 없이 수동 초기화:
 
 ```bash
 cd <your-project>
-bash <oma-repo>/scripts/init-omao.sh
+# install.sh 로 설치한 경우 (기본)
+bash ~/.oma/scripts/init-omao.sh
+
+# git clone 한 경우
+bash <cloned-repo>/scripts/init-omao.sh
 ```
 
 이 스크립트는 `.omao/plans/`, `.omao/state/`, `.omao/notepad.md`, `.omao/triggers.json`, `.omao/project-memory.json`을 생성합니다.
@@ -231,7 +237,7 @@ sudo apt-get install -y jq
 ls -la ~/.claude/commands/oma/
 # stale 심링크라면 제거 후 재설치
 rm ~/.claude/commands/oma
-bash <oma-repo>/scripts/install/claude.sh
+bash ~/.oma/scripts/install/claude.sh
 ```
 
 ### MCP 서버 연결 실패 (`uvx not found`)
@@ -259,8 +265,8 @@ jq '.hooks' ~/.claude/settings.json
 훅 파일에 실행 권한이 있는지도 확인합니다.
 
 ```bash
-chmod +x <oma-repo>/hooks/user-prompt-submit.sh
-chmod +x <oma-repo>/hooks/session-start.sh
+chmod +x ~/.oma/hooks/user-prompt-submit.sh
+chmod +x ~/.oma/hooks/session-start.sh
 ```
 
 ### 체크포인트가 무한 대기

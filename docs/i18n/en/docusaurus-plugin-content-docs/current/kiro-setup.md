@@ -220,11 +220,17 @@ After installation, users can directly edit this file to adjust default model, a
 
 ## Project Initialization
 
-Initialize `.omao/` in your project directory, the same as Claude Code.
+Initialize `.omao/` in your project directory, the same as Claude Code. **If you ran `oma setup`, this is already done** — no manual call needed.
+
+To initialize manually without the full setup wizard:
 
 ```bash
 cd <your-project>
-bash <oma-repo>/scripts/init-omao.sh
+# If installed via install.sh (default)
+bash ~/.oma/scripts/init-omao.sh
+
+# If installed via git clone
+bash <cloned-repo>/scripts/init-omao.sh
 ```
 
 Since `.omao/` is harness-agnostic, state stays synchronized even if you use Claude Code and Kiro in parallel on the same project. For example, you can start an AIDLC loop in Kiro and continue it in Claude Code for checkpoint approvals.
@@ -290,7 +296,7 @@ If symlinks are broken, reinstall.
 ```bash
 rm -rf ~/.kiro/skills/agentic-platform ~/.kiro/skills/agenticops \
        ~/.kiro/skills/aidlc-inception ~/.kiro/skills/aidlc-construction
-bash <oma-repo>/scripts/install/kiro.sh
+bash ~/.oma/scripts/install/kiro.sh
 ```
 
 ### `refusing to replace non-symlink` warning
@@ -299,7 +305,7 @@ This occurs when actual files exist in the Kiro skill directory. Back up and rem
 
 ```bash
 mv ~/.kiro/skills/<conflicting-skill> ~/.kiro/skills/<conflicting-skill>.bak
-bash <oma-repo>/scripts/install/kiro.sh
+bash ~/.oma/scripts/install/kiro.sh
 ```
 
 ### kiro.meta.yaml not taking effect

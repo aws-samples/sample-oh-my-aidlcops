@@ -161,11 +161,17 @@ Hooks serve these roles:
 
 ## Project Initialization
 
-Installation proceeds at the user home directory level, but actual work happens in `.omao/` at the project root.
+Installation happens at the user's home directory level, but actual work lives in `.omao/` at the project root. **If you ran `oma setup`, this is already done** — there is no need to call `init-omao.sh` separately.
+
+To initialize manually without the full setup wizard:
 
 ```bash
 cd <your-project>
-bash <oma-repo>/scripts/init-omao.sh
+# If installed via install.sh (default)
+bash ~/.oma/scripts/init-omao.sh
+
+# If installed via git clone
+bash <cloned-repo>/scripts/init-omao.sh
 ```
 
 This script creates `.omao/plans/`, `.omao/state/`, `.omao/notepad.md`, `.omao/triggers.json`, and `.omao/project-memory.json`.
@@ -230,7 +236,7 @@ The `~/.claude/commands/oma/` symlink may not have been created.
 ls -la ~/.claude/commands/oma/
 # If it is a stale symlink, remove and reinstall
 rm ~/.claude/commands/oma
-bash <oma-repo>/scripts/install/claude.sh
+bash ~/.oma/scripts/install/claude.sh
 ```
 
 ### MCP server connection fails (`uvx not found`)
@@ -258,8 +264,8 @@ jq '.hooks' ~/.claude/settings.json
 Also verify that hook files have execute permissions.
 
 ```bash
-chmod +x <oma-repo>/hooks/user-prompt-submit.sh
-chmod +x <oma-repo>/hooks/session-start.sh
+chmod +x ~/.oma/hooks/user-prompt-submit.sh
+chmod +x ~/.oma/hooks/session-start.sh
 ```
 
 ### Checkpoint stuck waiting

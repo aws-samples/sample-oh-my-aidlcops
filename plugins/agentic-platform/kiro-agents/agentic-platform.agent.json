@@ -42,7 +42,8 @@
         "awslabs.cloudwatch-mcp-server==0.0.25"
       ],
       "env": {
-        "FASTMCP_LOG_LEVEL": "ERROR"
+        "FASTMCP_LOG_LEVEL": "ERROR",
+        "AWS_REGION": "us-east-1"
       },
       "disabled": false
     }

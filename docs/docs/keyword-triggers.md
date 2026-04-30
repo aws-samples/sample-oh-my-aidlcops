@@ -189,7 +189,7 @@ jq 'del(.hooks.UserPromptSubmit[] | select(.hooks[].command | endswith("/hooks/u
 훅 스크립트를 수동 실행해 매칭 동작을 검증합니다.
 
 ```bash
-echo "autopilot으로 AIDLC를 돌려줘" | bash <oma-repo>/hooks/user-prompt-submit.sh
+echo "autopilot으로 AIDLC를 돌려줘" | bash ~/.oma/hooks/user-prompt-submit.sh
 # 기대 출력: {"systemMessage":"Trigger match: /oma:autopilot"}
 ```
 

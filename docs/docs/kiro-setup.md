@@ -220,11 +220,17 @@ Kiro 런타임에서 `@agentic-platform` 형태로 해당 프로필을 활성화
 
 ## 프로젝트 초기화
 
-Claude Code와 동일하게 작업 프로젝트에서 `.omao/`를 초기화합니다.
+Claude Code와 동일하게 작업 프로젝트에서 `.omao/` 를 초기화합니다. **`oma setup` 을 실행했다면 이미 완료된 상태**이므로 수동 호출은 필요 없습니다.
+
+`oma setup` 없이 수동 초기화:
 
 ```bash
 cd <your-project>
-bash <oma-repo>/scripts/init-omao.sh
+# install.sh 로 설치한 경우 (기본)
+bash ~/.oma/scripts/init-omao.sh
+
+# git clone 한 경우
+bash <cloned-repo>/scripts/init-omao.sh
 ```
 
 `.omao/`는 harness-agnostic 이므로 같은 프로젝트에서 Claude Code와 Kiro를 병행 사용해도 상태가 동기화됩니다. 예를 들어 Kiro에서 시작한 AIDLC 루프를 Claude Code에서 이어받아 체크포인트 승인을 처리할 수 있습니다.
@@ -290,7 +296,7 @@ find ~/.kiro/skills/ -maxdepth 2 -type l | head
 ```bash
 rm -rf ~/.kiro/skills/agentic-platform ~/.kiro/skills/agenticops \
        ~/.kiro/skills/aidlc-inception ~/.kiro/skills/aidlc-construction
-bash <oma-repo>/scripts/install/kiro.sh
+bash ~/.oma/scripts/install/kiro.sh
 ```
 
 ### `refusing to replace non-symlink` 경고
@@ -299,7 +305,7 @@ bash <oma-repo>/scripts/install/kiro.sh
 
 ```bash
 mv ~/.kiro/skills/<conflicting-skill> ~/.kiro/skills/<conflicting-skill>.bak
-bash <oma-repo>/scripts/install/kiro.sh
+bash ~/.oma/scripts/install/kiro.sh
 ```
 
 ### kiro.meta.yaml이 반영되지 않음

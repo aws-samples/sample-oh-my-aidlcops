@@ -124,12 +124,25 @@ non-interactive setups.
 
 ## Step 2: Initialize Your Project (10 seconds)
 
-OMA stores per-project state in `.omao/`. Run this in your project root.
+OMA stores per-project state under `.omao/`. **If you ran `oma setup`, this
+step is already done** — setup internally invokes `init-omao.sh` to create
+the directory.
+
+To create `.omao/` without running the full setup wizard:
 
 ```bash
+# Installed via the remote install.sh (recommended)
 cd <your-project>
-bash <oma-repo>/scripts/init-omao.sh
+bash ~/.oma/scripts/init-omao.sh
+
+# Installed via git clone
+cd <your-project>
+bash <cloned-repo>/scripts/init-omao.sh
 ```
+
+> Replace `<oma-repo>` placeholders with the **actual path**. For
+> `install.sh` installs that is `~/.oma`; for `git clone` installs use the
+> directory you cloned into.
 
 The structure created is as follows:
 

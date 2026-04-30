@@ -63,7 +63,8 @@
         "awslabs.cloudwatch-mcp-server==0.0.25"
       ],
       "env": {
-        "FASTMCP_LOG_LEVEL": "ERROR"
+        "FASTMCP_LOG_LEVEL": "ERROR",
+        "AWS_REGION": "us-east-1"
       },
       "timeout": 120000
     },
@@ -118,7 +119,8 @@
         "awslabs.aws-knowledge-mcp-server==0.1.0"
       ],
       "env": {
-        "FASTMCP_LOG_LEVEL": "ERROR"
+        "FASTMCP_LOG_LEVEL": "ERROR",
+        "AWS_REGION": "us-east-1"
       },
       "timeout": 120000
     }

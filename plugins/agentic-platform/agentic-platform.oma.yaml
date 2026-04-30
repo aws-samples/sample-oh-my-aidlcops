@@ -44,7 +44,11 @@ mcp:
   cloudwatch:
     command: uvx
     args: ["awslabs.cloudwatch-mcp-server==0.0.25"]
-    env: { FASTMCP_LOG_LEVEL: ERROR }
+    env:
+      FASTMCP_LOG_LEVEL: ERROR
+      # boto3 needs a region. Users can override via AWS_REGION/AWS_DEFAULT_REGION
+      # in their shell or edit this value; us-east-1 is the CloudWatch global default.
+      AWS_REGION: us-east-1
     timeout: 120000
   prometheus:
     command: uvx
@@ -69,7 +73,9 @@ mcp:
   aws-knowledge:
     command: uvx
     args: ["awslabs.aws-knowledge-mcp-server==0.1.0"]
-    env: { FASTMCP_LOG_LEVEL: ERROR }
+    env:
+      FASTMCP_LOG_LEVEL: ERROR
+      AWS_REGION: us-east-1
     timeout: 120000
 
 # ---------------------------------------------------------------------------
