@@ -6,6 +6,37 @@ inclusion: manual
 
 # OMA — oh-my-aidlcops Steering Hub
 
+## ABSOLUTE RULES — Ontology + Harness Mandate (priority = top-level)
+
+이 7 개 규칙은 모든 플러그인 `CLAUDE.md`, 모든 스킬 `SKILL.md` 본문, 그리고 이
+허브의 라우팅 지침보다 **우선**합니다. 상세 근거와 집행 경로는
+[`workflows/ontology-harness-mandate.md`](./workflows/ontology-harness-mandate.md)
+를 참조합니다.
+
+1. **온톨로지가 권위적**이다. deployment/incident/budget/risk 를 말할 때는 반드시
+   `.omao/ontology/<type>/*.json` 엔티티를 병행한다. 산문만으로 phase 간 핸드오프
+   금지.
+2. **`.omao/profile.yaml` 은 모든 휴리스틱을 override** 한다. 값이 빠지면
+   "먼저 `oma setup` 을 실행하세요" 로 응답하고 현재 작업을 중단한다.
+3. **approval gate 는 load-bearing** 이다. `Deployment` / `Incident` 의
+   `approval_state ∈ {draft, proposed}` 인 동안 write-side MCP 호출 거부.
+4. **`[MAGIC KEYWORD: OMA_BUDGET_WARN]` 수신 시** 첫 응답에서 경고를 명시하고
+   범위 축소 또는 `/oma:agenticops` 호출을 제안한다. 무시하고 진행하면 규칙 위반.
+5. **`blast_radius_ceiling` 초과 금지**. `ci-auto-approve-safe` 모드여도 상한
+   초과 배포는 human approval + secondary review 가 필요하다.
+6. **하네스 DSL 이 유일한 편집 표면**이다. `.mcp.json`, `kiro-agents/*.agent.json`
+   은 `oma compile` 출력이므로 직접 수정 금지. 변경은 `<plugin>.oma.yaml` 에서.
+7. **kill switch 는 명시적 환경변수뿐**이다 (`OMA_DISABLE_ONTOLOGY=1`). 세션 내
+   비활성화 경로 없음. 온톨로지 디렉터리가 없으면 작업 중단 후 `oma setup` 안내.
+
+집행 훅:
+- `hooks/session-start.sh` → 세션 시작 시 온톨로지 스냅샷 주입
+- `hooks/user-prompt-submit.sh` → 예산 초과 magic keyword 삽입
+- `oma doctor` → 프로파일/온톨로지/하네스 drift 검사
+- CI `oma-foundation.yml` → `oma compile --check` 로 DSL↔네이티브 drift 차단
+
+---
+
 OMA는 AIDLC(AI-Driven Development Lifecycle)와 AgenticOps를 결합한 플러그인 마켓플레이스입니다.
 이 허브 파일은 사용자의 자연어 요청을 적절한 Tier-0 슬래시 명령 또는 플러그인 스킬로 라우팅하는 **중앙 디스패처**입니다.
 

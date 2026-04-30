@@ -114,5 +114,31 @@ Invoke this command or proceed with the user's request using the relevant Tier-0
   fi
 done <<< "$TRIGGERS"
 
+# ----- Ontology-aware budget warning -----------------------------------------
+# If any .omao/ontology/budgets/*.json has `spend_ratio > warn_at_pct/100`
+# we prepend a warning. This requires the user or agenticops to have written
+# a `spend_usd` value into the instance; otherwise we silently skip.
+if [[ "${OMA_DISABLE_ONTOLOGY:-0}" != "1" ]] && [[ -d ".omao/ontology/budgets" ]]; then
+  while IFS= read -r f; do
+    [[ -z "$f" ]] && continue
+    warn_line=$(jq -r '
+      . as $b
+      | if ($b.spend_usd // null) == null then empty
+        elif ($b.spend_usd / $b.limit_usd) > 0.8 then
+          "Budget warn: \($b.id) at \( ( ($b.spend_usd / $b.limit_usd) * 100) | floor )% of $\($b.limit_usd)"
+        else empty end
+    ' "$f" 2>/dev/null || true)
+    if [[ -n "$warn_line" ]]; then
+      ADDITIONAL_CONTEXT="[MAGIC KEYWORD: OMA_BUDGET_WARN]
+
+$warn_line
+
+Consider running /oma:agenticops or pausing high-cost operations."
+      jq -n --arg ctx "$ADDITIONAL_CONTEXT" '{"additionalContext": $ctx}'
+      exit 0
+    fi
+  done < <(find .omao/ontology/budgets -maxdepth 1 -type f -name '*.json' 2>/dev/null)
+fi
+
 # No match found
 exit 0

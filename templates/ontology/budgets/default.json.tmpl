@@ -1,0 +1,9 @@
+{
+  "id": "default-monthly",
+  "scope": "account",
+  "scope_ref": "{{AWS_ACCOUNT_ID}}",
+  "limit_usd": {{BUDGET_MONTHLY_USD}},
+  "period": "monthly",
+  "rule_expression": "spend_usd > limit_usd * ({{BUDGET_WARN_PCT}} / 100)",
+  "action_on_breach": "notify"
+}

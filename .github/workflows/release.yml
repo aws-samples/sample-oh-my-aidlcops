@@ -1,0 +1,112 @@
+name: release
+
+# Builds the OMA tech-preview tarball and attaches it to a GitHub Release
+# when a tag matching `v*` is pushed. Runs the foundation tests first so
+# we never ship a broken build.
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Override version tag (e.g., v0.2.0-preview.2)'
+        required: false
+
+permissions:
+  contents: write
+
+jobs:
+  test:
+    name: foundation tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: pip
+      - name: Install Python deps
+        run: python -m pip install --upgrade pip jsonschema pyyaml pytest
+      - name: Install bats + jq
+        run: sudo apt-get update -qq && sudo apt-get install -y --no-install-recommends bats jq
+      - name: Python tests
+        run: python -m pytest tests/ --ignore=tests/installer --ignore=tests/profile --ignore=tests/hooks --ignore=tests/doctor
+      - name: Bats tests
+        run: |
+          bats tests/installer
+          bats tests/profile
+          bats tests/doctor
+          bats tests/hooks
+
+  build:
+    name: build tarball
+    needs: test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Resolve version
+        id: ver
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ] && [ -n "${{ github.event.inputs.version }}" ]; then
+            echo "tag=${{ github.event.inputs.version }}" >> "$GITHUB_OUTPUT"
+          else
+            echo "tag=${GITHUB_REF#refs/tags/}" >> "$GITHUB_OUTPUT"
+          fi
+      - name: Build tarball
+        run: bash scripts/dev/make-tarball.sh --version "${{ steps.ver.outputs.tag }}"
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: oma-tarball
+          path: |
+            dist/oh-my-aidlcops-${{ steps.ver.outputs.tag }}.tar.gz
+            dist/oh-my-aidlcops-${{ steps.ver.outputs.tag }}.tar.gz.sha256
+          retention-days: 14
+
+  release:
+    name: publish GitHub Release
+    needs: build
+    if: startsWith(github.ref, 'refs/tags/v') || github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Resolve version
+        id: ver
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ] && [ -n "${{ github.event.inputs.version }}" ]; then
+            echo "tag=${{ github.event.inputs.version }}" >> "$GITHUB_OUTPUT"
+          else
+            echo "tag=${GITHUB_REF#refs/tags/}" >> "$GITHUB_OUTPUT"
+          fi
+      - name: Download tarball
+        uses: actions/download-artifact@v4
+        with:
+          name: oma-tarball
+          path: dist
+      - name: Extract release notes from CHANGELOG
+        id: notes
+        run: |
+          python3 - <<'PY' > body.md
+          import re, sys
+          ver = "${{ steps.ver.outputs.tag }}".lstrip("v")
+          content = open("CHANGELOG.md", encoding="utf-8").read()
+          pattern = re.compile(rf"## \[{re.escape(ver)}\].*?(?=## \[|\Z)", re.S)
+          m = pattern.search(content)
+          if m:
+              sys.stdout.write(m.group(0).strip() + "\n")
+          else:
+              sys.stdout.write(f"Release {ver}\n")
+          PY
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ steps.ver.outputs.tag }}
+          name: OMA ${{ steps.ver.outputs.tag }}
+          body_path: body.md
+          files: |
+            dist/oh-my-aidlcops-${{ steps.ver.outputs.tag }}.tar.gz
+            dist/oh-my-aidlcops-${{ steps.ver.outputs.tag }}.tar.gz.sha256
+          draft: false
+          prerelease: ${{ contains(steps.ver.outputs.tag, 'preview') || contains(steps.ver.outputs.tag, 'rc') }}

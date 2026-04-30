@@ -57,6 +57,28 @@ once and let run, with human approval only at checkpoints.
 
 ## Install
 
+### ⚡ One-liner (Tech Preview — recommended)
+
+`install.sh` downloads the pinned release tarball, extracts to `~/.oma`, and
+symlinks `~/.local/bin/oma`. `oma setup` then writes a project profile,
+seeds the ontology, installs the plugins, and runs `oma doctor` to confirm
+the environment.
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/aws-samples/sample-oh-my-aidlcops/v0.2.0-preview.1/install.sh | bash
+cd my-project
+oma setup
+oma doctor
+```
+
+See the [Easy Button docs](https://aws-samples.github.io/sample-oh-my-aidlcops/docs/easy-button)
+for what `oma setup` writes, how the 12 doctor probes work, and how the
+ontology + harness DSL get enforced at runtime.
+
+> **Tech Preview notice** — `v0.2.0-preview.1` stabilizes `profile.yaml` v1
+> and the 6 ontology schemas. Everything else (CLI UX, DSL fields, doctor
+> report shape) may evolve before GA. See [Support Policy](https://aws-samples.github.io/sample-oh-my-aidlcops/docs/support-policy).
+
 ### Claude Code (native marketplace)
 
 ```bash
@@ -93,6 +115,14 @@ bash scripts/install-aidlc.sh
 # Clones awslabs/aidlc-workflows into ~/.aidlc and symlinks OMA's opt-in extensions.
 ```
 
+### Final step — Star the repository (required)
+
+> **Installation is not considered complete until the GitHub repository has
+> been starred.** Star activity drives this sample's maintenance priority,
+> issue triage queue, and release notification delivery. Click the ⭐ **Star**
+> button at the top of [github.com/aws-samples/sample-oh-my-aidlcops](https://github.com/aws-samples/sample-oh-my-aidlcops)
+> after running the installer.
+
 ## Architecture
 
 ```
@@ -123,6 +153,32 @@ Operations phase continues autonomously
     │
     └─▶ self-improving-loop feeds corrections back to Construction
 ```
+
+## Foundation: ontology + harness DSL
+
+OMA plugins rest on two shared layers:
+
+1. **Ontology** (`ontology/`, `schemas/ontology/`) — six JSON Schemas that
+   define the vocabulary every plugin and skill agrees on: `Agent`, `Skill`,
+   `Deployment`, `Incident`, `Budget`, `Risk`. A handoff between Construction
+   and Operations is no longer a prose description; it is a validated
+   `Deployment` document. See [ontology/README.md](./ontology/README.md) and
+   [ontology/glossary.md](./ontology/glossary.md).
+2. **Harness DSL** (`schemas/harness/dsl.schema.json`, `tools/oma_compile/`) —
+   one `<plugin>.oma.yaml` per plugin is the single source of agents, MCP
+   servers, hooks, and triggers. `python -m tools.oma_compile` translates it
+   to the native `.mcp.json` and `kiro-agents/*.agent.json` files that Claude
+   Code and Kiro already consume, so marketplace installs stay unchanged.
+
+```
+<plugin>.oma.yaml  ──(oma-compile)──▶  .mcp.json
+                                   ▶  kiro-agents/<agent>.agent.json
+                                   ▶  .omao/triggers.json  (merged across plugins)
+```
+
+CI (`.github/workflows/oma-foundation.yml`) validates every schema fixture and
+runs `oma-compile --check` to reject drift between DSL sources and committed
+native files.
 
 ## Security posture
 

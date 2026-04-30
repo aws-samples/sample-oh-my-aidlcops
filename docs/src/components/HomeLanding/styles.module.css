@@ -139,6 +139,52 @@
   border-radius: 50%;
 }
 
+.previewBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.55rem 0.85rem;
+  border-radius: 12px;
+  background: linear-gradient(90deg, rgba(255, 176, 46, 0.12), rgba(255, 115, 0, 0.08));
+  border: 1px solid rgba(255, 115, 0, 0.28);
+  color: #7a3a00;
+  font-size: 0.82rem;
+  line-height: 1.4;
+  margin: 0 0 1.3rem;
+  max-width: 560px;
+}
+
+.previewBadge a {
+  color: inherit;
+  text-decoration: underline;
+}
+
+.previewBadgeLabel {
+  padding: 0.18rem 0.55rem;
+  border-radius: 999px;
+  background: #ffb02e;
+  color: #3a2300;
+  font-weight: 700;
+  font-size: 0.68rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  flex-shrink: 0;
+}
+
+.previewBadgeText {
+  opacity: 0.9;
+}
+
+[data-theme='dark'] .previewBadge {
+  background: linear-gradient(90deg, rgba(255, 176, 46, 0.12), rgba(255, 115, 0, 0.06));
+  border-color: rgba(255, 176, 46, 0.4);
+  color: #f2c46a;
+}
+[data-theme='dark'] .previewBadgeLabel {
+  background: #f2c46a;
+  color: #3a2300;
+}
+
 .heroTitle {
   font-size: clamp(2.5rem, 6vw, 4.25rem);
   font-weight: 800;

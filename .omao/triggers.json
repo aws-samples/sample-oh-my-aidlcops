@@ -1,61 +1,14 @@
 {
-  "version": "1.0",
   "triggers": [
     {
-      "id": "autopilot",
-      "keywords": ["ulw autopilot", "/oma:autopilot", "autopilot-aidlc", "autopilot"],
-      "context_required": ["aidlc"],
-      "command": "/oma:autopilot",
-      "description": "AIDLC full-loop autopilot (Inception→Construction→Operations, checkpoint approvals only)"
+      "keyword": "platform-bootstrap",
+      "route": "/oma:platform-bootstrap",
+      "plugin": "agentic-platform"
     },
     {
-      "id": "agenticops",
-      "keywords": ["agenticops", "ops-mode", "/oma:agenticops"],
-      "context_required": [],
-      "command": "/oma:agenticops",
-      "description": "Operations mode (continuous-eval + incident-response + cost-governance active)"
-    },
-    {
-      "id": "self-improving",
-      "keywords": ["self-improving", "feedback-loop", "/oma:self-improving"],
-      "context_required": [],
-      "command": "/oma:self-improving",
-      "description": "Feedback loop runner (Langfuse traces → skill/prompt improvement PR)"
-    },
-    {
-      "id": "aidlc-loop",
-      "keywords": ["aidlc", "/oma:aidlc-loop"],
-      "context_required": [],
-      "command": "/oma:aidlc-loop",
-      "description": "Single feature AIDLC one-pass"
-    },
-    {
-      "id": "platform-bootstrap",
-      "keywords": ["eks-agentic", "platform-bootstrap", "/oma:platform-bootstrap"],
-      "context_required": [],
-      "command": "/oma:platform-bootstrap",
-      "description": "Agentic AI Platform 5-checkpoint bootstrap on EKS"
-    },
-    {
-      "id": "inception",
-      "keywords": ["inception", "/oma:inception"],
-      "context_required": [],
-      "command": "/oma:inception",
-      "description": "AIDLC Phase 1 only (requirements, stories, workflow planning)"
-    },
-    {
-      "id": "construction",
-      "keywords": ["construction", "/oma:construction"],
-      "context_required": [],
-      "command": "/oma:construction",
-      "description": "AIDLC Phase 2 only (component design, codegen, TDD for agentic systems)"
-    },
-    {
-      "id": "cancel",
-      "keywords": ["cancel", "stop-oma", "/oma:cancel"],
-      "context_required": [],
-      "command": "/oma:cancel",
-      "description": "Terminate active Tier-0 mode"
+      "keyword": "eks-agentic",
+      "route": "/oma:platform-bootstrap",
+      "plugin": "agentic-platform"
     }
   ]
 }

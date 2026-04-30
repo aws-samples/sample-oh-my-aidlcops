@@ -110,8 +110,30 @@ const config: Config = {
           label: 'Triggers',
         },
         {
+          to: '/docs/ontology',
+          position: 'left',
+          label: 'Ontology',
+        },
+        {
+          to: '/docs/harness-dsl',
+          position: 'left',
+          label: 'DSL',
+        },
+        {
+          to: '/docs/easy-button',
+          position: 'left',
+          label: 'Easy Button',
+        },
+        {
           type: 'localeDropdown',
           position: 'right',
+        },
+        {
+          href: 'https://github.com/aws-samples/sample-oh-my-aidlcops',
+          position: 'right',
+          label: 'Star',
+          className: 'navbar-star-button',
+          'aria-label': 'Star the sample-oh-my-aidlcops repository on GitHub',
         },
         {
           href: 'https://github.com/aws-samples/sample-oh-my-aidlcops',

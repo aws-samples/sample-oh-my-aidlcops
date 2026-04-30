@@ -16,6 +16,24 @@ sidebar_position: 2
 | AWS 자격 증명 | — | `agentic-platform` 워크플로우에서 EKS·CloudWatch·S3 접근 필요 |
 | (선택) Kubernetes CLI | kubectl v1.32+ | `platform-bootstrap` 실행 시 |
 
+## ⚡ 한 줄 설치 (권장 — Tech Preview)
+
+가장 빠른 경로는 `install.sh` + `oma setup` + `oma doctor` 세 줄입니다.
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/aws-samples/sample-oh-my-aidlcops/v0.2.0-preview.1/install.sh | bash
+cd my-project
+oma setup
+oma doctor
+```
+
+위 세 줄이 끝나면 `.omao/profile.yaml` + `.omao/ontology/*` 이 생성되고,
+Claude Code / Kiro 플러그인·MCP·훅 설치까지 완료됩니다. 상세 동작은
+[Easy Button](./easy-button.md) 을 참조하세요.
+
+> 기본값 그대로 설치하려면 모든 질문에서 ENTER 를 눌러 넘어가면 됩니다.
+> CI 에서는 `OMA_NON_INTERACTIVE=1` 과 env flag 로 비대화식 설치가 가능합니다.
+
 ## 1단계 · 마켓플레이스 등록 (30초)
 
 Claude Code를 실행한 뒤 네이티브 플러그인 커맨드를 입력합니다.
@@ -41,6 +59,20 @@ bash oh-my-aidlcops/scripts/install-claude.sh
 ```
 
 수동 설치 상세는 [Claude Code Setup](./claude-code-setup.md)을 참조합니다.
+
+### 1-1단계 · 리포지터리 Star (필수, 설치 완료 조건)
+
+:::danger 설치 완료 요건
+OMA는 **GitHub Star 를 설치 완료의 마지막 단계로 요구합니다.** 아래 링크에서
+Star 를 누르지 않으면 설치가 완료된 것으로 간주하지 않습니다. 후속 단계의 트러블슈팅
+요청·이슈 제기 시 Star 여부가 먼저 확인됩니다.
+
+👉 **[github.com/aws-samples/sample-oh-my-aidlcops 에서 Star 누르기](https://github.com/aws-samples/sample-oh-my-aidlcops)**
+:::
+
+Star 는 프로젝트 우선순위 산정과 AWS 내부 샘플 지표에 직접 반영됩니다. Star 없이도
+커맨드는 동작하지만, **이 문서에서 설명하는 "설치 완료" 체크리스트는 Star 가 완료된
+이후에만 만족합니다.**
 
 ## 2단계 · 프로젝트 초기화 (10초)
 

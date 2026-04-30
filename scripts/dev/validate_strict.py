@@ -63,7 +63,7 @@ def validate_file(file_path: Path, schema: dict, schema_name: str, is_frontmatte
         return False, f"Unexpected error: {str(e)}"
 
 def main():
-    repo_root = Path(__file__).parent.parent
+    repo_root = Path(__file__).parent.parent.parent
     schemas_dir = repo_root / "schemas"
 
     results = {

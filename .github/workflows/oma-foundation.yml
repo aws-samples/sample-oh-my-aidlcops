@@ -1,0 +1,66 @@
+name: foundation
+
+# Validates the ontology + harness foundation layer:
+#   - JSON Schemas under schemas/ontology/ round-trip against fixtures
+#   - Harness DSL schema rejects bad shapes
+#   - oma-compile is idempotent, rejects floating versions and undeclared MCP refs
+#   - Committed .mcp.json / kiro-agents/*.agent.json files do not drift from
+#     their *.oma.yaml sources (skipped silently until M2 introduces the first
+#     *.oma.yaml under plugins/)
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'schemas/**'
+      - 'ontology/**'
+      - 'tools/oma_compile/**'
+      - 'tests/**'
+      - 'plugins/**/*.oma.yaml'
+      - '.github/workflows/oma-foundation.yml'
+  pull_request:
+    paths:
+      - 'schemas/**'
+      - 'ontology/**'
+      - 'tools/oma_compile/**'
+      - 'tests/**'
+      - 'plugins/**/*.oma.yaml'
+      - '.github/workflows/oma-foundation.yml'
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+
+jobs:
+  foundation:
+    name: schemas + compiler
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: pip
+
+      - name: Install Python dependencies
+        run: python -m pip install --upgrade pip jsonschema pyyaml pytest
+
+      - name: Install bats-core
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y --no-install-recommends bats jq
+
+      - name: Run foundation tests (Python)
+        run: python -m pytest tests/ --ignore=tests/installer --ignore=tests/profile --ignore=tests/hooks
+
+      - name: Run dispatcher tests (bats)
+        run: bats tests/installer
+
+      - name: Check DSL <-> native file drift
+        run: |
+          if compgen -G 'plugins/*/*.oma.yaml' > /dev/null; then
+            python -m tools.oma_compile --check
+          else
+            echo "no *.oma.yaml files present yet; skipping drift check"
+          fi

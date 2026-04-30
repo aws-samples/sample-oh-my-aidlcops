@@ -1,0 +1,168 @@
+{
+  "$id": "https://aws-samples.github.io/sample-oh-my-aidlcops/schemas/harness/dsl.schema.json",
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "OMA Harness DSL (v1)",
+  "description": "Single-source YAML surface for an OMA plugin. oma-compile reads this and emits .mcp.json and kiro-agents/<agent>.agent.json. Native runtimes (Claude Code marketplace, Kiro) consume the emitted files unchanged.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["version", "plugin"],
+  "properties": {
+    "version": {
+      "description": "DSL schema version. Bumped on breaking changes.",
+      "type": "integer",
+      "enum": [1]
+    },
+    "plugin": {
+      "description": "Plugin id. Must match the directory name under plugins/.",
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9-]*$",
+      "maxLength": 64
+    },
+    "agents": {
+      "type": "array",
+      "items": { "$ref": "#/definitions/agent" }
+    },
+    "mcp": {
+      "description": "MCP server definitions keyed by short id. Short ids are what agents.mcp[] references.",
+      "type": "object",
+      "additionalProperties": { "$ref": "#/definitions/mcpServer" }
+    },
+    "hooks": {
+      "description": "Harness hooks. Keys are Claude Code hook event names (session-start, pre-tool-use, ...).",
+      "type": "object",
+      "additionalProperties": { "$ref": "#/definitions/hook" }
+    },
+    "triggers": {
+      "description": "Keyword triggers merged into .omao/triggers.json at compile time.",
+      "type": "array",
+      "items": { "$ref": "#/definitions/trigger" }
+    }
+  },
+  "definitions": {
+    "agent": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "runtime"],
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9-]*$",
+          "maxLength": 64
+        },
+        "runtime": {
+          "enum": ["claude-code", "kiro", "cli"]
+        },
+        "description": { "type": "string", "maxLength": 500 },
+        "model": { "type": "string" },
+        "tier": { "type": "integer", "minimum": 0, "maximum": 2 },
+        "mcp": {
+          "description": "Short ids into the top-level mcp: map. Unknown ids are rejected by the compiler.",
+          "type": "array",
+          "items": { "type": "string" },
+          "uniqueItems": true
+        },
+        "ontology": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "produces": {
+              "type": "array",
+              "items": { "$ref": "../ontology/agent.schema.json#/definitions/entityRef" },
+              "uniqueItems": true
+            },
+            "consumes": {
+              "type": "array",
+              "items": { "$ref": "../ontology/agent.schema.json#/definitions/entityRef" },
+              "uniqueItems": true
+            }
+          }
+        },
+        "welcomeMessage": {
+          "description": "Kiro-specific welcome text. Passed through when runtime=kiro.",
+          "type": "string"
+        },
+        "tools": {
+          "description": "Kiro tools allowlist. Passed through when runtime=kiro.",
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "resources": {
+          "description": "Kiro resources list (file://, skill://...). Passed through when runtime=kiro.",
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "notes": {
+          "description": "Free-form metadata block copied under `_meta` on the emitted agent.json.",
+          "type": "object"
+        },
+        "mcpEnvOverrides": {
+          "description": "Per-mcp-id env overrides applied ONLY to the emitted Kiro agent.json (not the Claude Code .mcp.json).",
+          "type": "object",
+          "additionalProperties": {
+            "type": "object",
+            "additionalProperties": { "type": "string" }
+          }
+        }
+      }
+    },
+    "mcpServer": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["command", "args"],
+      "properties": {
+        "command": { "type": "string", "enum": ["uvx", "npx", "pipx"] },
+        "args": {
+          "description": "Must contain a pinned version (==X.Y.Z). Compiler rejects floating versions.",
+          "type": "array",
+          "items": { "type": "string" },
+          "minItems": 1
+        },
+        "env": {
+          "type": "object",
+          "additionalProperties": { "type": "string" }
+        },
+        "timeout": {
+          "type": "integer",
+          "minimum": 1000,
+          "default": 120000
+        },
+        "type": {
+          "enum": ["stdio", "http"],
+          "default": "stdio"
+        }
+      }
+    },
+    "hook": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["runs"],
+      "properties": {
+        "runs": {
+          "description": "Path to the shell script, relative to the plugin root.",
+          "type": "string"
+        },
+        "timeout_ms": {
+          "type": "integer",
+          "minimum": 1000
+        }
+      }
+    },
+    "trigger": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["keyword", "route"],
+      "properties": {
+        "keyword": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 64
+        },
+        "route": {
+          "description": "Slash command or skill id the keyword resolves to.",
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    }
+  }
+}

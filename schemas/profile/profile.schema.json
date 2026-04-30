@@ -1,0 +1,120 @@
+{
+  "$id": "https://aws-samples.github.io/sample-oh-my-aidlcops/schemas/profile/profile.schema.json",
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "OMA Project Profile (v1)",
+  "description": "Per-project configuration written by `oma setup`. Hand-editable. Every field is validated at setup time and at every hook invocation that touches it.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["version", "created_at", "harness", "aws", "aidlc", "approval", "budgets", "observability"],
+  "properties": {
+    "version": {
+      "description": "Profile schema version. Only v1 is stable during Tech Preview.",
+      "type": "integer",
+      "enum": [1]
+    },
+    "created_at": {
+      "description": "ISO-8601 UTC timestamp set by `oma setup`.",
+      "type": "string",
+      "format": "date-time"
+    },
+    "harness": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["primary"],
+      "properties": {
+        "primary": { "enum": ["claude-code", "kiro"] },
+        "secondary": { "type": ["string", "null"], "enum": ["claude-code", "kiro", null] }
+      }
+    },
+    "aws": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["account_id", "region", "environment"],
+      "properties": {
+        "account_id": {
+          "description": "12-digit AWS account id, as string to preserve leading zeros.",
+          "type": "string",
+          "pattern": "^[0-9]{12}$"
+        },
+        "region": {
+          "description": "AWS region code. Not an enum — new regions land frequently.",
+          "type": "string",
+          "pattern": "^[a-z]{2,4}-[a-z]+-[0-9]+$"
+        },
+        "profile_name": {
+          "description": "AWS CLI profile name. Default: 'default'.",
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 64,
+          "default": "default"
+        },
+        "environment": {
+          "enum": ["sandbox", "staging", "prod"]
+        }
+      }
+    },
+    "aidlc": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["entry_phase"],
+      "properties": {
+        "entry_phase": { "enum": ["inception", "construction", "operations"] },
+        "strict_gates": { "type": "boolean", "default": false }
+      }
+    },
+    "approval": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["mode"],
+      "properties": {
+        "mode": { "enum": ["interactive", "ci-auto-approve-safe", "strict"] },
+        "blast_radius_ceiling": {
+          "description": "Maximum blast radius agenticops is allowed to target without extra approval.",
+          "enum": ["single-namespace", "single-cluster", "single-account", "cross-account", "cross-region"],
+          "default": "single-account"
+        }
+      }
+    },
+    "budgets": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["default_monthly_usd", "warn_at_pct", "block_at_pct"],
+      "properties": {
+        "default_monthly_usd": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "maximum": 1000000
+        },
+        "warn_at_pct": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 100
+        },
+        "block_at_pct": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 200
+        }
+      }
+    },
+    "observability": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["mode"],
+      "properties": {
+        "mode": {
+          "enum": ["langfuse-managed", "langfuse-self-hosted", "opentelemetry-only", "none"]
+        },
+        "endpoint": {
+          "description": "Ingest endpoint URL for the chosen observability backend. Null when mode=none.",
+          "type": ["string", "null"]
+        }
+      }
+    },
+    "star_confirmed": {
+      "description": "Whether the user indicated the repository has been starred. Informational only — never blocks install.",
+      "type": "boolean",
+      "default": false
+    }
+  }
+}

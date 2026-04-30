@@ -5,6 +5,8 @@ argument-hint: "[agent or deployment target]"
 user-invocable: true
 model: claude-sonnet-4-6
 allowed-tools: "Read,Grep,Bash,mcp__cloudwatch,mcp__prometheus"
+ontology:
+  references: [Budget, Agent, Deployment]
 ---
 
 ## When to Use

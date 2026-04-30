@@ -5,6 +5,8 @@ argument-hint: "[target:version, e.g. rag-qa-agent:v2.3.1]"
 user-invocable: true
 model: claude-sonnet-4-6
 allowed-tools: "Read,Grep,Bash,mcp__cloudwatch,mcp__prometheus"
+ontology:
+  references: [Deployment, Agent]
 ---
 
 ## When to Use

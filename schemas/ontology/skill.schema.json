@@ -1,0 +1,60 @@
+{
+  "$id": "https://aws-samples.github.io/sample-oh-my-aidlcops/schemas/ontology/skill.schema.json",
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "OMA Skill",
+  "description": "A skill in the OMA sense: a user-invocable or keyword-triggered procedure backed by a SKILL.md (Claude Code) or a Kiro steering fragment, or both.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["id", "harness"],
+  "properties": {
+    "id": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9-]*$",
+      "maxLength": 64
+    },
+    "harness": {
+      "description": "Which harness(es) load this skill.",
+      "enum": ["claude", "kiro", "both"]
+    },
+    "triggers": {
+      "description": "Keyword triggers that route to this skill via .omao/triggers.json.",
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 64
+      },
+      "uniqueItems": true
+    },
+    "steering": {
+      "description": "Optional path to a steering fragment (Kiro) that co-loads with this skill.",
+      "type": "string"
+    },
+    "ontology": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "produces": {
+          "type": "array",
+          "items": { "$ref": "agent.schema.json#/definitions/entityRef" },
+          "uniqueItems": true
+        },
+        "consumes": {
+          "type": "array",
+          "items": { "$ref": "agent.schema.json#/definitions/entityRef" },
+          "uniqueItems": true
+        },
+        "references": {
+          "description": "Entities this skill reads but does not produce (e.g., cost-governance references Budget).",
+          "type": "array",
+          "items": { "$ref": "agent.schema.json#/definitions/entityRef" },
+          "uniqueItems": true
+        }
+      }
+    },
+    "description": {
+      "type": "string",
+      "maxLength": 500
+    }
+  }
+}

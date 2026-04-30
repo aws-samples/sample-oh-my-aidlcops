@@ -36,6 +36,31 @@ const sidebars: SidebarsConfig = {
       id: 'keyword-triggers',
       label: 'Keyword Triggers',
     },
+    {
+      type: 'doc',
+      id: 'easy-button',
+      label: 'Easy Button',
+    },
+    {
+      type: 'category',
+      label: 'Foundation',
+      collapsed: false,
+      items: [
+        'ontology',
+        'harness-dsl',
+        'profile',
+        'doctor',
+      ],
+    },
+    {
+      type: 'category',
+      label: 'Governance',
+      collapsed: true,
+      items: [
+        'support-policy',
+        'telemetry',
+      ],
+    },
   ],
 };
 

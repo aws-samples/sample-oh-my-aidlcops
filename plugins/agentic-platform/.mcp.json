@@ -4,78 +4,122 @@
     "aws-documentation": {
       "type": "stdio",
       "command": "uvx",
-      "args": ["awslabs.aws-documentation-mcp-server==1.1.21"],
-      "env": {"FASTMCP_LOG_LEVEL": "ERROR"},
+      "args": [
+        "awslabs.aws-documentation-mcp-server==1.1.21"
+      ],
+      "env": {
+        "FASTMCP_LOG_LEVEL": "ERROR"
+      },
       "timeout": 120000
     },
     "eks": {
       "type": "stdio",
       "command": "uvx",
-      "args": ["awslabs.eks-mcp-server==0.1.28"],
-      "env": {"FASTMCP_LOG_LEVEL": "ERROR"},
+      "args": [
+        "awslabs.eks-mcp-server==0.1.28"
+      ],
+      "env": {
+        "FASTMCP_LOG_LEVEL": "ERROR"
+      },
       "timeout": 120000
     },
     "bedrock-agentcore": {
       "type": "stdio",
       "command": "uvx",
-      "args": ["awslabs.amazon-bedrock-agentcore-mcp-server==0.0.17"],
-      "env": {"FASTMCP_LOG_LEVEL": "ERROR"},
+      "args": [
+        "awslabs.amazon-bedrock-agentcore-mcp-server==0.0.17"
+      ],
+      "env": {
+        "FASTMCP_LOG_LEVEL": "ERROR"
+      },
       "timeout": 120000
     },
     "bedrock-kb-retrieval": {
       "type": "stdio",
       "command": "uvx",
-      "args": ["awslabs.bedrock-kb-retrieval-mcp-server==1.0.20"],
-      "env": {"FASTMCP_LOG_LEVEL": "ERROR"},
+      "args": [
+        "awslabs.bedrock-kb-retrieval-mcp-server==1.0.20"
+      ],
+      "env": {
+        "FASTMCP_LOG_LEVEL": "ERROR"
+      },
       "timeout": 120000
     },
     "sagemaker-ai": {
       "type": "stdio",
       "command": "uvx",
-      "args": ["awslabs.sagemaker-ai-mcp-server==1.0.8"],
-      "env": {"FASTMCP_LOG_LEVEL": "ERROR"},
+      "args": [
+        "awslabs.sagemaker-ai-mcp-server==1.0.8"
+      ],
+      "env": {
+        "FASTMCP_LOG_LEVEL": "ERROR"
+      },
       "timeout": 120000
     },
     "cloudwatch": {
       "type": "stdio",
       "command": "uvx",
-      "args": ["awslabs.cloudwatch-mcp-server==0.0.25"],
-      "env": {"FASTMCP_LOG_LEVEL": "ERROR"},
+      "args": [
+        "awslabs.cloudwatch-mcp-server==0.0.25"
+      ],
+      "env": {
+        "FASTMCP_LOG_LEVEL": "ERROR"
+      },
       "timeout": 120000
     },
     "prometheus": {
       "type": "stdio",
       "command": "uvx",
-      "args": ["awslabs.prometheus-mcp-server==0.2.15"],
-      "env": {"FASTMCP_LOG_LEVEL": "ERROR"},
+      "args": [
+        "awslabs.prometheus-mcp-server==0.2.15"
+      ],
+      "env": {
+        "FASTMCP_LOG_LEVEL": "ERROR"
+      },
       "timeout": 120000
     },
     "aws-iac": {
       "type": "stdio",
       "command": "uvx",
-      "args": ["awslabs.aws-iac-mcp-server==1.0.17"],
-      "env": {"FASTMCP_LOG_LEVEL": "ERROR"},
+      "args": [
+        "awslabs.aws-iac-mcp-server==1.0.17"
+      ],
+      "env": {
+        "FASTMCP_LOG_LEVEL": "ERROR"
+      },
       "timeout": 120000
     },
     "aws-pricing": {
       "type": "stdio",
       "command": "uvx",
-      "args": ["awslabs.aws-pricing-mcp-server==1.0.28"],
-      "env": {"FASTMCP_LOG_LEVEL": "ERROR"},
+      "args": [
+        "awslabs.aws-pricing-mcp-server==1.0.28"
+      ],
+      "env": {
+        "FASTMCP_LOG_LEVEL": "ERROR"
+      },
       "timeout": 120000
     },
     "well-architected-security": {
       "type": "stdio",
       "command": "uvx",
-      "args": ["awslabs.well-architected-security-mcp-server==0.1.7"],
-      "env": {"FASTMCP_LOG_LEVEL": "ERROR"},
+      "args": [
+        "awslabs.well-architected-security-mcp-server==0.1.7"
+      ],
+      "env": {
+        "FASTMCP_LOG_LEVEL": "ERROR"
+      },
       "timeout": 120000
     },
     "aws-knowledge": {
       "type": "stdio",
       "command": "uvx",
-      "args": ["awslabs.aws-knowledge-mcp-server==0.1.0"],
-      "env": {"FASTMCP_LOG_LEVEL": "ERROR"},
+      "args": [
+        "awslabs.aws-knowledge-mcp-server==0.1.0"
+      ],
+      "env": {
+        "FASTMCP_LOG_LEVEL": "ERROR"
+      },
       "timeout": 120000
     }
   }

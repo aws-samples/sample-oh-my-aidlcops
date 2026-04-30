@@ -80,6 +80,56 @@
   mask-size: 100%;
 }
 
+/* GitHub "Star" pill button in the navbar */
+.navbar-star-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.32rem 0.78rem;
+  margin: 0 0.2rem;
+  border-radius: 999px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  color: var(--ifm-navbar-link-color);
+  background: rgba(0, 74, 187, 0.06);
+  border: 1px solid rgba(0, 74, 187, 0.18);
+  transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease,
+    transform 0.15s ease;
+}
+
+.navbar-star-button:hover,
+.navbar-star-button:focus-visible {
+  color: var(--ifm-color-primary);
+  background: rgba(0, 74, 187, 0.1);
+  border-color: rgba(0, 74, 187, 0.32);
+  text-decoration: none;
+  transform: translateY(-1px);
+}
+
+.navbar-star-button::before {
+  content: '';
+  width: 14px;
+  height: 14px;
+  display: inline-block;
+  background-color: currentColor;
+  mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M12 2.25l2.998 6.077 6.706.975-4.852 4.73 1.146 6.678L12 17.76l-5.998 2.95 1.146-6.678-4.852-4.73 6.706-.975L12 2.25z' fill='%23fff'/%3E%3C/svg%3E");
+  mask-repeat: no-repeat;
+  mask-size: contain;
+  mask-position: center;
+}
+
+[data-theme='dark'] .navbar-star-button {
+  background: rgba(126, 169, 250, 0.08);
+  border-color: rgba(126, 169, 250, 0.22);
+}
+
+[data-theme='dark'] .navbar-star-button:hover,
+[data-theme='dark'] .navbar-star-button:focus-visible {
+  background: rgba(126, 169, 250, 0.18);
+  border-color: rgba(126, 169, 250, 0.4);
+}
+
 /* Doc content typography */
 article {
   max-width: 880px;

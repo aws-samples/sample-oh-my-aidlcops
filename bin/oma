@@ -1,0 +1,74 @@
+#!/usr/bin/env bash
+# bin/oma — OMA easy-button dispatcher.
+#
+# Invariants:
+#   - $0 points at this script (possibly through a symlink).
+#   - $OMA_REPO_ROOT is computed from $0 unless already set.
+#   - Subcommands live at $OMA_REPO_ROOT/scripts/oma/<name>.sh.
+#
+# Environment hooks (for CI/testing):
+#   OMA_QUIET=1     suppresses ok/step log output.
+#   NO_COLOR=1      strips ANSI from all log lines.
+#   OMA_DRY_RUN=1   subcommands should exit cleanly without side effects.
+
+set -euo pipefail
+
+# Resolve symlink to find the real repo root.
+__oma_self="${BASH_SOURCE[0]}"
+while [ -L "$__oma_self" ]; do
+    __oma_target="$(readlink "$__oma_self")"
+    case "$__oma_target" in
+        /*) __oma_self="$__oma_target" ;;
+        *)  __oma_self="$(cd "$(dirname "$__oma_self")" && cd "$(dirname "$__oma_target")" && pwd)/$(basename "$__oma_target")" ;;
+    esac
+done
+OMA_REPO_ROOT="${OMA_REPO_ROOT:-$(cd "$(dirname "$__oma_self")/.." && pwd)}"
+export OMA_REPO_ROOT
+
+# shellcheck disable=SC1091
+. "$OMA_REPO_ROOT/scripts/lib/log.sh"
+
+OMA_VERSION="$(jq -r '.metadata.version' "$OMA_REPO_ROOT/.claude-plugin/marketplace.json" 2>/dev/null || echo 'unknown')"
+export OMA_VERSION
+
+usage() {
+    cat <<EOF
+oma — AIDLC × AgenticOps easy button (v$OMA_VERSION)
+
+Usage: oma <subcommand> [options]
+
+Subcommands:
+    setup       Interactive setup: profile wizard, install plugins, seed ontology, doctor.
+    doctor      Run 12 environment probes; exit 0 all-pass / 1 warn / 2 fail.
+    compile     Compile every plugin's *.oma.yaml into native .mcp.json / agent.json files.
+    status      Read .omao/profile.yaml and summarize active mode, budgets, last doctor.
+    upgrade     git pull + re-run setup --migrate (clone installs only).
+    uninstall   Reverse symlinks and surgically remove OMA entries from ~/.claude/settings.json.
+    help        Show this message.
+    version     Print OMA version and exit.
+
+Environment:
+    OMA_REPO_ROOT   Override repo root (default: auto-detect via symlink).
+    OMA_QUIET       Suppress log output (1 = quiet).
+    NO_COLOR        Strip ANSI colors.
+    OMA_DRY_RUN     Ask subcommands to avoid side effects.
+
+Docs: https://aws-samples.github.io/sample-oh-my-aidlcops/
+EOF
+}
+
+cmd="${1:-help}"
+case "$cmd" in
+    -h|--help|help)      usage; exit 0 ;;
+    -v|--version|version) printf 'oma %s\n' "$OMA_VERSION"; exit 0 ;;
+esac
+shift || true
+
+script="$OMA_REPO_ROOT/scripts/oma/${cmd}.sh"
+if [ ! -f "$script" ]; then
+    warn "unknown subcommand: $cmd"
+    usage
+    exit 64  # EX_USAGE
+fi
+
+exec bash "$script" "$@"

@@ -41,6 +41,12 @@ try:
 except ImportError:  # pragma: no cover - fallback path
     _HAS_JSONSCHEMA = False
 
+try:
+    import yaml  # type: ignore
+    _HAS_YAML = True
+except ImportError:  # pragma: no cover - fallback path
+    _HAS_YAML = False
+
 
 # ---------------------------------------------------------------------------
 # Data structures
@@ -61,12 +67,21 @@ _FRONTMATTER_RE = re.compile(r"^---\s*\n(.*?)\n---\s*(?:\n|$)", re.DOTALL)
 
 
 def parse_frontmatter(text: str) -> Tuple[Dict[str, Any], str]:
-    """Return (frontmatter_dict, body). Handles simple scalars and lists."""
+    """Return (frontmatter_dict, body). Prefers pyyaml when available, falls
+    back to a hand-rolled scanner that supports simple scalars + flat lists."""
     m = _FRONTMATTER_RE.match(text)
     if not m:
         return {}, text
     raw = m.group(1)
     body = text[m.end():]
+
+    if _HAS_YAML:
+        try:
+            data = yaml.safe_load(raw) or {}
+            if isinstance(data, dict):
+                return data, body
+        except yaml.YAMLError:
+            pass
 
     data: Dict[str, Any] = {}
     current_key: Optional[str] = None
@@ -286,7 +301,7 @@ def main(argv: Optional[List[str]] = None) -> int:
     parser.add_argument(
         "--repo-dir",
         type=Path,
-        default=Path(__file__).resolve().parent.parent,
+        default=Path(__file__).resolve().parent.parent.parent,
         help="OMA repository root (default: inferred from script location).",
     )
     parser.add_argument(

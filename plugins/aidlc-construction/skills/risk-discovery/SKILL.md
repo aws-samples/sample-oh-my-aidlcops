@@ -5,6 +5,9 @@ argument-hint: "[slug or design.md path]"
 user-invocable: true
 model: claude-opus-4-7
 allowed-tools: "Read,Grep,Bash,mcp__aws-documentation,mcp__well-architected-security"
+ontology:
+  produces: [Risk]
+  consumes: [Spec, ADR]
 ---
 
 ## 언제 사용하나요

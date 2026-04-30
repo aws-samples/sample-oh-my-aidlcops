@@ -1,0 +1,47 @@
+{
+  "$id": "https://aws-samples.github.io/sample-oh-my-aidlcops/schemas/ontology/budget.schema.json",
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Budget",
+  "description": "A cost-governance budget. The rule_expression is evaluated by the simpleeval-backed eval_condition() defined in plugins/agenticops/skills/cost-governance/SKILL.md.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["id", "scope", "limit_usd", "period", "rule_expression", "action_on_breach"],
+  "properties": {
+    "id": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9-]*$",
+      "maxLength": 64
+    },
+    "scope": {
+      "description": "What the budget applies to.",
+      "enum": ["account", "agent", "skill", "deployment", "tag"]
+    },
+    "scope_ref": {
+      "description": "Concrete target. account id, Agent.id, Skill.id, Deployment.id, or 'k=v' tag pair.",
+      "type": "string"
+    },
+    "limit_usd": {
+      "description": "Hard limit in USD for the period.",
+      "type": "number",
+      "exclusiveMinimum": 0
+    },
+    "period": {
+      "enum": ["hourly", "daily", "weekly", "monthly", "quarterly"]
+    },
+    "rule_expression": {
+      "description": "simpleeval expression evaluated against runtime metrics. Example: 'spend_usd > limit_usd * 0.8'. Must NOT use Python eval() semantics beyond the simpleeval sandbox.",
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 500
+    },
+    "action_on_breach": {
+      "description": "What agenticops does when rule_expression becomes true.",
+      "enum": ["notify", "throttle", "suspend-agent", "require-approval", "auto-rollback"]
+    },
+    "notify_targets": {
+      "description": "Slack/Email/SNS destinations for 'notify' action.",
+      "type": "array",
+      "items": { "type": "string" }
+    }
+  }
+}

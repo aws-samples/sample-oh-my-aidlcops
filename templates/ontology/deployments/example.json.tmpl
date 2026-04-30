@@ -1,0 +1,11 @@
+{
+  "id": "vllm-mini",
+  "target": "eks",
+  "artifact": "public.ecr.aws/docker/library/nginx:1.27",
+  "approval_state": "draft",
+  "blast_radius": "single-namespace",
+  "rollback_plan": "kubectl rollout undo deployment/vllm-mini",
+  "produced_by": "aidlc-construction.construction-loop",
+  "spec_ref": ".omao/plans/spec.md",
+  "adr_refs": []
+}

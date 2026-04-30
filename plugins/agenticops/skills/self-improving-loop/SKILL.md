@@ -5,6 +5,9 @@ argument-hint: "[which agent/skill to analyze?]"
 user-invocable: true
 model: claude-opus-4-7
 allowed-tools: "Read,Grep,Bash,mcp__cloudwatch,mcp__prometheus"
+ontology:
+  consumes: [Skill, Agent]
+  references: [Deployment]
 ---
 
 ## When to Use

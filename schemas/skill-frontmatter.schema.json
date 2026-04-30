@@ -55,12 +55,39 @@
       "default": true,
       "description": "Show in slash command menu",
       "type": "boolean"
+    },
+    "ontology": {
+      "description": "Declarative link between this skill and OMA ontology entities. Consumed by hooks and validators to ensure produced/consumed artifacts conform to their schemas.",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "produces": {
+          "type": "array",
+          "items": { "$ref": "#/definitions/entityRef" },
+          "uniqueItems": true
+        },
+        "consumes": {
+          "type": "array",
+          "items": { "$ref": "#/definitions/entityRef" },
+          "uniqueItems": true
+        },
+        "references": {
+          "type": "array",
+          "items": { "$ref": "#/definitions/entityRef" },
+          "uniqueItems": true
+        }
+      }
     }
   },
   "required": [
     "name",
     "description"
   ],
+  "definitions": {
+    "entityRef": {
+      "enum": ["Agent", "Skill", "Deployment", "Incident", "Budget", "Risk", "Spec", "ADR"]
+    }
+  },
   "title": "SKILL.md Frontmatter",
   "type": "object"
 }

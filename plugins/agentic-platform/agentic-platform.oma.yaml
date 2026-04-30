@@ -1,0 +1,142 @@
+# OMA Harness DSL for the agentic-platform plugin.
+#
+# This file is the single source of truth for:
+#   - Claude Code MCP servers  ->  plugins/agentic-platform/.mcp.json
+#   - Kiro agent profile       ->  plugins/agentic-platform/kiro-agents/agentic-platform.agent.json
+#
+# Do NOT hand-edit the two files above. Instead:
+#   1. Edit this file.
+#   2. Run `python3 -m tools.oma_compile plugins/agentic-platform/agentic-platform.oma.yaml`.
+#   3. Commit all three files together. CI enforces drift via `oma compile --check`.
+
+version: 1
+plugin: agentic-platform
+
+# ---------------------------------------------------------------------------
+# MCP servers (pinned to exact PyPI versions for supply-chain safety)
+# ---------------------------------------------------------------------------
+mcp:
+  aws-documentation:
+    command: uvx
+    args: ["awslabs.aws-documentation-mcp-server==1.1.21"]
+    env: { FASTMCP_LOG_LEVEL: ERROR }
+    timeout: 120000
+  eks:
+    command: uvx
+    args: ["awslabs.eks-mcp-server==0.1.28"]
+    env: { FASTMCP_LOG_LEVEL: ERROR }
+    timeout: 120000
+  bedrock-agentcore:
+    command: uvx
+    args: ["awslabs.amazon-bedrock-agentcore-mcp-server==0.0.17"]
+    env: { FASTMCP_LOG_LEVEL: ERROR }
+    timeout: 120000
+  bedrock-kb-retrieval:
+    command: uvx
+    args: ["awslabs.bedrock-kb-retrieval-mcp-server==1.0.20"]
+    env: { FASTMCP_LOG_LEVEL: ERROR }
+    timeout: 120000
+  sagemaker-ai:
+    command: uvx
+    args: ["awslabs.sagemaker-ai-mcp-server==1.0.8"]
+    env: { FASTMCP_LOG_LEVEL: ERROR }
+    timeout: 120000
+  cloudwatch:
+    command: uvx
+    args: ["awslabs.cloudwatch-mcp-server==0.0.25"]
+    env: { FASTMCP_LOG_LEVEL: ERROR }
+    timeout: 120000
+  prometheus:
+    command: uvx
+    args: ["awslabs.prometheus-mcp-server==0.2.15"]
+    env: { FASTMCP_LOG_LEVEL: ERROR }
+    timeout: 120000
+  aws-iac:
+    command: uvx
+    args: ["awslabs.aws-iac-mcp-server==1.0.17"]
+    env: { FASTMCP_LOG_LEVEL: ERROR }
+    timeout: 120000
+  aws-pricing:
+    command: uvx
+    args: ["awslabs.aws-pricing-mcp-server==1.0.28"]
+    env: { FASTMCP_LOG_LEVEL: ERROR }
+    timeout: 120000
+  well-architected-security:
+    command: uvx
+    args: ["awslabs.well-architected-security-mcp-server==0.1.7"]
+    env: { FASTMCP_LOG_LEVEL: ERROR }
+    timeout: 120000
+  aws-knowledge:
+    command: uvx
+    args: ["awslabs.aws-knowledge-mcp-server==0.1.0"]
+    env: { FASTMCP_LOG_LEVEL: ERROR }
+    timeout: 120000
+
+# ---------------------------------------------------------------------------
+# Agents — Kiro agent profile emitted from this section.
+# ---------------------------------------------------------------------------
+agents:
+  - id: agentic-platform
+    runtime: kiro
+    description: "Agentic AI Platform architect for EKS + vLLM + Inference Gateway + Langfuse on AWS."
+    tools: ["*"]
+    mcp:
+      - eks
+      - aws-documentation
+      - aws-pricing
+      - cloudwatch
+    mcpEnvOverrides:
+      aws-documentation:
+        FASTMCP_LOG_LEVEL: ERROR
+        AWS_DOCUMENTATION_PARTITION: aws
+    resources:
+      - "file://.kiro/steering/oma-hub.md"
+      - "skill://.kiro/skills/agentic-platform/**/*.md"
+    notes:
+      eks_mcp_flags: "By default this profile does NOT pass --allow-write or --allow-sensitive-data-access to awslabs.eks-mcp-server. The server therefore runs read-only. `autoApprove.readOnly: true` then accurately reflects what the agent can do. To opt in to destructive operations, edit mcpEnvOverrides.eks or the emitted agent.json — that is an explicit, auditable change, not a silent default."
+    ontology:
+      produces: [Deployment]
+      consumes: [Spec, ADR]
+    welcomeMessage: |-
+      Hello! I'm the Agentic Platform Agent 🚀
+
+      ⚠️  SECURITY NOTE
+        This profile runs the awslabs EKS MCP server in READ-ONLY mode by default.
+        Destructive operations (create/update/delete EKS resources) and access to
+        sensitive fields (secrets, private keys, IAM policy docs) are DISABLED.
+        To enable write + sensitive-data access, export
+          OMA_EKS_MCP_ALLOW_WRITE=1
+          OMA_EKS_MCP_ALLOW_SENSITIVE=1
+        before starting this agent, and add `--allow-write` / `--allow-sensitive-data-access`
+        flags to the eks-mcp-server args. Do NOT enable these for customer-facing demos.
+
+      📌 **Capabilities**
+        • Design and architect agentic AI platforms on EKS
+        • Deploy vLLM model serving with GPU optimization
+        • Configure inference gateways (LiteLLM, Bifrost, Helicone)
+        • Set up observability stack (Langfuse, Prometheus, Grafana)
+        • Implement MLOps pipelines and cost governance
+
+      📋 **Common Workflows**
+        • Platform Bootstrap: Full EKS + GPU + Karpenter + vLLM stack
+        • Model Deployment: Custom model serving with LoRA/MoE support
+        • Gateway Setup: 2-tier routing with semantic caching
+        • Monitoring: Langfuse + OpenTelemetry integration
+
+      Let's build your agentic platform. What would you like to start with?
+
+# ---------------------------------------------------------------------------
+# Hooks — declared-only. The shell scripts remain hand-authored.
+# ---------------------------------------------------------------------------
+hooks:
+  session-start:
+    runs: ../../hooks/session-start.sh
+
+# ---------------------------------------------------------------------------
+# Keyword triggers (merged into .omao/triggers.json by the compiler).
+# ---------------------------------------------------------------------------
+triggers:
+  - keyword: platform-bootstrap
+    route: /oma:platform-bootstrap
+  - keyword: eks-agentic
+    route: /oma:platform-bootstrap

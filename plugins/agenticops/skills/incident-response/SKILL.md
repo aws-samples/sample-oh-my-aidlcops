@@ -5,6 +5,9 @@ argument-hint: "[alarm-id or incident context]"
 user-invocable: true
 model: claude-opus-4-7
 allowed-tools: "Read,Grep,Bash,mcp__cloudwatch,mcp__prometheus"
+ontology:
+  produces: [Incident]
+  references: [Deployment]
 ---
 
 ## When to Use

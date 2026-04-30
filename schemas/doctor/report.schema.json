@@ -1,0 +1,53 @@
+{
+  "$id": "https://aws-samples.github.io/sample-oh-my-aidlcops/schemas/doctor/report.schema.json",
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "OMA Doctor Report",
+  "description": "Machine-readable output of `oma doctor --json`. Versioned so CI consumers can pin.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["version", "summary", "probes"],
+  "properties": {
+    "version": {
+      "description": "Report format version. Bumps on breaking changes.",
+      "type": "string",
+      "enum": ["1"]
+    },
+    "oma_version": { "type": "string" },
+    "generated_at": { "type": "string", "format": "date-time" },
+    "summary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["pass", "warn", "fail"],
+      "properties": {
+        "pass": { "type": "integer", "minimum": 0 },
+        "warn": { "type": "integer", "minimum": 0 },
+        "fail": { "type": "integer", "minimum": 0 },
+        "skipped": { "type": "integer", "minimum": 0 }
+      }
+    },
+    "probes": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "status"],
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9-]*$"
+          },
+          "label": { "type": "string" },
+          "status": { "enum": ["pass", "warn", "fail", "skip"] },
+          "message": { "type": "string" },
+          "detail": { "type": "string" },
+          "duration_ms": { "type": "integer", "minimum": 0 },
+          "remediation": { "type": "string" }
+        }
+      }
+    },
+    "stub": {
+      "description": "Present and true only when the doctor command is a stub build.",
+      "type": "boolean"
+    }
+  }
+}

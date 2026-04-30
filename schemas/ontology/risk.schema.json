@@ -1,0 +1,57 @@
+{
+  "$id": "https://aws-samples.github.io/sample-oh-my-aidlcops/schemas/ontology/risk.schema.json",
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Risk",
+  "description": "A modernization risk surfaced by the modernization plugin's risk-discovery skill. Blocks Construction->Operations stage transitions when gate_ref is open.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["id", "category", "likelihood", "impact"],
+  "properties": {
+    "id": {
+      "type": "string",
+      "pattern": "^[a-z0-9][a-z0-9-]*$",
+      "maxLength": 128
+    },
+    "category": {
+      "description": "6R strategy bucket or cross-cutting concern.",
+      "enum": [
+        "rehost",
+        "replatform",
+        "refactor",
+        "repurchase",
+        "retain",
+        "retire",
+        "compliance",
+        "performance",
+        "security",
+        "data-migration"
+      ]
+    },
+    "likelihood": {
+      "enum": ["very-low", "low", "medium", "high", "very-high"]
+    },
+    "impact": {
+      "enum": ["minor", "moderate", "major", "severe", "catastrophic"]
+    },
+    "mitigation": {
+      "description": "Planned mitigation. Required before the risk can be marked 'accepted'.",
+      "type": "string"
+    },
+    "gate_ref": {
+      "description": "Quality gate this risk blocks. Open gates prevent stage transitions under stage-gate-strict mode.",
+      "type": "string"
+    },
+    "accepted": {
+      "type": "boolean",
+      "default": false
+    },
+    "owner": {
+      "description": "Human or team accountable for mitigation.",
+      "type": "string"
+    },
+    "evidence": {
+      "type": "array",
+      "items": { "type": "string" }
+    }
+  }
+}

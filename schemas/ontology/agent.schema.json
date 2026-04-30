@@ -1,0 +1,64 @@
+{
+  "$id": "https://aws-samples.github.io/sample-oh-my-aidlcops/schemas/ontology/agent.schema.json",
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "OMA Agent",
+  "description": "An OMA-invocable agent. Unifies Claude subagents, Kiro agents, and CLI workers under a single vocabulary. Referenced from harness DSL and from SKILL.md frontmatter.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["id", "runtime"],
+  "properties": {
+    "id": {
+      "description": "Agent identifier (kebab-case, unique within a plugin).",
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9-]*$",
+      "maxLength": 64
+    },
+    "runtime": {
+      "description": "Where the agent runs. claude-code = native Claude Code subagent; kiro = Kiro .agent.json profile; cli = tmux-hosted CLI worker (claude/codex/gemini).",
+      "enum": ["claude-code", "kiro", "cli"]
+    },
+    "model": {
+      "description": "Model tier. Free-form so future Claude/Bedrock/OSS names remain valid without schema churn.",
+      "type": "string"
+    },
+    "tier": {
+      "description": "OMA Tier-0/1/2 classification. Tier-0 is top-level workflows; Tier-1 is domain; Tier-2 is specialist.",
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 2
+    },
+    "mcp": {
+      "description": "MCP server ids this agent depends on. Ids are local to the plugin's DSL and resolved by oma-compile.",
+      "type": "array",
+      "items": { "type": "string", "pattern": "^[a-z][a-z0-9-]*$" },
+      "uniqueItems": true
+    },
+    "ontology": {
+      "description": "Inputs and outputs in terms of other ontology entities.",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "produces": {
+          "type": "array",
+          "items": { "$ref": "#/definitions/entityRef" },
+          "uniqueItems": true
+        },
+        "consumes": {
+          "type": "array",
+          "items": { "$ref": "#/definitions/entityRef" },
+          "uniqueItems": true
+        }
+      }
+    },
+    "description": {
+      "type": "string",
+      "maxLength": 500
+    }
+  },
+  "definitions": {
+    "entityRef": {
+      "description": "Reference to another ontology entity type.",
+      "enum": ["Agent", "Skill", "Deployment", "Incident", "Budget", "Risk", "Spec", "ADR"]
+    }
+  }
+}

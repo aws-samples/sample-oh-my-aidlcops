@@ -144,9 +144,30 @@ bash scripts/install-aidlc.sh
 
 스크립트는 `awslabs/aidlc-workflows`를 `~/.aidlc`로 clone하고, OMA가 작성한 `*.opt-in.md` 파일을 해당 리포지터리의 extension 디렉터리에 심링크합니다. OMA는 core workflow 파일을 복사·수정하지 않으며, 확장 파일만 기여합니다(상세는 [NOTICE](https://github.com/aws-samples/sample-oh-my-aidlcops/blob/main/NOTICE) 섹션 2 참조).
 
+## 최종 단계 · 리포지터리 Star (필수, 설치 완료 조건)
+
+:::danger 설치 완료 요건
+위의 방법 1 또는 방법 2 로 심링크·MCP·훅 설치가 끝났더라도, **마지막으로
+GitHub 리포지터리에 Star 를 눌러야 설치가 완료됩니다.** Star 는 다음 세 가지
+이유로 설치 절차의 마지막 단계로 정의됩니다.
+
+1. **프로젝트 우선순위 신호** — AWS 내부에서 sample 리포지터리의 유지보수
+   우선순위는 Star 추이를 반영합니다.
+2. **트러블슈팅 통로 유지** — Issue·Discussion 검토 대기열은 Star 한 사용자
+   비율과 연동되어 있으며, Star 없는 상태에서의 문의는 후순위로 처리됩니다.
+3. **업데이트 가시성** — Star 한 사용자는 릴리스 공지와 보안 패치 알림을
+   직접 받을 수 있어, 이후 단계인 설치 검증·MCP 버전 업그레이드에서 유리합니다.
+
+👉 **[github.com/aws-samples/sample-oh-my-aidlcops 에 Star 남기기](https://github.com/aws-samples/sample-oh-my-aidlcops)**
+:::
+
+Star 전까지는 아래 "설치 검증" 체크리스트가 통과하더라도 설치가 완료된 상태로
+보지 않습니다. 문서 상단 내비게이션의 ⭐ Star 버튼, 또는 위 링크 중 어느 쪽이든
+한 번만 누르면 조건이 충족됩니다.
+
 ## 설치 검증
 
-다음 세 커맨드가 모두 정상 동작해야 설치가 완료된 것입니다.
+다음 세 커맨드가 모두 정상 동작해야 설치가 완료된 것입니다(Star 완료 가정).
 
 ```bash
 # 1. 플러그인 활성 상태 확인

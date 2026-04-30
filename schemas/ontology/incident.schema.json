@@ -1,0 +1,48 @@
+{
+  "$id": "https://aws-samples.github.io/sample-oh-my-aidlcops/schemas/ontology/incident.schema.json",
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Incident",
+  "description": "An operational incident handled by AgenticOps incident-response. Produced by agents, gated by human approval before any remediation runs.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["id", "severity", "alarm_source", "approval_state"],
+  "properties": {
+    "id": {
+      "type": "string",
+      "pattern": "^[a-z0-9][a-z0-9-]*$",
+      "maxLength": 128
+    },
+    "severity": {
+      "description": "Sev-1 = customer-facing outage. Sev-5 = informational only.",
+      "enum": ["sev-1", "sev-2", "sev-3", "sev-4", "sev-5"]
+    },
+    "alarm_source": {
+      "description": "What emitted this incident (CloudWatch alarm name, Prometheus rule, Langfuse signal, etc.).",
+      "type": "string",
+      "minLength": 1
+    },
+    "deployment_ref": {
+      "description": "The Deployment.id affected, if known. Used to reuse the deployment's rollback_plan.",
+      "type": "string"
+    },
+    "blast_radius": {
+      "enum": ["single-namespace", "single-cluster", "single-account", "cross-account", "cross-region"]
+    },
+    "proposed_fix": {
+      "description": "Free-form description of the fix the agent wants to apply. Must be human-reviewable before execution.",
+      "type": "string"
+    },
+    "approval_state": {
+      "enum": ["draft", "proposed", "approved", "rejected", "mitigated", "closed"]
+    },
+    "runbook_ref": {
+      "description": "Path or URL to the runbook the agent consulted.",
+      "type": "string"
+    },
+    "evidence": {
+      "description": "Log excerpts, metric snapshots, trace ids supporting the proposal.",
+      "type": "array",
+      "items": { "type": "string" }
+    }
+  }
+}
