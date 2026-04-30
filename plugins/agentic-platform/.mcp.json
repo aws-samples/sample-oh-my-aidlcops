@@ -8,7 +8,8 @@
         "awslabs.aws-documentation-mcp-server==1.1.21"
       ],
       "env": {
-        "FASTMCP_LOG_LEVEL": "ERROR"
+        "FASTMCP_LOG_LEVEL": "ERROR",
+        "AWS_REGION": "us-east-1"
       },
       "timeout": 120000
     },
@@ -19,7 +20,8 @@
         "awslabs.eks-mcp-server==0.1.28"
       ],
       "env": {
-        "FASTMCP_LOG_LEVEL": "ERROR"
+        "FASTMCP_LOG_LEVEL": "ERROR",
+        "AWS_REGION": "us-east-1"
       },
       "timeout": 120000
     },
@@ -30,7 +32,8 @@
         "awslabs.amazon-bedrock-agentcore-mcp-server==0.0.17"
       ],
       "env": {
-        "FASTMCP_LOG_LEVEL": "ERROR"
+        "FASTMCP_LOG_LEVEL": "ERROR",
+        "AWS_REGION": "us-east-1"
       },
       "timeout": 120000
     },
@@ -41,7 +44,8 @@
         "awslabs.bedrock-kb-retrieval-mcp-server==1.0.20"
       ],
       "env": {
-        "FASTMCP_LOG_LEVEL": "ERROR"
+        "FASTMCP_LOG_LEVEL": "ERROR",
+        "AWS_REGION": "us-east-1"
       },
       "timeout": 120000
     },
@@ -52,7 +56,8 @@
         "awslabs.sagemaker-ai-mcp-server==1.0.8"
       ],
       "env": {
-        "FASTMCP_LOG_LEVEL": "ERROR"
+        "FASTMCP_LOG_LEVEL": "ERROR",
+        "AWS_REGION": "us-east-1"
       },
       "timeout": 120000
     },
@@ -75,7 +80,8 @@
         "awslabs.prometheus-mcp-server==0.2.15"
       ],
       "env": {
-        "FASTMCP_LOG_LEVEL": "ERROR"
+        "FASTMCP_LOG_LEVEL": "ERROR",
+        "AWS_REGION": "us-east-1"
       },
       "timeout": 120000
     },
@@ -86,7 +92,8 @@
         "awslabs.aws-iac-mcp-server==1.0.17"
       ],
       "env": {
-        "FASTMCP_LOG_LEVEL": "ERROR"
+        "FASTMCP_LOG_LEVEL": "ERROR",
+        "AWS_REGION": "us-east-1"
       },
       "timeout": 120000
     },
@@ -97,7 +104,8 @@
         "awslabs.aws-pricing-mcp-server==1.0.28"
       ],
       "env": {
-        "FASTMCP_LOG_LEVEL": "ERROR"
+        "FASTMCP_LOG_LEVEL": "ERROR",
+        "AWS_REGION": "us-east-1"
       },
       "timeout": 120000
     },
@@ -108,7 +116,8 @@
         "awslabs.well-architected-security-mcp-server==0.1.7"
       ],
       "env": {
-        "FASTMCP_LOG_LEVEL": "ERROR"
+        "FASTMCP_LOG_LEVEL": "ERROR",
+        "AWS_REGION": "us-east-1"
       },
       "timeout": 120000
     },

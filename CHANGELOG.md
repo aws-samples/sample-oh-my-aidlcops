@@ -10,7 +10,31 @@ breaking changes to non-stable surfaces as documented in
 
 ## [Unreleased]
 
-_Nothing yet._
+### Added
+- `oma init` subcommand — scaffolds `.omao/` without the full wizard.
+  Users no longer need to remember the install path.
+- `oma where` subcommand — prints the OMA install root plus key
+  subdirectories (pretty + `--json` modes).
+
+### Changed
+- `install/claude.sh` now detects Claude Code major version. On 2.0+ it
+  appends a marketplace install hint to the summary explaining that
+  symlinks alone do not populate `/plugin list`.
+- `oma setup` Next-steps now branches on the detected Claude Code
+  version. For 2.0+ it prints the exact `claude <<'MARKET' ... MARKET`
+  here-doc that registers the marketplace and installs all five
+  plugins.
+- All awslabs MCP servers in `agentic-platform.oma.yaml` now carry
+  `AWS_REGION: us-east-1` in their env. Previously only two did, which
+  caused `aws-knowledge` and `cloudwatch` to fail startup on boto3
+  region-resolution errors.
+- docs (EN + KO getting-started / claude-code-setup / kiro-setup) use
+  `oma init` instead of the raw `bash ~/.oma/scripts/init-omao.sh` path
+  so users don't need to know the install location.
+
+### Fixed
+- Raw `<oma-repo>` placeholders in docs replaced with concrete commands
+  (`oma init`, `oma where`) or the actual `~/.oma` path.
 
 ## [0.2.0-preview.1] — 2026-04-30
 

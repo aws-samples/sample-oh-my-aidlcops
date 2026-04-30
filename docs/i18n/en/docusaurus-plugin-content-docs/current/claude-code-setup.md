@@ -161,20 +161,16 @@ Hooks serve these roles:
 
 ## Project Initialization
 
-Installation happens at the user's home directory level, but actual work lives in `.omao/` at the project root. **If you ran `oma setup`, this is already done** — there is no need to call `init-omao.sh` separately.
+Installation happens at the user's home directory level, but actual work lives in `.omao/` at the project root. **If you ran `oma setup`, this is already done** — no manual call needed.
 
 To initialize manually without the full setup wizard:
 
 ```bash
 cd <your-project>
-# If installed via install.sh (default)
-bash ~/.oma/scripts/init-omao.sh
-
-# If installed via git clone
-bash <cloned-repo>/scripts/init-omao.sh
+oma init
 ```
 
-This script creates `.omao/plans/`, `.omao/state/`, `.omao/notepad.md`, `.omao/triggers.json`, and `.omao/project-memory.json`.
+This command creates `.omao/plans/`, `.omao/state/`, `.omao/notepad.md`, `.omao/triggers.json`, and `.omao/project-memory.json`. You do not need to know the install path — use `oma where` if you do.
 
 `.omao/` is **harness-agnostic**, so state remains consistent even if you alternate between Claude Code and Kiro in the same project.
 

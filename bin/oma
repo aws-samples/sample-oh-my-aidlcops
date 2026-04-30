@@ -53,9 +53,11 @@ Usage: oma <subcommand> [options]
 
 Subcommands:
     setup       Interactive setup: profile wizard, install plugins, seed ontology, doctor.
+    init        Scaffold .omao/ in the current project (subset of setup).
     doctor      Run 12 environment probes; exit 0 all-pass / 1 warn / 2 fail.
     compile     Compile every plugin's *.oma.yaml into native .mcp.json / agent.json files.
     status      Read .omao/profile.yaml and summarize active mode, budgets, last doctor.
+    where       Print the OMA install root and key subdirectories.
     upgrade     git pull + re-run setup --migrate (clone installs only).
     uninstall   Reverse symlinks and surgically remove OMA entries from ~/.claude/settings.json.
     help        Show this message.

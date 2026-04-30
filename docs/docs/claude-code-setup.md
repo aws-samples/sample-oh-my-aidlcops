@@ -162,20 +162,16 @@ OMA의 설치 스크립트는 **기존 `settings.json`을 덮어쓰지 않습니
 
 ## 프로젝트 초기화
 
-설치는 사용자 홈 디렉터리 기준으로 진행되지만, 실제 작업은 프로젝트 루트의 `.omao/` 에서 일어납니다. **`oma setup` 을 실행했다면 이 단계는 자동 수행** 되며, 별도 호출은 필요 없습니다.
+설치는 사용자 홈 디렉터리 기준으로 진행되지만, 실제 작업은 프로젝트 루트의 `.omao/` 에서 일어납니다. **`oma setup` 을 실행했다면 이 단계는 자동 수행** 되며 별도 호출은 필요 없습니다.
 
 `oma setup` 없이 수동 초기화:
 
 ```bash
 cd <your-project>
-# install.sh 로 설치한 경우 (기본)
-bash ~/.oma/scripts/init-omao.sh
-
-# git clone 한 경우
-bash <cloned-repo>/scripts/init-omao.sh
+oma init
 ```
 
-이 스크립트는 `.omao/plans/`, `.omao/state/`, `.omao/notepad.md`, `.omao/triggers.json`, `.omao/project-memory.json`을 생성합니다.
+이 커맨드는 `.omao/plans/`, `.omao/state/`, `.omao/notepad.md`, `.omao/triggers.json`, `.omao/project-memory.json` 을 생성합니다. 설치 경로를 직접 알 필요는 없습니다 — 필요하면 `oma where` 로 확인.
 
 `.omao/`는 **harness-agnostic**하므로 같은 프로젝트에서 Claude Code와 Kiro를 번갈아 사용해도 상태가 일관됩니다.
 

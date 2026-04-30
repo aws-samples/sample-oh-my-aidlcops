@@ -11,7 +11,8 @@
         "awslabs.eks-mcp-server==0.1.28"
       ],
       "env": {
-        "FASTMCP_LOG_LEVEL": "ERROR"
+        "FASTMCP_LOG_LEVEL": "ERROR",
+        "AWS_REGION": "us-east-1"
       },
       "disabled": false
     },
@@ -22,6 +23,7 @@
       ],
       "env": {
         "FASTMCP_LOG_LEVEL": "ERROR",
+        "AWS_REGION": "us-east-1",
         "AWS_DOCUMENTATION_PARTITION": "aws"
       },
       "disabled": false
@@ -32,7 +34,8 @@
         "awslabs.aws-pricing-mcp-server==1.0.28"
       ],
       "env": {
-        "FASTMCP_LOG_LEVEL": "ERROR"
+        "FASTMCP_LOG_LEVEL": "ERROR",
+        "AWS_REGION": "us-east-1"
       },
       "disabled": false
     },

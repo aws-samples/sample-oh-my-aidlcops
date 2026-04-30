@@ -23,6 +23,8 @@ STEERING_CMDS_DIR="$OMA_REPO_DIR/steering/commands/oma"
 PLUGINS_INSTALLED=0
 MCP_SERVERS_MERGED=0
 HOOKS_REGISTERED=0
+CLAUDE_MAJOR_VERSION=""
+CLAUDE_SUPPORTS_NATIVE=0
 
 # ---------------------------------------------------------------------------
 # Usage
@@ -195,6 +197,19 @@ install_hooks() {
     done
 }
 
+detect_claude_version() {
+    if ! command -v claude >/dev/null 2>&1; then
+        CLAUDE_MAJOR_VERSION=""
+        return 0
+    fi
+    # Expected output shape: "2.1.123 (Claude Code)"
+    raw="$(claude --version 2>/dev/null | head -1 | awk '{print $1}')"
+    CLAUDE_MAJOR_VERSION="${raw%%.*}"
+    if [ -n "$CLAUDE_MAJOR_VERSION" ] && [ "$CLAUDE_MAJOR_VERSION" -ge 2 ] 2>/dev/null; then
+        CLAUDE_SUPPORTS_NATIVE=1
+    fi
+}
+
 summary() {
     cat <<EOF
 
@@ -202,12 +217,45 @@ Installation complete.
     plugins installed : $PLUGINS_INSTALLED
     MCP servers added : $MCP_SERVERS_MERGED
     hooks registered  : $HOOKS_REGISTERED
+EOF
+
+    if [ "$CLAUDE_SUPPORTS_NATIVE" = 1 ]; then
+        cat <<EOF
+
+⚠️  Claude Code $CLAUDE_MAJOR_VERSION.x detected.
+    Symlinks and settings.json merges above are necessary, but Claude
+    Code 2.0+ will NOT show plugins in \`/plugin list\` until the
+    marketplace is registered through the built-in command. Run:
+
+        claude
+        > /plugin marketplace add https://github.com/aws-samples/sample-oh-my-aidlcops
+        > /plugin install agentic-platform@oh-my-aidlcops
+        > /plugin install agenticops@oh-my-aidlcops
+        > /plugin install aidlc-inception@oh-my-aidlcops
+        > /plugin install aidlc-construction@oh-my-aidlcops
+        > /plugin install modernization@oh-my-aidlcops
+        > /plugin list
+
+    Or as a shell one-liner:
+        claude <<'EOF2'
+        /plugin marketplace add https://github.com/aws-samples/sample-oh-my-aidlcops
+        /plugin install agentic-platform@oh-my-aidlcops
+        /plugin install agenticops@oh-my-aidlcops
+        /plugin install aidlc-inception@oh-my-aidlcops
+        /plugin install aidlc-construction@oh-my-aidlcops
+        /plugin install modernization@oh-my-aidlcops
+        /plugin list
+        EOF2
+EOF
+    else
+        cat <<EOF
 
 Next steps:
     - Start Claude Code: \`claude\`
     - Verify plugins:    \`/plugin list\`
     - Verify commands:   type \`/oma:\` and look for suggestions.
 EOF
+    fi
 }
 
 # ---------------------------------------------------------------------------
@@ -222,9 +270,15 @@ main() {
             ;;
     esac
     require jq
+    detect_claude_version
     log "OMA repo  : $OMA_REPO_DIR"
     log "CLAUDE_HOME: $CLAUDE_HOME"
     log "OMA_OWNER : $OMA_OWNER"
+    if [ "$CLAUDE_SUPPORTS_NATIVE" = 1 ]; then
+        log "claude CLI: $CLAUDE_MAJOR_VERSION.x (native /plugin manager available)"
+    elif [ -n "$CLAUDE_MAJOR_VERSION" ]; then
+        log "claude CLI: $CLAUDE_MAJOR_VERSION.x (legacy mode)"
+    fi
     install_plugins
     install_commands
     install_mcp_servers

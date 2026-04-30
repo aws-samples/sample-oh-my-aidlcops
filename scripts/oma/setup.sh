@@ -303,16 +303,52 @@ else
 fi
 
 # -----------------------------------------------------------------------------
-# Next steps
+# Next steps — branches on detected Claude Code major version
 # -----------------------------------------------------------------------------
+CLAUDE_MAJOR=""
+if command -v claude >/dev/null 2>&1; then
+    raw_ver="$(claude --version 2>/dev/null | head -1 | awk '{print $1}')"
+    CLAUDE_MAJOR="${raw_ver%%.*}"
+fi
+
 cat <<EOF
 
 Next steps:
     1. Verify setup:
        oma doctor
+EOF
+
+if [ -n "$CLAUDE_MAJOR" ] && [ "$CLAUDE_MAJOR" -ge 2 ] 2>/dev/null; then
+    cat <<EOF
+
+    2. Register the OMA marketplace in Claude Code $CLAUDE_MAJOR.x
+       (symlinks alone do NOT activate plugins in /plugin list):
+
+       claude <<'MARKET'
+       /plugin marketplace add https://github.com/aws-samples/sample-oh-my-aidlcops
+       /plugin install agentic-platform@oh-my-aidlcops
+       /plugin install agenticops@oh-my-aidlcops
+       /plugin install aidlc-inception@oh-my-aidlcops
+       /plugin install aidlc-construction@oh-my-aidlcops
+       /plugin install modernization@oh-my-aidlcops
+       /plugin list
+       MARKET
+
+    3. Start your first AIDLC loop (after the plugins appear as 'enabled'):
+       claude
+       > /oma:autopilot "your goal here"
+
+    4. (Optional) Give the repo a star if OMA was useful:
+       https://github.com/aws-samples/sample-oh-my-aidlcops
+EOF
+else
+    cat <<EOF
+
     2. Start your first AIDLC loop:
        claude
        > /oma:autopilot "your goal here"
+
     3. (Optional) Give the repo a star if OMA was useful:
        https://github.com/aws-samples/sample-oh-my-aidlcops
 EOF
+fi

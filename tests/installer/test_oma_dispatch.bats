@@ -15,12 +15,32 @@ setup() {
     run "$OMA_BIN" help
     [ "$status" -eq 0 ]
     [[ "$output" == *"oma — AIDLC × AgenticOps easy button"* ]]
-    for name in setup doctor compile status upgrade uninstall help version; do
+    for name in setup init doctor compile status where upgrade uninstall help version; do
         [[ "$output" == *"$name"* ]] || {
             echo "missing subcommand in help: $name"
             return 1
         }
     done
+}
+
+@test "oma init --help prints usage" {
+    run "$OMA_BIN" init --help
+    [ "$status" -eq 0 ]
+    [[ "$output" == *"oma init"* ]]
+    [[ "$output" == *".omao"* ]]
+}
+
+@test "oma where prints install root" {
+    run env OMA_REPO_ROOT="$REPO_ROOT" "$OMA_BIN" where
+    [ "$status" -eq 0 ]
+    [[ "$output" == *"OMA install root"* ]]
+    [[ "$output" == *"$REPO_ROOT"* ]]
+}
+
+@test "oma where --json emits valid JSON" {
+    run env OMA_REPO_ROOT="$REPO_ROOT" "$OMA_BIN" where --json
+    [ "$status" -eq 0 ]
+    echo "$output" | jq -e '.repo_root' >/dev/null
 }
 
 @test "oma --help is a synonym" {

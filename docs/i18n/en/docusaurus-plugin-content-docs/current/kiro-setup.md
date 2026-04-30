@@ -226,11 +226,7 @@ To initialize manually without the full setup wizard:
 
 ```bash
 cd <your-project>
-# If installed via install.sh (default)
-bash ~/.oma/scripts/init-omao.sh
-
-# If installed via git clone
-bash <cloned-repo>/scripts/init-omao.sh
+oma init
 ```
 
 Since `.omao/` is harness-agnostic, state stays synchronized even if you use Claude Code and Kiro in parallel on the same project. For example, you can start an AIDLC loop in Kiro and continue it in Claude Code for checkpoint approvals.
