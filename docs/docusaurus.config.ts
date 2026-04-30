@@ -125,15 +125,15 @@ const config: Config = {
           label: 'Easy Button',
         },
         {
-          type: 'localeDropdown',
-          position: 'right',
-        },
-        {
           href: 'https://github.com/aws-samples/sample-oh-my-aidlcops',
-          position: 'right',
+          position: 'left',
           label: 'Star',
           className: 'navbar-star-button',
           'aria-label': 'Star the sample-oh-my-aidlcops repository on GitHub',
+        },
+        {
+          type: 'localeDropdown',
+          position: 'right',
         },
         {
           href: 'https://github.com/aws-samples/sample-oh-my-aidlcops',
