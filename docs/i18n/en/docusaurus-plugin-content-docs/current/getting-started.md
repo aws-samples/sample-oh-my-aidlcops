@@ -16,9 +16,14 @@ This document is a 5-minute Quickstart for users new to `oh-my-aidlcops` (OMA). 
 | AWS credentials | — | `agentic-platform` workflows require EKS, CloudWatch, and S3 access |
 | (Optional) Kubernetes CLI | kubectl v1.32+ | Needed for `platform-bootstrap` |
 
-## Lightning Setup (Recommended — Tech Preview)
+## Optional: Install the `oma` CLI (for AgenticOps)
 
-The fastest path is three lines: `install.sh` + `oma setup` + `oma doctor`.
+`oma setup` writes `.omao/profile.yaml` (AWS account, region, budget,
+approval mode) and seeds the ontology (`budgets/deployments/risks`) in your
+project directory. **Required** if you plan to use the AgenticOps plugin
+(autopilot-deploy, incident-response, cost-governance, continuous-eval,
+self-improving-loop, audit-trail). **Skippable** if you only need AIDLC
+Inception/Construction.
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/aws-samples/sample-oh-my-aidlcops/v0.2.0-preview.1/install.sh | bash
@@ -27,36 +32,71 @@ oma setup
 oma doctor
 ```
 
-After these three lines, `.omao/profile.yaml` + `.omao/ontology/*` are generated, and Claude Code / Kiro plugins, MCP servers, and hooks are installed. See [Easy Button](./easy-button.md) for detailed behavior.
-
-> To install with defaults, press ENTER at every prompt.
-> For CI, use `OMA_NON_INTERACTIVE=1` with env flags for non-interactive installation.
+> Press ENTER at every prompt to accept defaults.
+> In CI, set `OMA_NON_INTERACTIVE=1` with env flags for unattended install.
+> Step 1 below is independent — it works even if `oma setup` was skipped.
 
 ## Step 1: Register the Marketplace (30 seconds)
 
-Launch Claude Code and enter the native plugin command.
+On Claude Code **2.0+** the native marketplace is the **only supported**
+installation path. Launch Claude Code:
 
 ```bash
 claude
-> /plugin marketplace add https://github.com/aws-samples/sample-oh-my-aidlcops
-> /plugin install agentic-platform agenticops aidlc-inception aidlc-construction
 ```
 
-Verify the installation:
+Inside the Claude Code session:
+
+```text
+/plugin marketplace add https://github.com/aws-samples/sample-oh-my-aidlcops
+/plugin install agentic-platform@oh-my-aidlcops
+/plugin install agenticops@oh-my-aidlcops
+/plugin install aidlc-inception@oh-my-aidlcops
+/plugin install aidlc-construction@oh-my-aidlcops
+/plugin install modernization@oh-my-aidlcops
+/plugin list
+```
+
+:::info Installing all five at once
+`/plugin install` itself takes a single plugin id per invocation
+(space-separated arguments are **not** supported). Pasting the six lines
+above lets Claude Code run them sequentially. If you prefer to script
+installation from a shell one-liner, use a here-doc:
 
 ```bash
-> /plugin list
-# All four plugins should appear as activated.
+claude <<'EOF'
+/plugin marketplace add https://github.com/aws-samples/sample-oh-my-aidlcops
+/plugin install agentic-platform@oh-my-aidlcops
+/plugin install agenticops@oh-my-aidlcops
+/plugin install aidlc-inception@oh-my-aidlcops
+/plugin install aidlc-construction@oh-my-aidlcops
+/plugin install modernization@oh-my-aidlcops
+/plugin list
+EOF
+```
+:::
+
+`/plugin list` should show all five as `enabled`:
+
+```text
+agentic-platform      v0.2.0-preview.1  enabled
+agenticops            v0.2.0-preview.1  enabled
+aidlc-inception       v0.2.0-preview.1  enabled
+aidlc-construction    v0.2.0-preview.1  enabled
+modernization         v0.2.0-preview.1  enabled
 ```
 
-If native marketplace is unavailable or you are offline, manual installation is also supported.
+:::caution `bash scripts/install/claude.sh` alone does NOT work
+The OMA installer script only creates symlinks under `~/.claude/plugins/`.
+That was enough for Claude Code 1.x, but **Claude Code 2.0+** treats
+`~/.claude/installed_plugins.json` as ground truth. Running the script
+on its own leaves `/plugin list` empty. Use the native marketplace flow
+above instead.
 
-```bash
-git clone https://github.com/aws-samples/sample-oh-my-aidlcops
-bash oh-my-aidlcops/scripts/install/claude.sh
-```
-
-See [Claude Code Setup](./claude-code-setup.md) for manual installation details.
+The installer script remains useful for legacy Claude Code 1.x
+environments and for syncing MCP servers / hooks into `settings.json` in
+non-interactive setups.
+:::
 
 ## Step 2: Initialize Your Project (10 seconds)
 

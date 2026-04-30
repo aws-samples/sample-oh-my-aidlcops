@@ -79,20 +79,40 @@ ontology + harness DSL get enforced at runtime.
 > and the 6 ontology schemas. Everything else (CLI UX, DSL fields, doctor
 > report shape) may evolve before GA. See [Support Policy](https://aws-samples.github.io/sample-oh-my-aidlcops/docs/support-policy).
 
-### Claude Code (native marketplace)
+### Claude Code (native marketplace — Claude Code 2.0+)
 
 ```bash
 claude
-> /plugin marketplace add https://github.com/aws-samples/sample-oh-my-aidlcops
-> /plugin install agentic-platform agenticops aidlc-inception aidlc-construction modernization
 ```
 
-### Claude Code (manual)
+Inside the Claude Code session:
+
+```text
+/plugin marketplace add https://github.com/aws-samples/sample-oh-my-aidlcops
+/plugin install agentic-platform@oh-my-aidlcops
+/plugin install agenticops@oh-my-aidlcops
+/plugin install aidlc-inception@oh-my-aidlcops
+/plugin install aidlc-construction@oh-my-aidlcops
+/plugin install modernization@oh-my-aidlcops
+/plugin list
+```
+
+> `/plugin install` accepts a single plugin id per invocation. Pasting the
+> six lines above lets Claude Code run them sequentially. For a shell
+> one-liner, use `claude <<'EOF' ... EOF` to feed the commands via stdin.
+
+### Claude Code (manual script — legacy / MCP-only)
 
 ```bash
 git clone https://github.com/aws-samples/sample-oh-my-aidlcops
 bash sample-oh-my-aidlcops/scripts/install/claude.sh
 ```
+
+> The manual script creates `~/.claude/plugins/` symlinks and merges MCP
+> servers + hooks into `settings.json`. **On Claude Code 2.0+ this alone
+> does NOT register plugins with `/plugin list`.** Use it only for
+> legacy 1.x environments, offline CI, or when you want to wire MCP
+> servers without activating the marketplace.
 
 ### Kiro
 

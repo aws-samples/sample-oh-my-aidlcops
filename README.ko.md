@@ -68,20 +68,39 @@ oma doctor
 > 변경될 수 있습니다. [Support Policy](https://aws-samples.github.io/sample-oh-my-aidlcops/docs/support-policy) 를
 > 확인하세요.
 
-### Claude Code (네이티브 마켓플레이스)
+### Claude Code (네이티브 마켓플레이스 — Claude Code 2.0+)
 
 ```bash
 claude
-> /plugin marketplace add https://github.com/aws-samples/sample-oh-my-aidlcops
-> /plugin install agentic-platform agenticops aidlc-inception aidlc-construction modernization
 ```
 
-### Claude Code (수동 설치)
+Claude Code 세션 안에서:
+
+```text
+/plugin marketplace add https://github.com/aws-samples/sample-oh-my-aidlcops
+/plugin install agentic-platform@oh-my-aidlcops
+/plugin install agenticops@oh-my-aidlcops
+/plugin install aidlc-inception@oh-my-aidlcops
+/plugin install aidlc-construction@oh-my-aidlcops
+/plugin install modernization@oh-my-aidlcops
+/plugin list
+```
+
+> `/plugin install` 은 한 번에 하나의 플러그인 id 만 받습니다. 위 6 줄을
+> 붙여넣으면 Claude Code 가 순차적으로 처리합니다. 쉘 한 줄로 스크립팅하고
+> 싶다면 `claude <<'EOF' ... EOF` 히어독 사용.
+
+### Claude Code (수동 스크립트 — 레거시 / MCP-only)
 
 ```bash
 git clone https://github.com/aws-samples/sample-oh-my-aidlcops
 bash sample-oh-my-aidlcops/scripts/install/claude.sh
 ```
+
+> 수동 스크립트는 `~/.claude/plugins/` 심링크를 만들고 `settings.json` 에
+> MCP 서버·훅을 병합합니다. **Claude Code 2.0+ 에서는 이것만으로
+> `/plugin list` 에 플러그인이 등록되지 않습니다.** 레거시 1.x 환경, 오프라인
+> CI, 또는 마켓플레이스 등록 없이 MCP 만 연결하고 싶을 때만 사용하세요.
 
 ### Kiro
 

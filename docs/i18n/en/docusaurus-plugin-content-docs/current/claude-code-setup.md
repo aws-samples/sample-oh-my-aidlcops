@@ -16,32 +16,70 @@ This document explains two paths to install and configure `oh-my-aidlcops` (OMA)
 | uv / uvx | latest | `pipx install uv` (required for MCP server execution) |
 | git | 2.30+ | System defaults are acceptable for most environments |
 
-## Method 1 · Native Marketplace Installation (Recommended)
+## Method 1 · Native Marketplace Installation (only supported path)
 
-Claude Code registers the marketplace directly via the `/plugin` command.
+On Claude Code **2.0+** the native marketplace is the only mechanism that
+exposes plugins in `/plugin list`. Launch Claude Code:
 
 ```bash
 claude
-> /plugin marketplace add https://github.com/aws-samples/sample-oh-my-aidlcops
-> /plugin install agentic-platform agenticops aidlc-inception aidlc-construction
-> /plugin list
 ```
 
-Verify installation:
+Inside the Claude Code session, paste (or enter) the six lines below:
+
+```text
+/plugin marketplace add https://github.com/aws-samples/sample-oh-my-aidlcops
+/plugin install agentic-platform@oh-my-aidlcops
+/plugin install agenticops@oh-my-aidlcops
+/plugin install aidlc-inception@oh-my-aidlcops
+/plugin install aidlc-construction@oh-my-aidlcops
+/plugin install modernization@oh-my-aidlcops
+/plugin list
+```
+
+To script the whole sequence from a shell one-liner use a here-doc:
+
+```bash
+claude <<'EOF'
+/plugin marketplace add https://github.com/aws-samples/sample-oh-my-aidlcops
+/plugin install agentic-platform@oh-my-aidlcops
+/plugin install agenticops@oh-my-aidlcops
+/plugin install aidlc-inception@oh-my-aidlcops
+/plugin install aidlc-construction@oh-my-aidlcops
+/plugin install modernization@oh-my-aidlcops
+/plugin list
+EOF
+```
+
+Expected `/plugin list` output:
 
 ```bash
 > /plugin list
-# agentic-platform     0.1.0   activated
-# agenticops           0.1.0   activated
-# aidlc-inception      0.1.0   activated
-# aidlc-construction   0.1.0   activated
+# agentic-platform     0.2.0-preview.1   enabled
+# agenticops           0.2.0-preview.1   enabled
+# aidlc-inception      0.2.0-preview.1   enabled
+# aidlc-construction   0.2.0-preview.1   enabled
+# modernization        0.2.0-preview.1   enabled
 ```
 
-This path ensures Claude Code internally places plugins in `~/.claude/plugins/` and automatically integrates each plugin's `.mcp.json` and commands.
+This path updates `~/.claude/installed_plugins.json` and merges each
+plugin's `.mcp.json` and commands automatically.
 
-## Method 2 · Manual Installation
+## Method 2 · Manual Script (legacy / auxiliary)
 
-`scripts/install/claude.sh` guarantees the same results as the native path but runs manually. Use this when offline, on GitHub Enterprise mirrors, or with Claude Code versions that do not support the `/plugin` command.
+:::caution Claude Code 2.0+ will not load plugins from this path alone
+`scripts/install/claude.sh` creates symlinks under `~/.claude/plugins/` and
+merges MCP servers + hooks into `~/.claude/settings.json`. That was enough
+for Claude Code 1.x, but **Claude Code 2.0+** treats
+`~/.claude/installed_plugins.json` as ground truth. Running the script by
+itself leaves `/plugin list` empty. Use it only in the scenarios below.
+:::
+
+`scripts/install/claude.sh` remains useful in three scenarios:
+
+1. **Legacy Claude Code 1.x** — the symlink approach was the only install path there.
+2. **MCP / hooks only** — merge OMA MCP servers + hooks into `settings.json` without registering the marketplace.
+3. **Offline CI** — air-gapped environments where `/plugin marketplace add` cannot reach GitHub.
 
 ```bash
 git clone https://github.com/aws-samples/sample-oh-my-aidlcops

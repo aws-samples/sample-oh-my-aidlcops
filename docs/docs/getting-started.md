@@ -16,9 +16,13 @@ sidebar_position: 2
 | AWS 자격 증명 | — | `agentic-platform` 워크플로우에서 EKS·CloudWatch·S3 접근 필요 |
 | (선택) Kubernetes CLI | kubectl v1.32+ | `platform-bootstrap` 실행 시 |
 
-## ⚡ 한 줄 설치 (권장 — Tech Preview)
+## ⚡ `oma` CLI 설치 (선택, AgenticOps 용)
 
-가장 빠른 경로는 `install.sh` + `oma setup` + `oma doctor` 세 줄입니다.
+`oma setup` 은 `.omao/profile.yaml` (AWS 계정·예산·승인 모드 등) 과 씨드
+온톨로지(`budgets/deployments/risks`) 를 프로젝트에 만들어 줍니다. **AgenticOps
+플러그인**(autopilot-deploy / incident-response / cost-governance / continuous-eval /
+self-improving-loop / audit-trail)을 쓸 계획이라면 필요합니다. AIDLC
+Inception·Construction 만 쓸 계획이라면 건너뛰어도 됩니다.
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/aws-samples/sample-oh-my-aidlcops/v0.2.0-preview.1/install.sh | bash
@@ -27,36 +31,70 @@ oma setup
 oma doctor
 ```
 
-위 세 줄이 끝나면 `.omao/profile.yaml` + `.omao/ontology/*` 이 생성되고,
-Claude Code / Kiro 플러그인·MCP·훅 설치까지 완료됩니다. 상세 동작은
-[Easy Button](./easy-button.md) 을 참조하세요.
-
 > 기본값 그대로 설치하려면 모든 질문에서 ENTER 를 눌러 넘어가면 됩니다.
 > CI 에서는 `OMA_NON_INTERACTIVE=1` 과 env flag 로 비대화식 설치가 가능합니다.
+> `oma setup` 이 실패해도 아래 "1단계 · 마켓플레이스 등록" 은 독립적으로 진행 가능합니다.
 
 ## 1단계 · 마켓플레이스 등록 (30초)
 
-Claude Code를 실행한 뒤 네이티브 플러그인 커맨드를 입력합니다.
+Claude Code **2.0 이상**에서는 네이티브 마켓플레이스 경로가 **유일한 공식 설치
+방법**입니다. Claude Code 를 실행한 뒤 아래 명령을 순서대로 입력합니다.
 
 ```bash
 claude
-> /plugin marketplace add https://github.com/aws-samples/sample-oh-my-aidlcops
-> /plugin install agentic-platform agenticops aidlc-inception aidlc-construction
 ```
 
-설치 후 다음을 확인합니다.
+Claude Code 세션 안에서:
+
+```text
+/plugin marketplace add https://github.com/aws-samples/sample-oh-my-aidlcops
+/plugin install agentic-platform@oh-my-aidlcops
+/plugin install agenticops@oh-my-aidlcops
+/plugin install aidlc-inception@oh-my-aidlcops
+/plugin install aidlc-construction@oh-my-aidlcops
+/plugin install modernization@oh-my-aidlcops
+/plugin list
+```
+
+:::info 여러 플러그인을 한 번에 설치하고 싶다면
+Claude Code `/plugin install` 자체는 한 번에 하나의 플러그인만 받습니다
+(공백 구분 여러 인자 **미지원**). 위처럼 5줄을 붙여넣으면 Claude Code 가
+순차적으로 각 줄을 실행해 줍니다. 혹은 쉘에서 한 번에 다섯 세션을 띄우고
+싶다면 아래처럼 here-doc 을 사용할 수도 있습니다.
 
 ```bash
-> /plugin list
-# 네 개의 플러그인이 activated 상태로 표시되어야 합니다.
+claude <<'EOF'
+/plugin marketplace add https://github.com/aws-samples/sample-oh-my-aidlcops
+/plugin install agentic-platform@oh-my-aidlcops
+/plugin install agenticops@oh-my-aidlcops
+/plugin install aidlc-inception@oh-my-aidlcops
+/plugin install aidlc-construction@oh-my-aidlcops
+/plugin install modernization@oh-my-aidlcops
+/plugin list
+EOF
+```
+:::
+
+`/plugin list` 결과에 5 개 플러그인이 전부 `enabled` 로 보이면 성공입니다.
+
+```text
+agentic-platform      v0.2.0-preview.1  enabled
+agenticops            v0.2.0-preview.1  enabled
+aidlc-inception       v0.2.0-preview.1  enabled
+aidlc-construction    v0.2.0-preview.1  enabled
+modernization         v0.2.0-preview.1  enabled
 ```
 
-네이티브 마켓플레이스가 불가하거나 오프라인 환경이라면 수동 설치도 가능합니다.
+:::caution `bash scripts/install/claude.sh` 단독 실행은 동작하지 않습니다
+OMA 설치 스크립트(`install/claude.sh`)는 `~/.claude/plugins/` 에 심링크만
+생성합니다. 이는 Claude Code 1.x 구조였고, **Claude Code 2.0+** 는
+`~/.claude/installed_plugins.json` 를 단일 기준(ground truth)으로 사용합니다.
+따라서 스크립트 단독 실행으로는 `/plugin list` 에 플러그인이 나타나지
+않습니다. 반드시 위의 네이티브 마켓플레이스 경로를 이용하세요.
 
-```bash
-git clone https://github.com/aws-samples/sample-oh-my-aidlcops
-bash oh-my-aidlcops/scripts/install/claude.sh
-```
+설치 스크립트는 향후 Claude Code 1.x 레거시 환경 혹은 MCP·hook 동기화용
+보조 도구로만 사용됩니다.
+:::
 
 수동 설치 상세는 [Claude Code Setup](./claude-code-setup.md)을 참조합니다.
 

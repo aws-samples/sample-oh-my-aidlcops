@@ -16,32 +16,71 @@ sidebar_position: 4
 | uv / uvx | latest | `pipx install uv` (MCP 서버 실행용) |
 | git | 2.30+ | 시스템 기본값 대부분 가능 |
 
-## 방법 1 · 네이티브 마켓플레이스 설치 (권장)
+## 방법 1 · 네이티브 마켓플레이스 설치 (유일한 공식 경로)
 
-Claude Code는 `/plugin` 커맨드로 마켓플레이스를 직접 등록합니다.
+Claude Code **2.0 이상** 에서는 네이티브 마켓플레이스만 `/plugin list` 에
+플러그인을 노출합니다. 다른 경로(예: 수동 심링크)는 UI 에 반영되지 않습니다.
 
 ```bash
 claude
-> /plugin marketplace add https://github.com/aws-samples/sample-oh-my-aidlcops
-> /plugin install agentic-platform agenticops aidlc-inception aidlc-construction
-> /plugin list
+```
+
+Claude Code 세션 안에서 다음을 순서대로 입력(또는 통째로 붙여넣기):
+
+```text
+/plugin marketplace add https://github.com/aws-samples/sample-oh-my-aidlcops
+/plugin install agentic-platform@oh-my-aidlcops
+/plugin install agenticops@oh-my-aidlcops
+/plugin install aidlc-inception@oh-my-aidlcops
+/plugin install aidlc-construction@oh-my-aidlcops
+/plugin install modernization@oh-my-aidlcops
+/plugin list
+```
+
+쉘에서 한 번에 처리하고 싶다면 here-doc:
+
+```bash
+claude <<'EOF'
+/plugin marketplace add https://github.com/aws-samples/sample-oh-my-aidlcops
+/plugin install agentic-platform@oh-my-aidlcops
+/plugin install agenticops@oh-my-aidlcops
+/plugin install aidlc-inception@oh-my-aidlcops
+/plugin install aidlc-construction@oh-my-aidlcops
+/plugin install modernization@oh-my-aidlcops
+/plugin list
+EOF
 ```
 
 설치 확인:
 
 ```bash
 > /plugin list
-# agentic-platform     0.1.0   activated
-# agenticops           0.1.0   activated
-# aidlc-inception      0.1.0   activated
-# aidlc-construction   0.1.0   activated
+# agentic-platform     0.2.0-preview.1   enabled
+# agenticops           0.2.0-preview.1   enabled
+# aidlc-inception      0.2.0-preview.1   enabled
+# aidlc-construction   0.2.0-preview.1   enabled
+# modernization        0.2.0-preview.1   enabled
 ```
 
-이 경로는 Claude Code가 내부적으로 `~/.claude/plugins/`에 플러그인을 배치하고, 각 플러그인의 `.mcp.json`·commands를 자동으로 통합합니다.
+이 경로는 Claude Code 가 내부적으로 `~/.claude/installed_plugins.json` 을
+갱신하고, 각 플러그인의 `.mcp.json`·commands 를 자동으로 통합합니다.
 
-## 방법 2 · 수동 설치
+## 방법 2 · 수동 스크립트 (레거시 / 보조)
 
-`scripts/install/claude.sh` 는 네이티브 경로와 동일한 결과를 보장하되 수동으로 실행할 수 있습니다. 오프라인 환경, GitHub Enterprise 미러, 또는 `/plugin` 커맨드를 지원하지 않는 구버전에서 이용합니다.
+:::caution Claude Code 2.0+ 에서는 이 경로만으로는 플러그인이 로드되지 않습니다
+`scripts/install/claude.sh` 는 `~/.claude/plugins/` 에 심링크를 만들고
+`~/.claude/settings.json` 에 MCP 서버·훅을 병합합니다. Claude Code 1.x 까지는
+이것만으로 플러그인이 작동했지만, **Claude Code 2.0+** 는
+`~/.claude/installed_plugins.json` 을 단일 기준으로 삼습니다. 스크립트를
+직접 실행하고 끝내면 `/plugin list` 는 비어있는 채로 남습니다. 아래
+"MCP·hook 만 필요한 경우" 시나리오에서만 유효합니다.
+:::
+
+`scripts/install/claude.sh` 는 다음 세 가지 시나리오에서 여전히 유용합니다.
+
+1. **Claude Code 1.x 레거시 환경** — 구버전에서는 심링크 방식이 유일한 설치 경로였습니다.
+2. **MCP/hook 만 선반영** — 마켓플레이스 등록 없이 `settings.json` 에 OMA MCP 서버 + 훅만 병합하고 싶을 때.
+3. **오프라인 CI** — 네트워크가 차단된 환경에서 `/plugin marketplace add` 가 불가능할 때.
 
 ```bash
 git clone https://github.com/aws-samples/sample-oh-my-aidlcops
