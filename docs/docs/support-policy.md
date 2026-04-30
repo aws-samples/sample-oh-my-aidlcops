@@ -29,7 +29,6 @@ OMA `v0.2.0-preview.1` 은 **Tech Preview** 릴리스입니다. 프로덕션 SLA
 ## 이슈 제출
 
 - 버그: https://github.com/aws-samples/sample-oh-my-aidlcops/issues
-- 보안 이슈: **public issue 금지**. https://aws.amazon.com/security/vulnerability-reporting/ 를 통해 제출.
 
 ## 텔레메트리
 
