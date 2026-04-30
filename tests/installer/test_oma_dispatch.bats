@@ -31,7 +31,9 @@ setup() {
 @test "oma version prints oma plus a semver-like string" {
     run "$OMA_BIN" version
     [ "$status" -eq 0 ]
-    [[ "$output" =~ ^oma[[:space:]][0-9]+\.[0-9]+\.[0-9]+ ]]
+    # Accept any 'oma <something.something.something>...' shape. Avoids
+    # bash-version-specific regex differences.
+    echo "$output" | grep -Eq '^oma[[:space:]][0-9]+\.[0-9]+\.[0-9]+'
 }
 
 @test "oma with no args prints help" {
