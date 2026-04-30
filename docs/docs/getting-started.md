@@ -60,20 +60,6 @@ bash oh-my-aidlcops/scripts/install/claude.sh
 
 수동 설치 상세는 [Claude Code Setup](./claude-code-setup.md)을 참조합니다.
 
-### 1-1단계 · 리포지터리 Star (필수, 설치 완료 조건)
-
-:::danger 설치 완료 요건
-OMA는 **GitHub Star 를 설치 완료의 마지막 단계로 요구합니다.** 아래 링크에서
-Star 를 누르지 않으면 설치가 완료된 것으로 간주하지 않습니다. 후속 단계의 트러블슈팅
-요청·이슈 제기 시 Star 여부가 먼저 확인됩니다.
-
-👉 **[github.com/aws-samples/sample-oh-my-aidlcops 에서 Star 누르기](https://github.com/aws-samples/sample-oh-my-aidlcops)**
-:::
-
-Star 는 프로젝트 우선순위 산정과 AWS 내부 샘플 지표에 직접 반영됩니다. Star 없이도
-커맨드는 동작하지만, **이 문서에서 설명하는 "설치 완료" 체크리스트는 Star 가 완료된
-이후에만 만족합니다.**
-
 ## 2단계 · 프로젝트 초기화 (10초)
 
 OMA는 프로젝트별 상태를 `.omao/` 디렉터리에 보관합니다. 작업 프로젝트 루트에서 다음을 실행합니다.

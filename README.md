@@ -115,13 +115,12 @@ bash scripts/install/aidlc-extensions.sh
 # Clones awslabs/aidlc-workflows into ~/.aidlc and symlinks OMA's opt-in extensions.
 ```
 
-### Final step — Star the repository (required)
+### Liked it? Give the repo a Star
 
-> **Installation is not considered complete until the GitHub repository has
-> been starred.** Star activity drives this sample's maintenance priority,
-> issue triage queue, and release notification delivery. Click the ⭐ **Star**
-> button at the top of [github.com/aws-samples/sample-oh-my-aidlcops](https://github.com/aws-samples/sample-oh-my-aidlcops)
-> after running the installer.
+If OMA was useful, a ⭐ on the [GitHub repository](https://github.com/aws-samples/sample-oh-my-aidlcops)
+helps us prioritize maintenance and keeps release notifications flowing
+to you. It is entirely optional — nothing in the CLI changes based on
+your star status.
 
 ## Architecture
 

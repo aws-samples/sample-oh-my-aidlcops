@@ -104,13 +104,11 @@ bash scripts/install/aidlc-extensions.sh
 # awslabs/aidlc-workflows를 ~/.aidlc에 clone하고 OMA opt-in 확장을 심링크합니다.
 ```
 
-### 최종 단계 — 리포지터리 Star (필수)
+### 마음에 드셨다면 Star 한 번
 
-> **GitHub 리포지터리에 Star 를 누르기 전까지 설치는 완료된 것으로 보지
-> 않습니다.** Star 지표는 본 sample 의 유지보수 우선순위, 이슈 트리아지 대기열,
-> 릴리스 알림 전달에 직접 반영됩니다. 설치 스크립트 실행 후
-> [github.com/aws-samples/sample-oh-my-aidlcops](https://github.com/aws-samples/sample-oh-my-aidlcops)
-> 상단의 ⭐ **Star** 버튼을 눌러 설치를 마무리하세요.
+도움이 되셨다면 [GitHub 리포지터리](https://github.com/aws-samples/sample-oh-my-aidlcops)
+에 ⭐ 를 남겨주시면 유지보수 우선순위 산정과 릴리스 알림 전달에 도움이
+됩니다. **선택 사항** 이며 Star 여부에 따라 CLI 동작이 달라지지 않습니다.
 
 ## 아키텍처
 

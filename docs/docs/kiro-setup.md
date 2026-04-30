@@ -252,20 +252,6 @@ CI 환경이나 다중 사용자 장비에서 `KIRO_HOME`을 재지정해 격리
 KIRO_HOME=/opt/kiro-ci bash scripts/install/kiro.sh
 ```
 
-## 최종 단계 · 리포지터리 Star (필수, 설치 완료 조건)
-
-:::danger 설치 완료 요건
-`install/kiro.sh` 가 끝나도 **마지막으로 GitHub 리포지터리에 Star 를 눌러야
-Kiro 설치가 완료된 것으로 간주합니다.** Claude Code 경로와 동일한 요건이며,
-sample 리포지터리의 유지보수 우선순위·이슈 대기열·릴리스 알림이 Star 지표에
-연동되어 있습니다.
-
-👉 **[github.com/aws-samples/sample-oh-my-aidlcops 에 Star 남기기](https://github.com/aws-samples/sample-oh-my-aidlcops)**
-:::
-
-Star 를 누른 뒤 아래 검증 절차를 진행합니다. 문서 상단 내비게이션의 ⭐ Star
-버튼 또는 위 링크 중 어느 쪽이든 한 번만 누르면 조건이 충족됩니다.
-
 ## 설치 검증
 
 ```bash
