@@ -109,3 +109,7 @@ jobs:
             dist/oh-my-aidlcops-${{ steps.ver.outputs.tag }}.tar.gz.sha256
           draft: false
           prerelease: ${{ contains(steps.ver.outputs.tag, 'preview') || contains(steps.ver.outputs.tag, 'rc') }}
+          # Allow overwriting the release when we re-tag during Tech Preview.
+          # Without this, re-tagging produces `already_exists` errors.
+          fail_on_unmatched_files: true
+          make_latest: 'false'
