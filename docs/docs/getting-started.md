@@ -18,22 +18,45 @@ sidebar_position: 2
 
 ## ⚡ `oma` CLI 설치 (선택, AgenticOps 용)
 
-`oma setup` 은 `.omao/profile.yaml` (AWS 계정·예산·승인 모드 등) 과 씨드
-온톨로지(`budgets/deployments/risks`) 를 프로젝트에 만들어 줍니다. **AgenticOps
-플러그인**(autopilot-deploy / incident-response / cost-governance / continuous-eval /
-self-improving-loop / audit-trail)을 쓸 계획이라면 필요합니다. AIDLC
-Inception·Construction 만 쓸 계획이라면 건너뛰어도 됩니다.
+OMA 에는 **세 개의 서로 다른 설치 스크립트**가 있고 각각 역할이 다릅니다.
+아래 표를 먼저 이해하면 혼란을 피할 수 있습니다.
+
+| 스크립트 | 어디에 영향? | Claude Code 2.0+ 에서 필수? |
+|---|---|---|
+| **`install.sh`** (remote one-liner) | `~/.oma/` 에 CLI 설치, `~/.local/bin/oma` 심링크. **`~/.claude/` 는 안 건드림** | 선택 — `oma` CLI 쓰려면 필요 |
+| **`oma setup`** | 프로젝트의 `.omao/profile.yaml`·씨드 온톨로지 기록. 내부적으로 `install/claude.sh` 도 호출해 `settings.json` 에 MCP·훅 병합 | 선택 — AgenticOps 쓸 때만 필요 |
+| **`scripts/install/claude.sh`** | `~/.claude/plugins/` 심링크 + `settings.json` 에 MCP·훅 병합 (Claude Code 1.x 경로) | ❌ **단독으론 `/plugin list` 에 안 보임** |
+| **`/plugin marketplace add` + `install`** | Claude Code 네이티브 플러그인 등록 (`~/.claude/installed_plugins.json` 업데이트) | ✅ **필수** |
+
+즉, Claude Code 2.0+ 사용자는 **네이티브 마켓플레이스 경로(아래 1단계)** 가
+필수이고, `oma setup` 은 **AgenticOps 기능을 쓸 때만** 추가로 실행합니다.
 
 ```bash
+# OMA CLI 설치 (AgenticOps 쓸 계획이면)
 curl -fsSL https://raw.githubusercontent.com/aws-samples/sample-oh-my-aidlcops/v0.2.0-preview.1/install.sh | bash
 cd my-project
-oma setup
-oma doctor
+oma setup      # .omao/profile.yaml + 씨드 온톨로지 생성
+oma doctor     # 환경 점검
 ```
 
 > 기본값 그대로 설치하려면 모든 질문에서 ENTER 를 눌러 넘어가면 됩니다.
 > CI 에서는 `OMA_NON_INTERACTIVE=1` 과 env flag 로 비대화식 설치가 가능합니다.
 > `oma setup` 이 실패해도 아래 "1단계 · 마켓플레이스 등록" 은 독립적으로 진행 가능합니다.
+
+### AWS 자격 증명은 별도 설정이 필요합니다
+
+`oma setup` 이 묻는 AWS account id·region 은 **프로젝트의 의도를 적는 메타데이터**
+입니다. 실제 AWS API 호출 권한은 다음 중 하나로 **별도로** 구성되어 있어야 합니다.
+
+```bash
+aws configure                  # 정적 access key 방식
+aws configure sso              # SSO / IAM Identity Center
+export AWS_PROFILE=my-profile  # 이미 있는 프로필 재사용
+```
+
+`oma setup` 종료 시 `aws sts get-caller-identity` 로 현재 쉘의 크리덴셜이
+profile.yaml 에 기록한 account id 와 일치하는지 자동 확인하고 불일치/미설정 시
+경고합니다. `oma doctor` 의 `AWS credentials` probe 에서도 동일하게 검증됩니다.
 
 ## 1단계 · 마켓플레이스 등록 (30초)
 

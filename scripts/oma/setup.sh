@@ -111,7 +111,24 @@ ask() {
 }
 
 ask OMA_HARNESS        "Harness (claude-code/kiro/both)"           "${OMA_HARNESS:-claude-code}"
-ask OMA_AWS_ACCOUNT    "AWS account id (12 digits)"                "${OMA_AWS_ACCOUNT:-123456789012}"
+
+if [ "$NON_INTERACTIVE" = 0 ]; then
+    cat >&2 <<'EOT'
+
+# NOTE ─────────────────────────────────────────────────────────────────────
+# The AWS values below are METADATA only — they describe which account this
+# project targets. oma setup does NOT run `aws configure` or log you in.
+# Actual AWS API access is controlled separately by:
+#   • `aws configure` / `aws configure sso` (writes ~/.aws/credentials|config)
+#   • AWS_PROFILE / AWS_ACCESS_KEY_ID / SSO token in the shell environment
+# After setup, oma runs `aws sts get-caller-identity` to verify your shell
+# can reach the account you entered and warns on mismatch.
+# ──────────────────────────────────────────────────────────────────────────
+
+EOT
+fi
+
+ask OMA_AWS_ACCOUNT    "AWS account id (12 digits, recorded in profile.yaml)" "${OMA_AWS_ACCOUNT:-123456789012}"
 ask OMA_AWS_REGION     "AWS region"                                "${OMA_AWS_REGION:-ap-northeast-2}"
 ask OMA_AWS_ENV        "Environment (sandbox/staging/prod)"        "${OMA_AWS_ENV:-sandbox}"
 ask OMA_AIDLC_PHASE    "AIDLC entry phase (inception/construction/operations)" "${OMA_AIDLC_PHASE:-inception}"
@@ -247,7 +264,35 @@ if command -v python3 >/dev/null 2>&1 && [ "$DRY_RUN" = 0 ]; then
 fi
 
 # -----------------------------------------------------------------------------
-# Step 7 — doctor summary
+# Step 7 — AWS credential sanity check (metadata vs. real access)
+# -----------------------------------------------------------------------------
+# profile.yaml records the INTENDED account id; real API access comes from
+# ~/.aws/credentials, ~/.aws/config, or the AWS_* environment variables.
+# Confirm the current shell's credentials resolve to the same account id
+# the user entered. Never fails hard — only informs.
+if [ "$DRY_RUN" = 0 ]; then
+    if command -v aws >/dev/null 2>&1; then
+        actual_account="$(aws sts get-caller-identity --query Account --output text 2>/dev/null || true)"
+        if [ -z "$actual_account" ]; then
+            warn "AWS credentials not configured in this shell"
+            warn "  agenticops skills require active AWS access. Run one of:"
+            warn "    aws configure                         # static keys"
+            warn "    aws configure sso                     # SSO / IAM Identity Center"
+            warn "    export AWS_PROFILE=<your-profile>     # reuse an existing profile"
+        elif [ "$actual_account" != "$OMA_AWS_ACCOUNT" ]; then
+            warn "AWS credentials resolve to account $actual_account but profile.yaml records $OMA_AWS_ACCOUNT"
+            warn "  Either edit .omao/profile.yaml (.aws.account_id) or switch profile:"
+            warn "    export AWS_PROFILE=<profile-for-${OMA_AWS_ACCOUNT}>"
+        else
+            ok "AWS credentials verified: account $actual_account matches profile"
+        fi
+    else
+        skip "aws CLI not installed; skipping credential sanity check"
+    fi
+fi
+
+# -----------------------------------------------------------------------------
+# Step 8 — doctor summary
 # -----------------------------------------------------------------------------
 if [ "$SKIP_DOCTOR" = 1 ]; then
     skip "skipping doctor"

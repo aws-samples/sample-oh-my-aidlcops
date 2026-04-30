@@ -18,23 +18,47 @@ This document is a 5-minute Quickstart for users new to `oh-my-aidlcops` (OMA). 
 
 ## Optional: Install the `oma` CLI (for AgenticOps)
 
-`oma setup` writes `.omao/profile.yaml` (AWS account, region, budget,
-approval mode) and seeds the ontology (`budgets/deployments/risks`) in your
-project directory. **Required** if you plan to use the AgenticOps plugin
-(autopilot-deploy, incident-response, cost-governance, continuous-eval,
-self-improving-loop, audit-trail). **Skippable** if you only need AIDLC
-Inception/Construction.
+OMA ships **three installation scripts** that serve different layers.
+Understand them first:
+
+| Script | Effects | Required on Claude Code 2.0+? |
+|---|---|---|
+| **`install.sh`** (remote one-liner) | Unpacks CLI into `~/.oma/`, symlinks `~/.local/bin/oma`. **Does not touch `~/.claude/`** | Optional — only if you want the `oma` CLI |
+| **`oma setup`** | Writes `.omao/profile.yaml` + seed ontology; internally also runs `install/claude.sh` to merge MCP/hooks into `settings.json` | Optional — needed only for AgenticOps |
+| **`scripts/install/claude.sh`** | Creates `~/.claude/plugins/` symlinks + merges MCP/hooks into `settings.json` (Claude Code 1.x path) | ❌ **Alone, it does NOT appear in `/plugin list`** |
+| **`/plugin marketplace add` + `install`** | Native Claude Code registration (`~/.claude/installed_plugins.json`) | ✅ **Mandatory** |
+
+So on Claude Code 2.0+ the **native marketplace flow (Step 1 below) is
+required**, and `oma setup` is only needed **when you plan to use AgenticOps**.
 
 ```bash
+# Install the OMA CLI (only if you plan to use AgenticOps)
 curl -fsSL https://raw.githubusercontent.com/aws-samples/sample-oh-my-aidlcops/v0.2.0-preview.1/install.sh | bash
 cd my-project
-oma setup
-oma doctor
+oma setup      # writes .omao/profile.yaml + seed ontology
+oma doctor     # environment probes
 ```
 
 > Press ENTER at every prompt to accept defaults.
 > In CI, set `OMA_NON_INTERACTIVE=1` with env flags for unattended install.
 > Step 1 below is independent — it works even if `oma setup` was skipped.
+
+### AWS credentials must be configured separately
+
+The AWS account id and region that `oma setup` asks for are **metadata
+only** — a record of which account this project targets. Actual AWS API
+access is governed **separately** by one of:
+
+```bash
+aws configure                  # static access keys
+aws configure sso              # SSO / IAM Identity Center
+export AWS_PROFILE=my-profile  # reuse an existing profile
+```
+
+At the end of setup, `oma` runs `aws sts get-caller-identity` to confirm
+the current shell's credentials resolve to the same account id recorded in
+`profile.yaml` and warns on mismatch. The `AWS credentials` probe in
+`oma doctor` performs the same check on demand.
 
 ## Step 1: Register the Marketplace (30 seconds)
 
