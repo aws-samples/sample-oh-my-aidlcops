@@ -224,12 +224,23 @@ else
 fi
 
 # -----------------------------------------------------------------------------
-# Step 6 — compile DSL (no-op if no *.oma.yaml)
+# Step 6 — compile DSL (no-op if no *.oma.yaml or pyyaml missing)
 # -----------------------------------------------------------------------------
 if command -v python3 >/dev/null 2>&1 && [ "$DRY_RUN" = 0 ]; then
-    if compgen -G "$REPO_ROOT/plugins/*/*.oma.yaml" >/dev/null; then
-        (cd "$REPO_ROOT" && python3 -m tools.oma_compile --all) || warn "oma compile had issues"
-        ok "compiled DSL"
+    dsl_found=0
+    for f in "$REPO_ROOT"/plugins/*/*.oma.yaml; do
+        [ -e "$f" ] && { dsl_found=1; break; }
+    done
+    if [ "$dsl_found" = 1 ]; then
+        if python3 -c 'import yaml, jsonschema' >/dev/null 2>&1; then
+            if (cd "$REPO_ROOT" && python3 -m tools.oma_compile --all) >/dev/null 2>&1; then
+                ok "compiled DSL"
+            else
+                warn "oma compile returned non-zero; committed .mcp.json files retained"
+            fi
+        else
+            skip "python yaml/jsonschema missing; using committed .mcp.json as-is"
+        fi
     else
         skip "no *.oma.yaml found; compile skipped"
     fi
@@ -252,11 +263,11 @@ fi
 cat <<EOF
 
 Next steps:
-    1. Star the repository (required to close installation):
-       https://github.com/aws-samples/sample-oh-my-aidlcops
-    2. Verify setup:
+    1. Verify setup:
        oma doctor
-    3. Start your first AIDLC loop:
+    2. Start your first AIDLC loop:
        claude
        > /oma:autopilot "your goal here"
+    3. (Optional) Give the repo a star if OMA was useful:
+       https://github.com/aws-samples/sample-oh-my-aidlcops
 EOF

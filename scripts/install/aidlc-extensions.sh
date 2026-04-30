@@ -10,7 +10,7 @@ set -euo pipefail
 # ---------------------------------------------------------------------------
 # Globals
 # ---------------------------------------------------------------------------
-OMA_REPO_DIR="$(cd "$(dirname "$0")/.." && pwd)"
+OMA_REPO_DIR="${OMA_REPO_ROOT:-$(cd "$(dirname "$0")/../.." && pwd)}"
 OMA_OWNER="${OMA_OWNER:-aws-samples}"
 AIDLC_DIR="${AIDLC_DIR:-$HOME/.aidlc}"
 AIDLC_REPO_URL="${AIDLC_REPO_URL:-https://github.com/awslabs/aidlc-workflows.git}"

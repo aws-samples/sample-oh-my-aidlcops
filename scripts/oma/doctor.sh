@@ -127,12 +127,15 @@ probe_profile_valid() {
     fi
     # shellcheck disable=SC1091
     . "$REPO_ROOT/scripts/lib/profile.sh"
-    if profile_validate "$path" 2>/dev/null; then
-        record profile-valid ".omao/profile.yaml valid" pass "schema OK"
-    else
-        record profile-valid ".omao/profile.yaml valid" fail "schema violations" \
-            "Run \`oma doctor\` output; then edit .omao/profile.yaml and re-run setup."
-    fi
+    profile_validate "$path" 2>/dev/null
+    case $? in
+        0) record profile-valid ".omao/profile.yaml valid" pass "schema OK" ;;
+        2) record profile-valid ".omao/profile.yaml valid" warn \
+               "pyyaml/jsonschema missing; schema check skipped" \
+               "pip3 install --user pyyaml jsonschema" ;;
+        *) record profile-valid ".omao/profile.yaml valid" fail "schema violations" \
+               "Run \`oma doctor\` output; then edit .omao/profile.yaml and re-run setup." ;;
+    esac
 }
 
 probe_ontology_valid() {
