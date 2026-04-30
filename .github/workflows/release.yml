@@ -98,18 +98,28 @@ jobs:
           else:
               sys.stdout.write(f"Release {ver}\n")
           PY
+      - name: Delete existing release if present (idempotent re-tag)
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh release delete "${{ steps.ver.outputs.tag }}" --yes --cleanup-tag 2>/dev/null || true
+
+      - name: Re-push tag at current commit
+        run: |
+          git tag -f "${{ steps.ver.outputs.tag }}"
+          git push origin "${{ steps.ver.outputs.tag }}" --force
+
       - name: Create GitHub Release
-        uses: softprops/action-gh-release@v2
-        with:
-          tag_name: ${{ steps.ver.outputs.tag }}
-          name: OMA ${{ steps.ver.outputs.tag }}
-          body_path: body.md
-          files: |
-            dist/oh-my-aidlcops-${{ steps.ver.outputs.tag }}.tar.gz
-            dist/oh-my-aidlcops-${{ steps.ver.outputs.tag }}.tar.gz.sha256
-          draft: false
-          prerelease: ${{ contains(steps.ver.outputs.tag, 'preview') || contains(steps.ver.outputs.tag, 'rc') }}
-          # Allow overwriting the release when we re-tag during Tech Preview.
-          # Without this, re-tagging produces `already_exists` errors.
-          fail_on_unmatched_files: true
-          make_latest: 'false'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          is_prerelease=""
+          case "${{ steps.ver.outputs.tag }}" in
+              *preview*|*rc*) is_prerelease="--prerelease" ;;
+          esac
+          gh release create "${{ steps.ver.outputs.tag }}" \
+              --title "OMA ${{ steps.ver.outputs.tag }}" \
+              --notes-file body.md \
+              $is_prerelease \
+              "dist/oh-my-aidlcops-${{ steps.ver.outputs.tag }}.tar.gz" \
+              "dist/oh-my-aidlcops-${{ steps.ver.outputs.tag }}.tar.gz.sha256"
