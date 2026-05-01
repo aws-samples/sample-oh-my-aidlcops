@@ -3,7 +3,7 @@ name: oma:inception
 description: AIDLC Phase 1(Inception)만 단독 실행한다. workspace 감지, 요구사항 분석, 유저스토리 작성, workflow plan 생성까지 수행해 `.omao/plans/` 산출물을 생산한다. 구현 단계는 포함하지 않는다.
 ---
 <objective>
-aidlc-inception 플러그인의 스킬을 규정 순서대로 실행해 스펙(spec), 유저스토리(stories), workflow plan 3종 산출물을 생성한다. 이 산출물은 이후 `/oma:construction` 또는 `/oma:aidlc-loop`의 입력으로 재사용된다.
+aidlc 플러그인 inception 스킬을 규정 순서대로 실행해 스펙(spec), 유저스토리(stories), workflow plan 3종 산출물을 생성한다. 이 산출물은 이후 `/oma:construction` 또는 `/oma:aidlc-loop`의 입력으로 재사용된다.
 </objective>
 
 <when_to_use>
@@ -21,9 +21,9 @@ aidlc-inception 플러그인의 스킬을 규정 순서대로 실행해 스펙(s
 `aidlc-full-loop.md`의 5-checkpoint 중 **Inception 범위**만 실행한다.
 
 1. **Gather Context** — greenfield vs brownfield 판정, 기존 `.omao/plans/` 파일 로드, engineering-playbook 스타일 가이드 적용 여부 확인
-2. **Pre-flight Checks** — aidlc-inception 플러그인 설치 확인, awslabs/aidlc-workflows 버전 정합 확인
+2. **Pre-flight Checks** — aidlc 플러그인 (inception 스킬 그룹) 설치 확인, awslabs/aidlc-workflows 버전 정합 확인
 3. **Plan** — 스펙 섹션 구조, 유저스토리 템플릿, workflow 플랜 항목을 사용자와 미리 합의
-4. **Execute** — aidlc-inception 플러그인 스킬을 다음 순서로 호출
+4. **Execute** — aidlc 플러그인 inception 스킬을 다음 순서로 호출
    - `workspace-detection` → `requirements-analysis` → `user-stories` → `workflow-planning`
 5. **Validate** — 산출물 3종(`spec.md`, `stories.md`, `workflow-plan.md`)의 필수 섹션·링크 무결성 점검
 
