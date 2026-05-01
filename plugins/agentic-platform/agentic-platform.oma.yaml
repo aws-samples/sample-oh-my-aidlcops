@@ -15,6 +15,8 @@ plugin: agentic-platform
 metadata:
   labels:
     aidlc-phase: construction
+    cost-tier: high
+    compliance-required: "true"
 
 # ---------------------------------------------------------------------------
 # MCP servers (pinned to exact PyPI versions for supply-chain safety)
@@ -161,6 +163,49 @@ agents:
 hooks:
   session-start:
     runs: ../../hooks/session-start.sh
+
+# ---------------------------------------------------------------------------
+# Keyword triggers (merged into .omao/triggers.json by the compiler).
+# ---------------------------------------------------------------------------
+# ---------------------------------------------------------------------------
+# Workflows (v2) — DAG-based execution plans validated at compile time.
+# ---------------------------------------------------------------------------
+workflows:
+  platform-bootstrap:
+    description: "Full EKS + GPU + vLLM + Langfuse bootstrap with preflight checks and rollback."
+    steps:
+      - id: preflight
+        agent_ref: agentic-platform
+      - id: provision
+        agent_ref: agentic-platform
+        depends_on: [preflight]
+        on_failure: rollback
+      - id: verify
+        skill_ref: agentic-eks-bootstrap
+        depends_on: [provision]
+
+# ---------------------------------------------------------------------------
+# Telemetry (v2) — OpenTelemetry endpoints for traces, metrics, logs.
+# ---------------------------------------------------------------------------
+telemetry:
+  traces:
+    endpoint: http://langfuse.ops.svc.cluster.local:4317
+    protocol: grpc
+    sampler: parentbased_traceidratio
+    sampler_ratio: 0.1
+  metrics:
+    endpoint: http://otel-collector.ops.svc.cluster.local:4318
+    interval_seconds: 30
+
+# ---------------------------------------------------------------------------
+# Policies (v2) — OPA policy references checked at compile time.
+# ---------------------------------------------------------------------------
+policies:
+  - id: require-approval-for-prod
+    rego_ref: policies/examples/deployment-approval.rego
+    severity: blocking
+    phase: [construction, operations]
+    description: "Enforce non-empty approval_chain for production deployments."
 
 # ---------------------------------------------------------------------------
 # Keyword triggers (merged into .omao/triggers.json by the compiler).
