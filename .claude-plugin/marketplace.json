@@ -11,9 +11,9 @@
   },
   "plugins": [
     {
-      "name": "agentic-platform",
+      "name": "ai-infra",
       "description": "Build and operate agentic AI workloads on EKS with vLLM, Inference Gateway, Langfuse, and Kagent. Covers GPU planning, model serving, routing, observability, and guardrails.",
-      "source": "./plugins/agentic-platform",
+      "source": "./plugins/ai-infra",
       "version": "0.2.0-preview.1",
       "category": "ai-platform",
       "keywords": [
