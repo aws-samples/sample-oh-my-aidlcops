@@ -18,8 +18,7 @@ from tools.oma_compile.compile import REPO_ROOT, check_drift
 PLUGINS_UNDER_DSL = [
     "ai-infra",
     "agenticops",
-    "aidlc-inception",
-    "aidlc-construction",
+    "aidlc",
     "modernization",
 ]
 
