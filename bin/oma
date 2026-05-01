@@ -57,6 +57,7 @@ Subcommands:
     doctor      Run 12 environment probes; exit 0 all-pass / 1 warn / 2 fail.
     compile     Compile every plugin's *.oma.yaml into native .mcp.json / agent.json files.
     validate    Validate a Deployment YAML against the ontology + active OPA policies.
+    run-workflow Resolve and print workflow DAG execution plan (stub: no invocation yet).
     status      Read .omao/profile.yaml and summarize active mode, budgets, last doctor.
     where       Print the OMA install root and key subdirectories.
     upgrade     git pull + re-run setup --migrate (clone installs only).
