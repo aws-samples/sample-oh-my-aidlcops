@@ -3,7 +3,7 @@
 **AIDLC × AgenticOps** — a plugin marketplace that automates the full AI-Driven
 Development Lifecycle with agent-based operations on AWS.
 
-[한국어 README](./README.ko.md) · [Documentation](./docs/) · [Plugins](./plugins/) · [Steering](./steering/) · [Releases](https://aws-samples.github.io/sample-oh-my-aidlcops/releases)
+[한국어 README](./README.ko.md) · [Documentation](./docs/) · [Plugins](./plugins/) · [Steering](./steering/) · [Releases](https://aws-samples.github.io/sample-oh-my-aidlcops/releases) · [References](./REFERENCES.md)
 
 ---
 
@@ -318,7 +318,10 @@ OMA stands on top of existing AWS and community work rather than reinventing.
 | [Atom-oh/oh-my-cloud-skills](https://github.com/Atom-oh/oh-my-cloud-skills) | MIT | Eval script patterns, Kiro conversion reference. |
 | [oh-my-claudecode](https://github.com/Yeachan-Heo/oh-my-claudecode) | — | Tier-0 orchestration and `.omc/` state inheritance. |
 
-Full attribution in [NOTICE](./NOTICE).
+Full attribution in [NOTICE](./NOTICE). See
+[REFERENCES.md](./REFERENCES.md) for the complete catalogue of every
+upstream repo, authoritative spec, framework, and runtime tool that
+OMA touches.
 
 ## License
 
