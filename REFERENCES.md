@@ -23,6 +23,10 @@ back.
   define the schema shape of OMA ontology fields.
 - [Frameworks and methodologies](#frameworks-and-methodologies) —
   governance and lifecycle references that shape OMA's decision trees.
+- [Harness engineering](#harness-engineering) — CI, release, and
+  supply-chain building blocks that keep the automation honest.
+- [AIDLC and AgenticOps references](#aidlc-and-agenticops-references)
+  — upstream material for the AIDLC lifecycle and AgenticOps pattern.
 - [Tools used at runtime](#tools-used-at-runtime) — binaries and
   libraries the Easy Button expects on `$PATH`.
 - [Our own artefacts](#our-own-artefacts) — canonical URLs for this
@@ -61,6 +65,11 @@ quick-access list for humans.
 | <a id="rfc-3339"></a>RFC 3339 (ISO 8601 profile) | https://datatracker.ietf.org/doc/html/rfc3339 | All `*_at` timestamp fields across ontology |
 | <a id="keep-a-changelog"></a>Keep a Changelog 1.1 | https://keepachangelog.com/en/1.1.0/ | `CHANGELOG.md` section shape |
 | <a id="semver"></a>Semantic Versioning 2.0 | https://semver.org/spec/v2.0.0.html | Git tag naming post-GA |
+| <a id="nygard-adr"></a>Michael Nygard, "Documenting Architecture Decisions" (2011) | https://cognitect.com/blog/2011/11/15/documenting-architecture-decisions | `schemas/ontology/adr.schema.json` field set (`context` / `decision` / `consequences`) and 5-state status machine trace directly to this post |
+| <a id="adr-github-io"></a>adr.github.io (community ADR hub) | https://adr.github.io/ | Template catalogue and tool ecosystem; OMA follows the MADR slug convention from this hub |
+| <a id="madr"></a>MADR — Markdown Any Decision Records | https://adr.github.io/madr/ | `adr-NNNN-<slug>` id format and file-naming convention for `.omao/plans/adr/*.md` |
+| <a id="ieee-830"></a>IEEE Std 830-1998 (Software Requirements Specifications) | https://standards.ieee.org/ieee/830/1222/ | `schemas/ontology/spec.schema.json` `requirements[]` shape (id / text / MoSCoW priority) follows the IEEE 830 shall/should/may layering; superseded by ISO/IEC/IEEE 29148 but widely cited |
+| <a id="ieee-29148"></a>ISO/IEC/IEEE 29148-2018 (successor to IEEE 830) | https://www.iso.org/standard/72089.html | Modern restatement of the requirements template referenced by Spec entity |
 
 ## Frameworks and methodologies
 
@@ -74,6 +83,30 @@ quick-access list for humans.
 | <a id="iso-42001"></a>ISO/IEC 42001 | https://www.iso.org/standard/81230.html | `Risk.compliance_refs[].framework=iso-42001` |
 | <a id="soc-2"></a>AICPA SOC 2 | https://www.aicpa-cima.com/topic/audit-assurance/audit-and-assurance-greater-than-soc-2 | `Risk.compliance_refs[].framework=soc-2` |
 | <a id="mitre-atlas"></a>MITRE ATLAS | https://atlas.mitre.org/ | `Risk.compliance_refs[].framework=mitre-atlas` (attack taxonomy) |
+| <a id="claude-code"></a>Claude Code (Anthropic) | https://docs.anthropic.com/en/docs/claude-code/overview | Primary agent harness that loads OMA plugins; trigger + hook contracts follow Claude Code docs |
+
+## Harness engineering
+
+| Reference | URL | Where it lands in OMA |
+|---|---|---|
+| <a id="gh-actions-workflow-syntax"></a>GitHub Actions workflow syntax | https://docs.github.com/en/actions/using-workflows/workflow-syntax-for-github-actions | Every `.github/workflows/*.yml` structure |
+| <a id="gh-actions-reusable"></a>GitHub Actions reusable workflows | https://docs.github.com/en/actions/using-workflows/reusing-workflows | Future refactor target to dedupe `foundation` and `release` test jobs |
+| <a id="gh-actions-release-cycle"></a>GitHub Actions release-event triggers | https://docs.github.com/en/actions/using-workflows/events-that-trigger-workflows#release | `docs-build.yml` rebuild on `release: {published,edited,deleted}` |
+| <a id="gh-actions-deprecation-node20"></a>GitHub Actions Node 20 deprecation notice (2026-09-16) | https://github.blog/changelog/2025-09-19-deprecation-of-node-20-on-github-actions-runners/ | Drove the `actions/checkout@v4 → v5` bump (PR #18) |
+| <a id="conventional-commits"></a>Conventional Commits 1.0 | https://www.conventionalcommits.org/en/v1.0.0/ | `CONTRIBUTING.md` commit-message style (`feat:` / `fix:` / `chore:` / `docs:`) |
+| <a id="sigstore"></a>Sigstore project overview | https://www.sigstore.dev/ | Background for `Deployment.artifact.signing` (cosign bundle URI) |
+| <a id="oci-distribution"></a>OCI Distribution Spec | https://github.com/opencontainers/distribution-spec | Registry behaviour for artifact pulls referenced by `Deployment.artifact.uri` |
+| <a id="slsa-generator"></a>SLSA Generator (GitHub Action) | https://github.com/slsa-framework/slsa-github-generator | Reference implementation for generating `artifact.provenance_uri` in CI |
+
+## AIDLC and AgenticOps references
+
+| Reference | URL | Why it is here |
+|---|---|---|
+| <a id="awslabs-agent-plugins-readme"></a>awslabs/agent-plugins README (governance model) | https://github.com/awslabs/agent-plugins/blob/main/README.md | Canonical definition of the plugin / skill / marketplace contract OMA adopts |
+| <a id="awslabs-aidlc-workflows-readme"></a>awslabs/aidlc-workflows README | https://github.com/awslabs/aidlc-workflows/blob/main/README.md | AIDLC 3-phase loop definition OMA extends via `*.opt-in.md` files |
+| <a id="aws-well-arch-genai-lens"></a>AWS Well-Architected Generative AI Lens | https://docs.aws.amazon.com/wellarchitected/latest/generative-ai-lens/generative-ai-lens.html | Design review checklist OMA's `agentic-platform` plugin aligns with |
+| <a id="aws-agentic-ai-blog"></a>AWS blog — Build an agentic AI assistant on AWS (reference architecture) | https://aws.amazon.com/blogs/machine-learning/ | General entry point; individual posts rotate — follow the blog index rather than pin a single URL |
+| <a id="aws-modernization"></a>AWS Cloud Migration landing (was aws.amazon.com/modernization/) | https://aws.amazon.com/cloud-migration/ | Updated canonical URL after the modernization alias was retired; used by `plugins/modernization` |
 
 ## Tools used at runtime
 
@@ -89,6 +122,9 @@ quick-access list for humans.
 | <a id="lychee"></a>lycheeverse/lychee-action | https://github.com/lycheeverse/lychee-action | Link-check CI (see `.github/workflows/link-check.yml` and `.lycheeignore`) |
 | <a id="opa-tool"></a>OPA binary | https://www.openpolicyagent.org/docs/latest/#running-opa | `scripts/oma/validate.sh` policy evaluation shell-out |
 | <a id="mermaid"></a>Mermaid | https://mermaid.js.org/ | Flow diagrams in docs (`theme-mermaid` plugin) |
+| <a id="hypothesis"></a>Hypothesis (property-based testing) | https://hypothesis.readthedocs.io/ | Referenced by `plugins/aidlc-construction` agentic TDD rules; property-based invariant generator |
+| <a id="kiro"></a>Kiro | https://kiro.dev/ | Secondary agent harness alongside Claude Code; `scripts/install/kiro.sh` target |
+| <a id="gh-cli"></a>GitHub CLI (`gh`) | https://cli.github.com/ | Release create, PR open, workflow dispatch across release pipeline |
 
 ## Our own artefacts
 
@@ -103,6 +139,16 @@ quick-access list for humans.
 
 Programmatic references also exist inline in each skill / plugin; this
 file intentionally only captures the **external** surface.
+
+## Verification
+
+`scripts/dev/check-references.py` walks this file once per week
+(via `.github/workflows/references-check.yml`) and issues `HEAD` /
+`GET` against every `https://` URL. Failures fail the workflow; the
+next PR either fixes the URL or moves the entry to `.lycheeignore`
+with a dated reason.
+
+_Last reviewed: 2026-05-01_
 
 ## Changelog
 
