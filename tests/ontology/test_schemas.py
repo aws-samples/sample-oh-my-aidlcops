@@ -127,3 +127,125 @@ def test_negative(schema_name, payload):
     validator = _validator(schema_name)
     errors = list(validator.iter_errors(payload))
     assert errors, "expected schema violations but payload validated"
+
+
+# ---------------------------------------------------------------------------
+# Enterprise optional-field fixtures (v0.3a PR 3).
+# These extend the minimal positive payloads with every enterprise field so
+# we prove additive compatibility: the schemas keep passing even when a
+# consumer populates the new enterprise surface.
+# ---------------------------------------------------------------------------
+
+AGENT_ENTERPRISE = {
+    **AGENT_OK,
+    "mcp_uri": "mcp://awslabs.eks-mcp-server",
+    "model_tier": "opus",
+}
+
+SKILL_ENTERPRISE = {
+    **SKILL_OK,
+    "sla_tier": "critical",
+}
+
+DEPLOYMENT_ENTERPRISE = {
+    **DEPLOYMENT_OK,
+    "approval_chain": [
+        {
+            "approver": "alice@example.com",
+            "approved_at": "2026-04-30T12:00:00Z",
+            "reason": "Rollback plan validated.",
+            "role": "tech-lead",
+        }
+    ],
+    "risk_exceptions": ["legacy-oracle-migration"],
+}
+
+INCIDENT_ENTERPRISE = {
+    **INCIDENT_OK,
+    "approval_chain": [
+        {
+            "approver": "oncall-team",
+            "approved_at": "2026-04-30T12:05:00Z",
+            "reason": "Runbook override acknowledged.",
+        }
+    ],
+    "trace_id": "4bf92f3577b34da6a3ce929d0e0e4736",
+    "span_id": "00f067aa0ba902b7",
+}
+
+BUDGET_ENTERPRISE = {
+    **BUDGET_OK,
+    "cost_center_owner": "finops@example.com",
+    "approval_gate": "finops-director",
+    "exception_expires_at": "2026-06-01T00:00:00Z",
+}
+
+RISK_ENTERPRISE = {
+    **RISK_OK,
+    "owasp_llm_top10_id": "LLM01",
+    "nist_ai_rmf_subcategory": "GOVERN.1.1",
+    "compliance_refs": [
+        {"framework": "iso-42001", "control_id": "8.2"},
+        {"framework": "nist-800-53", "control_id": "SI-12"},
+    ],
+    "deployment_refs": ["vllm-llama3-70b"],
+}
+
+
+@pytest.mark.parametrize(
+    "schema_name, payload",
+    [
+        ("agent.schema.json", AGENT_ENTERPRISE),
+        ("skill.schema.json", SKILL_ENTERPRISE),
+        ("deployment.schema.json", DEPLOYMENT_ENTERPRISE),
+        ("incident.schema.json", INCIDENT_ENTERPRISE),
+        ("budget.schema.json", BUDGET_ENTERPRISE),
+        ("risk.schema.json", RISK_ENTERPRISE),
+    ],
+)
+def test_enterprise_fields_accepted(schema_name, payload):
+    validator = _validator(schema_name)
+    errors = list(validator.iter_errors(payload))
+    assert errors == [], [e.message for e in errors]
+
+
+@pytest.mark.parametrize(
+    "schema_name, payload",
+    [
+        # model_tier enum violation
+        ("agent.schema.json", {**AGENT_OK, "model_tier": "gpt-5"}),
+        # sla_tier enum violation
+        ("skill.schema.json", {**SKILL_OK, "sla_tier": "platinum"}),
+        # approval_chain missing required approver field
+        (
+            "deployment.schema.json",
+            {
+                **DEPLOYMENT_OK,
+                "approval_chain": [
+                    {"approved_at": "2026-04-30T12:00:00Z", "reason": "r"}
+                ],
+            },
+        ),
+        # trace_id bad pattern
+        ("incident.schema.json", {**INCIDENT_OK, "trace_id": "not-hex"}),
+        # approval_gate enum violation
+        ("budget.schema.json", {**BUDGET_OK, "approval_gate": "board"}),
+        # owasp_llm_top10_id enum violation
+        ("risk.schema.json", {**RISK_OK, "owasp_llm_top10_id": "LLM99"}),
+        # nist_ai_rmf_subcategory pattern violation
+        ("risk.schema.json", {**RISK_OK, "nist_ai_rmf_subcategory": "GOVERN-1-1"}),
+    ],
+    ids=[
+        "agent.model_tier",
+        "skill.sla_tier",
+        "deployment.approval_chain",
+        "incident.trace_id",
+        "budget.approval_gate",
+        "risk.owasp_llm",
+        "risk.nist_subcat",
+    ],
+)
+def test_enterprise_fields_negative(schema_name, payload):
+    validator = _validator(schema_name)
+    errors = list(validator.iter_errors(payload))
+    assert errors, "expected schema violations but payload validated"

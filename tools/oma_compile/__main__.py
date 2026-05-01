@@ -20,6 +20,7 @@ from .compile import (
     CompileError,
     check_drift,
     compile_workspace,
+    enforce_strict_enterprise,
 )
 
 
@@ -32,9 +33,15 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("files", nargs="*", type=Path, help="*.oma.yaml paths")
     parser.add_argument("--all", action="store_true", help="discover every plugin")
     parser.add_argument("--check", action="store_true", help="fail on drift")
+    parser.add_argument(
+        "--strict-enterprise",
+        action="store_true",
+        help="enforce enterprise-readiness gates (DSL v2 only, SLSA digest, "
+             "Risk OWASP/NIST classification, approval_chain on approved deployments)",
+    )
     args = parser.parse_args(argv)
 
-    if args.all or args.check:
+    if args.all or args.check or args.strict_enterprise:
         files = _discover()
     else:
         files = [f.resolve() for f in args.files]
@@ -54,6 +61,13 @@ def main(argv: list[str] | None = None) -> int:
             print(f"clean ({len(files)} plugin(s))")
             return 0
         results = compile_workspace(files, write=True)
+        if args.strict_enterprise:
+            strict_errors = enforce_strict_enterprise(files)
+            if strict_errors:
+                print("strict-enterprise gate failed:", file=sys.stderr)
+                for line in strict_errors:
+                    print(f"  {line}", file=sys.stderr)
+                return 1
     except CompileError as err:
         print(f"oma-compile error: {err}", file=sys.stderr)
         return 2

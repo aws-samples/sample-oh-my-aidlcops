@@ -9,7 +9,7 @@ happens to be machine-checkable**. JSON Schema validation runs in CI so drift
 between plugins surfaces as a failing test instead of a subtle behavioural
 difference.
 
-## Six core entities
+## Eight core entities (six in DSL references, two as Phase-1 artefacts)
 
 ```
                    +-----------+
@@ -47,6 +47,15 @@ Each box is a JSON Schema in `../schemas/ontology/`.
 | Incident    | `incident.schema.json`              | `agenticops.incident-response` | human approver; auto-rollback path    |
 | Budget      | `budget.schema.json`                | plugin author / finops team    | `agenticops.cost-governance`          |
 | Risk        | `risk.schema.json`                  | `modernization.risk-discovery` | stage-gate-strict mode                |
+| Spec        | `spec.schema.json` (Draft 2020-12)  | `aidlc-inception`              | ADR author; Deployment.spec_ref       |
+| ADR         | `adr.schema.json` (Draft 2020-12)   | `aidlc-inception`/`aidlc-construction` | Deployment.adr_refs; review gates |
+
+Shared definitions live in `../schemas/common/`:
+- `approval-chain.schema.json` — `$defs.approvalChain` reused by
+  Deployment.approval_chain and Incident.approval_chain.
+
+Audit events (one line per ISO 8601 action) are described by
+`../schemas/audit/event.schema.json` and written to `.omao/audit.jsonl`.
 
 ## Relationships
 
@@ -70,6 +79,22 @@ Each box is a JSON Schema in `../schemas/ontology/`.
   `steering/workflows/stage-gated-progression.md` (stage-gate-strict), any
   `Risk` with `accepted=false` and a non-empty `gate_ref` blocks the
   Construction->Operations transition.
+
+- **Spec feeds ADR feeds Deployment.** A `Spec` captures Inception-phase
+  requirements. `ADR`s record the architecture decisions taken to satisfy a
+  Spec. A `Deployment` lists both via `spec_ref` and `adr_refs`, giving a
+  single traceable chain from requirement to running artefact.
+
+- **Risk <-> Deployment is now bidirectional.** `Risk.deployment_refs[]`
+  records which Deployments are exposed to the risk. `Deployment.risk_exceptions[]`
+  records which Risks were explicitly waived for that Deployment. Any audit
+  gate can now answer "why did this risky deploy go out?" from the schema
+  alone.
+
+- **Enterprise approval is explicit.** Deployment and Incident each carry an
+  optional `approval_chain` array (`{approver, approved_at, reason, role?}`)
+  capturing who approved the transition. Under `oma compile --strict-enterprise`
+  (v0.5), this chain is required when `approval_state=approved`.
 
 ## Why shared vocabulary matters here
 

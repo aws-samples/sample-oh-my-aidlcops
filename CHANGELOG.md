@@ -10,7 +10,81 @@ breaking changes to non-stable surfaces as documented in
 
 ## [Unreleased]
 
-### Added
+### Added — v0.5 Plugin migration + enterprise tooling
+- `plugins/{agenticops,aidlc-inception,aidlc-construction,modernization}/*.oma.yaml`
+  bring every first-party plugin under the harness DSL. Triggers merge
+  into `.omao/triggers.json` via `oma compile --all`.
+- `oma doctor --enterprise` (`scripts/oma/doctor-enterprise.sh`) runs
+  eight probes: ontology-2020-12, slsa-digest, risk-classification,
+  audit-jsonl, dsl-version, policies-rego, plugin-dsl, mcp-pinned.
+- `oma compile --strict-enterprise` enforces:
+  DSL v2 only, `Deployment.approval_chain` non-empty on approved
+  deployments, object-form `Deployment.artifact` with `sha256:…` digest,
+  and `owasp_llm_top10_id` or `nist_ai_rmf_subcategory` on every `Risk`.
+- Per-entity error format (one line per offender with a fix hint)
+  under `--strict-enterprise` so CI logs stay parseable.
+- `tests/harness/test_plugin_migration.py`, `test_strict_enterprise.py`.
+- `docs/docs/enterprise-readiness.md`, `docs/docs/rollback.md`.
+
+### Added — v0.4 SLSA / OTEL / OPA / audit + compliance docs
+- `tools/oma_audit/` — validated JSON-L append helper (`append_audit_event`)
+  and CLI (`python -m tools.oma_audit.append`). Replaces the
+  `echo >> aidlc-docs/audit.md` pattern; dual-write is supported.
+- `scripts/oma/migrate-audit.sh` — best-effort converter from legacy
+  Markdown append log to `.omao/audit.jsonl`.
+- `schemas/ontology/deployment.schema.json` `artifact` now accepts
+  either the legacy string or an SLSA v1.1 object
+  (`uri/digest/provenance_uri/signing/builder`).
+- `schemas/harness/dsl.schema.json` v2 fills in `spec.telemetry`
+  (traces/metrics/logs) and `spec.policies[]` (`id/rego_ref/severity/phase`).
+- `tools/oma_compile/compile.py` gains `_verify_rego_refs()` — policies
+  must point at an existing `.rego` file.
+- `scripts/oma/validate.sh` + `oma validate` subcommand: schema + OPA
+  shell-out with graceful fallback when `opa` is absent.
+- `docs/docs/compliance/{nist-ai-rmf,owasp-llm-top10,slsa-provenance}.md`.
+- `policies/examples/deployment-approval.rego` reference policy.
+
+### Added — v0.3b Harness DSL v2
+- `schemas/harness/dsl.schema.json`: `version` enum extended to `[1, 2]`;
+  v1 files continue to validate unchanged. v2 adds optional
+  `metadata.labels/annotations`, `workflows.<name>.steps[]` DAG,
+  `telemetry` (body in v0.4), `policies` (body in v0.4).
+- `tools/oma_compile/compile.py` adds `_validate_workflows()` — checks
+  agent_ref resolves, depends_on stays in-workflow, no cycles, no
+  duplicate step ids.
+- `allOf[0].if/then` in the DSL schema makes the v2-only keys a
+  **hard error** under `version: 1`.
+- `tests/harness/test_workflows.py`, `test_compile_roundtrip.py` gains
+  `MINI_DSL_V2` proving v1 and v2 compile to byte-equivalent outputs.
+- `docs/docs/harness-dsl-v2.md` migration guide.
+
+### Added — v0.3a Enterprise ontology foundation
+- `schemas/ontology/spec.schema.json` and `schemas/ontology/adr.schema.json`
+  close the Phase 1 traceability gap (`entityRef` enum previously listed
+  Spec/ADR without schema files).
+- `schemas/common/approval-chain.schema.json` — reusable `$defs.approvalChain`
+  shared by Deployment and Incident approval gating.
+- `schemas/audit/event.schema.json` — JSON-L audit event record replacing the
+  free-form `aidlc-docs/audit.md` surface (migration of skill writers lands
+  in v0.4).
+- Enterprise optional fields on the existing six schemas:
+  - Agent: `mcp_uri`, `model_tier`
+  - Skill: `sla_tier`
+  - Deployment: `approval_chain`, `risk_exceptions[]`
+  - Incident: `approval_chain`, `trace_id`, `span_id`
+  - Budget: `cost_center_owner`, `approval_gate`, `exception_expires_at`
+  - Risk: `owasp_llm_top10_id`, `nist_ai_rmf_subcategory`,
+    `compliance_refs[]`, `deployment_refs[]`
+- `pyproject.toml` pins runtime/dev dependencies (`jsonschema>=4.18,<5`,
+  `pyyaml>=6.0,<7`, `pytest>=7.4,<9`). `tests/conftest.py` silences the
+  jsonschema `RefResolver` DeprecationWarning so CI runs with `-W error`
+  stay green until the move to `referencing.Registry` in v0.6+.
+- Trigger schema on harness DSL now captures `{id, keywords[],
+  context_required[], command, description}`. `tools/oma_compile` emits
+  this richer shape directly into `.omao/triggers.json`, aligning with the
+  format `hooks/user-prompt-submit.sh` already expected.
+
+### Added — v0.3a existing features
 - `oma init` subcommand — scaffolds `.omao/` without the full wizard.
   Users no longer need to remember the install path.
 - `oma where` subcommand — prints the OMA install root plus key

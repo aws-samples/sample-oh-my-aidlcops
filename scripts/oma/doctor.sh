@@ -20,14 +20,22 @@ REPO_ROOT="${OMA_REPO_ROOT:-$(cd "$(dirname "$0")/../.." && pwd)}"
 
 FORMAT=pretty
 PROJECT_DIR="$(pwd)"
+ENTERPRISE=0
 while [ $# -gt 0 ]; do
     case "$1" in
-        --json)     FORMAT=json; shift ;;
-        --project)  PROJECT_DIR="$2"; shift 2 ;;
-        -h|--help)  sed -n '2,15p' "$0" | sed 's/^# \{0,1\}//'; exit 0 ;;
-        *)          die "unknown flag: $1" ;;
+        --json)       FORMAT=json; shift ;;
+        --project)    PROJECT_DIR="$2"; shift 2 ;;
+        --enterprise) ENTERPRISE=1; shift ;;
+        -h|--help)    sed -n '2,15p' "$0" | sed 's/^# \{0,1\}//'; exit 0 ;;
+        *)            die "unknown flag: $1" ;;
     esac
 done
+
+# When --enterprise is set, delegate to the dedicated probe script. It
+# exits 0/1 on its own and bypasses the 12 baseline probes below.
+if [ "$ENTERPRISE" -eq 1 ]; then
+    exec bash "$REPO_ROOT/scripts/oma/doctor-enterprise.sh" "$@"
+fi
 
 # -----------------------------------------------------------------------------
 # Probe plumbing

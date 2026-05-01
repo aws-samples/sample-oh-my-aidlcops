@@ -104,6 +104,54 @@ constructs: `single-namespace` (one k8s namespace), `single-cluster` (one EKS
 cluster), `single-account` (one AWS account), `cross-account`, `cross-region`.
 AgenticOps escalates approval requirements as the blast radius grows.
 
+## Spec
+
+An Inception-phase artefact (schema `spec.schema.json`, Draft 2020-12)
+capturing requirements and owner. Every requirement carries an id, text, and
+MoSCoW priority (`must`/`should`/`may`). Spec supersedes older specs via
+`supersedes[]` and links forward to ADRs via `linked_adrs[]`. Deployments
+reference the spec they satisfy through `Deployment.spec_ref`.
+
+## ADR
+
+Architecture Decision Record (schema `adr.schema.json`, Draft 2020-12).
+Numbered (`adr-0001-...`), with `context` / `decision` / `consequences`
+sections. An ADR moves from `proposed` -> `accepted` (or `rejected`) and may
+later be `deprecated` or `superseded_by` a later ADR. Deployments reference
+the ADRs they follow via `Deployment.adr_refs[]`.
+
+## ApprovalChain
+
+A reusable `$defs` block in `schemas/common/approval-chain.schema.json`.
+Each link is `{approver, approved_at, reason, role?}`. Appears on
+`Deployment.approval_chain` and `Incident.approval_chain`. Client-provided
+timestamps are not cryptographic non-repudiation; see
+`docs/docs/compliance/slsa-provenance.md` (v0.4) for how cosign bundles
+layer on top.
+
+## AuditEvent
+
+One line of `.omao/audit.jsonl`, described by
+`schemas/audit/event.schema.json`. Captures `{timestamp, actor, action,
+target, phase}` plus optional `compliance`, `trace_id`, and `span_id`
+fields. Skills move from `echo >> aidlc-docs/audit.md` to
+`tools.oma_audit.append` over v0.4 (dual-write) and v0.5 (Markdown path
+removed).
+
+## OWASP LLM Top 10
+
+The OWASP project "Top 10 for Large Language Model Applications". OMA
+captures the categorisation on `Risk.owasp_llm_top10_id` (enum
+`LLM01`..`LLM10`). The mapping from each category to the OMA field that
+mitigates it lives in `docs/docs/compliance/owasp-llm-top10.md` (v0.4).
+
+## NIST AI RMF subcategory
+
+An identifier from NIST AI 100-1 of the shape
+`{GOVERN|MAP|MEASURE|MANAGE}.<number>.<number>` (e.g. `MEASURE.2.6`).
+Appears on `Risk.nist_ai_rmf_subcategory` and on
+`AuditEvent.compliance.nist_ai_rmf`. Mapping docs land in v0.4.
+
 ## Quality gate
 
 A blocking check at a phase boundary. Tracked via

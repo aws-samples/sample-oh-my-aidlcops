@@ -53,6 +53,16 @@
     "description": {
       "type": "string",
       "maxLength": 500
+    },
+    "mcp_uri": {
+      "description": "Optional canonical MCP server URI (Model Context Protocol v1.0). Used when the agent invokes a hosted MCP service directly rather than via a pinned local uvx entry. Example: mcp://awslabs.eks-mcp-server.",
+      "type": "string",
+      "format": "uri",
+      "pattern": "^mcp://"
+    },
+    "model_tier": {
+      "description": "Optional model tier hint consumed by autopilot/agenticops for cost-aware routing. 'custom' escapes the Claude/OpenAI tier vocabulary.",
+      "enum": ["opus", "sonnet", "haiku", "gpt-4o", "custom"]
     }
   },
   "definitions": {

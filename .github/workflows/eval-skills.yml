@@ -28,7 +28,7 @@ jobs:
 
       - name: Run skill quality checks
         run: |
-          python scripts/eval-skills.py --strict
+          python scripts/dev/eval-skills.py --strict
 
   matrix-harness:
     runs-on: ubuntu-latest
@@ -42,4 +42,9 @@ jobs:
 
       - name: Syntax check install script for ${{ matrix.harness }}
         run: |
-          bash -n scripts/install-${{ matrix.harness }}.sh
+          # scripts/install/{claude,kiro}.sh (plus .sh shims) are the canonical paths since v0.2.
+          case "${{ matrix.harness }}" in
+            claude-code) bash -n scripts/install/claude.sh ;;
+            kiro)        bash -n scripts/install/kiro.sh ;;
+            *)           echo "unknown harness: ${{ matrix.harness }}" >&2; exit 1 ;;
+          esac

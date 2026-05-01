@@ -55,6 +55,11 @@
     "description": {
       "type": "string",
       "maxLength": 500
+    },
+    "sla_tier": {
+      "description": "Optional service-level expectation for this skill. critical = must not regress; standard = regression review; best-effort = experimental.",
+      "enum": ["critical", "standard", "best-effort"],
+      "default": "standard"
     }
   }
 }

@@ -42,6 +42,22 @@
       "description": "Slack/Email/SNS destinations for 'notify' action.",
       "type": "array",
       "items": { "type": "string" }
+    },
+    "cost_center_owner": {
+      "description": "Optional FinOps chargeback owner (email or team handle). Required before FinOps dashboards attribute spend.",
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 128
+    },
+    "approval_gate": {
+      "description": "Optional approval gate applied when action_on_breach=require-approval. none bypasses human approval entirely.",
+      "enum": ["none", "finops-director", "cfo"],
+      "default": "none"
+    },
+    "exception_expires_at": {
+      "description": "Optional ISO 8601 timestamp after which temporary overage waivers are auto-revoked.",
+      "type": "string",
+      "format": "date-time"
     }
   }
 }
