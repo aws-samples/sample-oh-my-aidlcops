@@ -71,7 +71,7 @@ jobs:
           (github.event_name == 'push' && github.ref == 'refs/heads/main') ||
           github.event_name == 'release' ||
           github.event_name == 'workflow_dispatch'
-        uses: actions/upload-pages-artifact@v3
+        uses: actions/upload-pages-artifact@v4
         with:
           path: docs/build
 
