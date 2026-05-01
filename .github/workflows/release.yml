@@ -20,6 +20,7 @@ on:
 
 permissions:
   contents: write
+  actions: write  # needed by the 'Trigger docs-build' step below to run another workflow
 
 jobs:
   test:
@@ -197,3 +198,16 @@ jobs:
               $is_prerelease \
               "dist/oh-my-aidlcops-${{ steps.ver.outputs.tag }}.tar.gz" \
               "dist/oh-my-aidlcops-${{ steps.ver.outputs.tag }}.tar.gz.sha256"
+
+      - name: Trigger docs-build so /releases refreshes
+        if: github.event_name != 'workflow_dispatch' || github.event.inputs.dry_run != 'true'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          # Belt-and-suspenders: docs-build.yml already subscribes to
+          # `release: published`, but GitHub sometimes fires that event
+          # before Pages picks up the new repo state. Explicitly
+          # dispatching the workflow guarantees the /releases page
+          # regenerates with the new tag even when the event path lags.
+          echo "Dispatching docs-build.yml on main for ${{ steps.ver.outputs.tag }}"
+          gh workflow run docs --repo "$GITHUB_REPOSITORY" --ref main
