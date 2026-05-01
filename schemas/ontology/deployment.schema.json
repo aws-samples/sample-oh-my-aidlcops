@@ -5,7 +5,12 @@
   "description": "A deployable unit produced by AIDLC Construction and consumed by AgenticOps. Represents the handoff artifact between Phase 2 and Phase 3.",
   "type": "object",
   "additionalProperties": false,
-  "required": ["id", "target", "artifact", "approval_state"],
+  "required": [
+    "id",
+    "target",
+    "artifact",
+    "approval_state"
+  ],
   "properties": {
     "id": {
       "type": "string",
@@ -14,7 +19,14 @@
     },
     "target": {
       "description": "Where this deployment runs.",
-      "enum": ["eks", "ec2", "lambda", "ecs", "bedrock-agentcore", "sagemaker"]
+      "enum": [
+        "eks",
+        "ec2",
+        "lambda",
+        "ecs",
+        "bedrock-agentcore",
+        "sagemaker"
+      ]
     },
     "artifact": {
       "description": "Primary build output. Container image ref, Lambda zip S3 URI, or similar.",
@@ -24,11 +36,20 @@
     "manifests": {
       "description": "Paths to IaC / Helm / k8s manifest files that describe this deployment.",
       "type": "array",
-      "items": { "type": "string" }
+      "items": {
+        "type": "string"
+      }
     },
     "approval_state": {
       "description": "Human-in-the-loop checkpoint state. AgenticOps only progresses on 'approved'.",
-      "enum": ["draft", "proposed", "approved", "rejected", "deployed", "rolled_back"]
+      "enum": [
+        "draft",
+        "proposed",
+        "approved",
+        "rejected",
+        "deployed",
+        "rolled_back"
+      ]
     },
     "rollback_plan": {
       "description": "Path or inline description of how to roll back. Required before approval_state=approved in strict mode.",
@@ -36,7 +57,13 @@
     },
     "blast_radius": {
       "description": "What breaks if this deployment misbehaves. Used by incident-response skill.",
-      "enum": ["single-namespace", "single-cluster", "single-account", "cross-account", "cross-region"]
+      "enum": [
+        "single-namespace",
+        "single-cluster",
+        "single-account",
+        "cross-account",
+        "cross-region"
+      ]
     },
     "produced_by": {
       "description": "Agent or skill id that generated this deployment.",
@@ -49,7 +76,52 @@
     "adr_refs": {
       "description": "ADR identifiers that constrain this deployment.",
       "type": "array",
-      "items": { "type": "string" }
+      "items": {
+        "type": "string"
+      }
+    },
+    "approval_chain": {
+      "description": "Optional ordered list of approvals gating approval_state=approved. Shape defined in schemas/common/approval-chain.schema.json#/$defs/approvalChain. Under --strict-enterprise this array must be non-empty when approval_state=approved.",
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "approver",
+          "approved_at",
+          "reason"
+        ],
+        "properties": {
+          "approver": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 128
+          },
+          "approved_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "reason": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 1000
+          },
+          "role": {
+            "type": "string",
+            "maxLength": 64
+          }
+        }
+      }
+    },
+    "risk_exceptions": {
+      "description": "Risk.id values whose gate_ref was explicitly waived for this deployment. Closes the Risk -> Deployment traceability gap.",
+      "type": "array",
+      "items": {
+        "type": "string",
+        "pattern": "^[a-z0-9][a-z0-9-]*$"
+      },
+      "uniqueItems": true
     }
   }
 }

@@ -37,7 +37,14 @@ MINI_DSL = {
             "env": {"FASTMCP_LOG_LEVEL": "ERROR"},
         }
     },
-    "triggers": [{"keyword": "platform-bootstrap", "route": "/oma:platform-bootstrap"}],
+    "triggers": [
+        {
+            "id": "platform-bootstrap",
+            "keywords": ["platform-bootstrap", "eks-agentic"],
+            "command": "/oma:platform-bootstrap",
+            "description": "Bootstrap the platform.",
+        }
+    ],
 }
 
 
@@ -104,6 +111,52 @@ def test_undeclared_mcp_rejected(tmp_path):
         compile_plugin(dsl_path, write=False)
 
 
+MINI_DSL_V2 = {
+    "version": 2,
+    "plugin": "agentic-platform",
+    "metadata": {"labels": {"aidlc-phase": "construction"}},
+    "agents": [
+        {
+            "id": "platform-architect",
+            "runtime": "kiro",
+            "description": "v2 architect",
+            "mcp": ["eks"],
+        }
+    ],
+    "mcp": {
+        "eks": {
+            "command": "uvx",
+            "args": ["awslabs.eks-mcp-server==0.1.28"],
+            "env": {"FASTMCP_LOG_LEVEL": "ERROR"},
+        }
+    },
+    "workflows": {
+        "bootstrap": {
+            "steps": [
+                {"id": "prep", "agent_ref": "platform-architect"},
+                {"id": "run", "skill_ref": "agentic-eks-bootstrap", "depends_on": ["prep"]},
+            ]
+        }
+    },
+    "telemetry": {},
+    "policies": [],
+}
+
+
+def test_v2_dsl_compiles_same_as_v1(tmp_path):
+    """v2 files with only reserved/empty workflows slots must produce
+    functionally-equivalent .mcp.json output to v1 (workflows/telemetry/policies
+    have no emission effect in v0.3b)."""
+    v1_path = _write_dsl(tmp_path / "v1", MINI_DSL)
+    v2_path = _write_dsl(tmp_path / "v2", MINI_DSL_V2)
+    v1 = compile_plugin(v1_path, write=True)
+    v2 = compile_plugin(v2_path, write=True)
+
+    v1_mcp = json.loads(v1.mcp_json_path.read_text(encoding="utf-8"))
+    v2_mcp = json.loads(v2.mcp_json_path.read_text(encoding="utf-8"))
+    assert v1_mcp == v2_mcp
+
+
 def test_workspace_merges_triggers(tmp_path):
     dsl_path = _write_dsl(tmp_path, MINI_DSL)
     # Point workspace output at the tmp path by monkey-patching TRIGGERS_OUT.
@@ -117,4 +170,11 @@ def test_workspace_merges_triggers(tmp_path):
     finally:
         compile_mod.TRIGGERS_OUT = original
 
-    assert merged["triggers"][0]["keyword"] == "platform-bootstrap"
+    first = merged["triggers"][0]
+    assert first["id"] == "platform-bootstrap"
+    assert first["keywords"] == ["platform-bootstrap", "eks-agentic"]
+    assert first["command"] == "/oma:platform-bootstrap"
+    assert first["plugin"] == "agentic-platform"
+    # context_required defaults to empty list and description passes through.
+    assert first["context_required"] == []
+    assert first["description"] == "Bootstrap the platform."

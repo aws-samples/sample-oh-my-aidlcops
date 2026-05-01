@@ -9,8 +9,12 @@
 #   2. Run `python3 -m tools.oma_compile plugins/agentic-platform/agentic-platform.oma.yaml`.
 #   3. Commit all three files together. CI enforces drift via `oma compile --check`.
 
-version: 1
+version: 2
 plugin: agentic-platform
+
+metadata:
+  labels:
+    aidlc-phase: construction
 
 # ---------------------------------------------------------------------------
 # MCP servers (pinned to exact PyPI versions for supply-chain safety)
@@ -162,7 +166,8 @@ hooks:
 # Keyword triggers (merged into .omao/triggers.json by the compiler).
 # ---------------------------------------------------------------------------
 triggers:
-  - keyword: platform-bootstrap
-    route: /oma:platform-bootstrap
-  - keyword: eks-agentic
-    route: /oma:platform-bootstrap
+  - id: platform-bootstrap
+    keywords: ["platform-bootstrap", "eks-agentic"]
+    context_required: []
+    command: /oma:platform-bootstrap
+    description: "Bootstrap the Agentic AI Platform on EKS with the 5-checkpoint workflow."

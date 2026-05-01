@@ -17,11 +17,22 @@ from __future__ import annotations
 
 import json
 import re
+import warnings
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Iterable
 
 import yaml
+
+# jsonschema>=4.18 deprecated RefResolver. Migration to referencing.Registry
+# is planned; silence the warning at import time so CI runs with -W error stay
+# green.
+warnings.filterwarnings(
+    "ignore",
+    category=DeprecationWarning,
+    module=r"jsonschema(\..*)?",
+)
+
 from jsonschema import Draft7Validator, RefResolver
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
@@ -92,6 +103,61 @@ def _validate(dsl: dict, source: Path) -> None:
         if not any(PINNED_VERSION_RE.search(a) for a in args):
             raise CompileError(
                 f"{source}: mcp {name!r} has no pinned version (expected '==X.Y.Z' in args)"
+            )
+
+    # v2-only checks: the schema already rejects the fields on v1, we just
+    # need to keep the v1 file untouched here.
+    if dsl.get("version") == 2:
+        _validate_workflows(dsl, source)
+
+
+def _validate_workflows(dsl: dict, source: Path) -> None:
+    """Validate v2 workflow DAGs: step refs resolve, depends_on is a DAG."""
+    workflows = dsl.get("workflows") or {}
+    agent_ids = {a["id"] for a in (dsl.get("agents") or [])}
+    for wf_name, workflow in workflows.items():
+        steps = workflow.get("steps") or []
+        step_ids = set()
+        for step in steps:
+            sid = step["id"]
+            if sid in step_ids:
+                raise CompileError(
+                    f"{source}: workflow {wf_name!r} has duplicate step id {sid!r}"
+                )
+            step_ids.add(sid)
+            if "agent_ref" in step and step["agent_ref"] not in agent_ids:
+                raise CompileError(
+                    f"{source}: workflow {wf_name!r} step {sid!r} references "
+                    f"undeclared agent_ref {step['agent_ref']!r}"
+                )
+            # skill_ref is resolved by the harness at runtime, not here.
+        # depends_on must stay within the same workflow.
+        for step in steps:
+            for dep in step.get("depends_on") or []:
+                if dep not in step_ids:
+                    raise CompileError(
+                        f"{source}: workflow {wf_name!r} step {step['id']!r} "
+                        f"depends_on {dep!r} which is not declared in the same workflow"
+                    )
+        # Cycle detection (Kahn's algorithm).
+        indeg = {sid: 0 for sid in step_ids}
+        edges: dict[str, list[str]] = {sid: [] for sid in step_ids}
+        for step in steps:
+            for dep in step.get("depends_on") or []:
+                edges[dep].append(step["id"])
+                indeg[step["id"]] += 1
+        queue = [sid for sid, deg in indeg.items() if deg == 0]
+        visited = 0
+        while queue:
+            sid = queue.pop()
+            visited += 1
+            for succ in edges[sid]:
+                indeg[succ] -= 1
+                if indeg[succ] == 0:
+                    queue.append(succ)
+        if visited != len(step_ids):
+            raise CompileError(
+                f"{source}: workflow {wf_name!r} depends_on graph has a cycle"
             )
 
 
@@ -177,10 +243,20 @@ def compile_plugin(dsl_path: Path, write: bool = True) -> CompileResult:
         kiro_payloads.append((agent_path, _build_agent_json(dsl, agent)))
         agent_json_paths.append(agent_path)
 
-    triggers = [
-        {"keyword": t["keyword"], "route": t["route"], "plugin": dsl["plugin"]}
-        for t in (dsl.get("triggers") or [])
-    ]
+    triggers = []
+    for t in (dsl.get("triggers") or []):
+        entry = {
+            "id": t["id"],
+            "keywords": list(t["keywords"]),
+            "command": t["command"],
+            "plugin": dsl["plugin"],
+        }
+        if t.get("context_required"):
+            entry["context_required"] = list(t["context_required"])
+        else:
+            entry["context_required"] = []
+        entry["description"] = t.get("description", "")
+        triggers.append(entry)
 
     if write:
         mcp_path.parent.mkdir(parents=True, exist_ok=True)

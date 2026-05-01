@@ -43,6 +43,32 @@
       "description": "Log excerpts, metric snapshots, trace ids supporting the proposal.",
       "type": "array",
       "items": { "type": "string" }
+    },
+    "approval_chain": {
+      "description": "Optional approvals for runbook overrides. Matches schemas/common/approval-chain.schema.json#/$defs/approvalChain.",
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["approver", "approved_at", "reason"],
+        "properties": {
+          "approver": { "type": "string", "minLength": 1, "maxLength": 128 },
+          "approved_at": { "type": "string", "format": "date-time" },
+          "reason": { "type": "string", "minLength": 1, "maxLength": 1000 },
+          "role": { "type": "string", "maxLength": 64 }
+        }
+      }
+    },
+    "trace_id": {
+      "description": "Optional OpenTelemetry trace id (hex, 32 chars) linking the incident to distributed traces.",
+      "type": "string",
+      "pattern": "^[a-f0-9]{32}$"
+    },
+    "span_id": {
+      "description": "Optional OpenTelemetry span id (hex, 16 chars).",
+      "type": "string",
+      "pattern": "^[a-f0-9]{16}$"
     }
   }
 }
