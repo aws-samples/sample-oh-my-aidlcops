@@ -1,0 +1,43 @@
+{
+  "$id": "https://aws-samples.github.io/sample-oh-my-aidlcops/schemas/common/approval-chain.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "ApprovalChain",
+  "description": "Reusable approval-chain definition consumed by Deployment and Incident entities. Each link records who approved, when, and the reason. Timestamps are client-provided ISO 8601 strings; cryptographic non-repudiation (e.g. cosign bundles) is layered separately.",
+  "$defs": {
+    "approvalLink": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["approver", "approved_at", "reason"],
+      "properties": {
+        "approver": {
+          "description": "Identifier of the approver. Prefer stable handles (email, team slug, LDAP id) over display names.",
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        },
+        "approved_at": {
+          "description": "ISO 8601 date-time the approval was recorded.",
+          "type": "string",
+          "format": "date-time"
+        },
+        "reason": {
+          "description": "Free-form justification. Shown in audit output.",
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 1000
+        },
+        "role": {
+          "description": "Approver role at the time of approval (e.g. tech-lead, cto, finops-director).",
+          "type": "string",
+          "maxLength": 64
+        }
+      }
+    },
+    "approvalChain": {
+      "description": "Ordered list of approvals. First entry is the earliest approver. Under --strict-enterprise this list must be non-empty when approval_state=approved.",
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/approvalLink" }
+    }
+  }
+}

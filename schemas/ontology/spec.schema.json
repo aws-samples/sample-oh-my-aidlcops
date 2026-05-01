@@ -1,0 +1,77 @@
+{
+  "$id": "https://aws-samples.github.io/sample-oh-my-aidlcops/schemas/ontology/spec.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Spec",
+  "description": "AIDLC Phase 1 (Inception) output capturing requirements, scope, and owner. A Spec feeds ADRs and Deployments downstream via the entityRef enum.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["id", "owner", "status"],
+  "properties": {
+    "id": {
+      "description": "Stable spec identifier. Matches the filename under .omao/plans/spec/.",
+      "type": "string",
+      "pattern": "^spec-[a-z0-9-]+$",
+      "maxLength": 128
+    },
+    "owner": {
+      "description": "Team handle or individual accountable for the spec lifecycle.",
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 128
+    },
+    "status": {
+      "enum": ["draft", "reviewing", "approved", "superseded"]
+    },
+    "title": {
+      "type": "string",
+      "maxLength": 200
+    },
+    "description": {
+      "type": "string",
+      "maxLength": 5000
+    },
+    "requirements": {
+      "description": "Ordered list of atomic requirements. Each item is traceable to downstream ADRs and Deployments.",
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "text", "priority"],
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^REQ-[A-Z0-9]+-[0-9]+$"
+          },
+          "text": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 1000
+          },
+          "priority": {
+            "enum": ["must", "should", "may"]
+          }
+        }
+      }
+    },
+    "supersedes": {
+      "description": "Prior spec ids this document replaces.",
+      "type": "array",
+      "items": { "type": "string", "pattern": "^spec-[a-z0-9-]+$" },
+      "uniqueItems": true
+    },
+    "linked_adrs": {
+      "description": "ADR ids that motivated or flow from this spec.",
+      "type": "array",
+      "items": { "type": "string", "pattern": "^adr-[0-9]{4}-[a-z0-9-]+$" },
+      "uniqueItems": true
+    },
+    "created_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "approved_at": {
+      "type": "string",
+      "format": "date-time"
+    }
+  }
+}

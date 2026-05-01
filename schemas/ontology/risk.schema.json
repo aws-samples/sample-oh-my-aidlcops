@@ -52,6 +52,43 @@
     "evidence": {
       "type": "array",
       "items": { "type": "string" }
+    },
+    "owasp_llm_top10_id": {
+      "description": "Optional OWASP Top 10 for LLM Applications category this risk maps to.",
+      "enum": [
+        "LLM01", "LLM02", "LLM03", "LLM04", "LLM05",
+        "LLM06", "LLM07", "LLM08", "LLM09", "LLM10"
+      ]
+    },
+    "nist_ai_rmf_subcategory": {
+      "description": "Optional NIST AI RMF (AI 100-1) subcategory id, e.g. 'GOVERN.1.1' or 'MEASURE.2.6'.",
+      "type": "string",
+      "pattern": "^(GOVERN|MAP|MEASURE|MANAGE)\\.[0-9]+\\.[0-9]+$"
+    },
+    "compliance_refs": {
+      "description": "Optional compliance framework controls this risk maps to. Multiple frameworks permitted.",
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["framework", "control_id"],
+        "properties": {
+          "framework": {
+            "enum": ["iso-42001", "nist-800-53", "mitre-atlas", "slsa", "soc-2"]
+          },
+          "control_id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 64
+          }
+        }
+      }
+    },
+    "deployment_refs": {
+      "description": "Optional Deployment.id values this risk applies to (inverse of Deployment.risk_exceptions).",
+      "type": "array",
+      "items": { "type": "string", "pattern": "^[a-z][a-z0-9-]*$" },
+      "uniqueItems": true
     }
   }
 }

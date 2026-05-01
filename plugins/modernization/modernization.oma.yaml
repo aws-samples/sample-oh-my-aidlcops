@@ -1,0 +1,28 @@
+# OMA Harness DSL for the modernization plugin (v0.5 DSL v2 migration).
+#
+# modernization guides legacy workloads to AWS via the 6R strategy:
+# Rehost / Replatform / Refactor / Repurchase / Retain / Retire. Unlike
+# the other AIDLC plugins this one ships four agents (workload-assessor,
+# modernization-strategist, containerization-expert, cutover-planner),
+# but they are SKILL.md + agents/*.md assets today rather than Kiro
+# .agent.json profiles — Kiro profile generation is out of scope for the
+# v0.5 migration. Adding the .oma.yaml here unlocks triggers and future
+# telemetry/policy wiring.
+
+version: 2
+plugin: modernization
+
+metadata:
+  labels:
+    aidlc-phase: construction
+    modernization-strategy: "6r"
+
+mcp: {}
+agents: []
+
+triggers:
+  - id: modernization
+    keywords: ["modernization", "legacy-migration", "6r"]
+    context_required: []
+    command: /oma:modernization
+    description: "Run the 6R legacy modernization workflow (assess -> strategize -> containerize -> cutover)."

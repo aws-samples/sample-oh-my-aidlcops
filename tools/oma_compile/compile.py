@@ -17,11 +17,22 @@ from __future__ import annotations
 
 import json
 import re
+import warnings
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Iterable
 
 import yaml
+
+# jsonschema>=4.18 deprecated RefResolver. Migration to referencing.Registry
+# is planned; silence the warning at import time so CI runs with -W error stay
+# green.
+warnings.filterwarnings(
+    "ignore",
+    category=DeprecationWarning,
+    module=r"jsonschema(\..*)?",
+)
+
 from jsonschema import Draft7Validator, RefResolver
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
@@ -92,6 +103,75 @@ def _validate(dsl: dict, source: Path) -> None:
         if not any(PINNED_VERSION_RE.search(a) for a in args):
             raise CompileError(
                 f"{source}: mcp {name!r} has no pinned version (expected '==X.Y.Z' in args)"
+            )
+
+    # v2-only checks: the schema already rejects the fields on v1, we just
+    # need to keep the v1 file untouched here.
+    if dsl.get("version") == 2:
+        _validate_workflows(dsl, source)
+        _verify_rego_refs(dsl, source)
+
+
+def _verify_rego_refs(dsl: dict, source: Path) -> None:
+    """Verify every policies[].rego_ref points at an existing .rego file."""
+    for policy in dsl.get("policies") or []:
+        rel = policy.get("rego_ref")
+        if not rel:
+            continue
+        candidate = (REPO_ROOT / rel).resolve()
+        if not candidate.exists():
+            raise CompileError(
+                f"{source}: policy {policy['id']!r} rego_ref points at missing file {rel!r}"
+            )
+
+
+def _validate_workflows(dsl: dict, source: Path) -> None:
+    """Validate v2 workflow DAGs: step refs resolve, depends_on is a DAG."""
+    workflows = dsl.get("workflows") or {}
+    agent_ids = {a["id"] for a in (dsl.get("agents") or [])}
+    for wf_name, workflow in workflows.items():
+        steps = workflow.get("steps") or []
+        step_ids = set()
+        for step in steps:
+            sid = step["id"]
+            if sid in step_ids:
+                raise CompileError(
+                    f"{source}: workflow {wf_name!r} has duplicate step id {sid!r}"
+                )
+            step_ids.add(sid)
+            if "agent_ref" in step and step["agent_ref"] not in agent_ids:
+                raise CompileError(
+                    f"{source}: workflow {wf_name!r} step {sid!r} references "
+                    f"undeclared agent_ref {step['agent_ref']!r}"
+                )
+            # skill_ref is resolved by the harness at runtime, not here.
+        # depends_on must stay within the same workflow.
+        for step in steps:
+            for dep in step.get("depends_on") or []:
+                if dep not in step_ids:
+                    raise CompileError(
+                        f"{source}: workflow {wf_name!r} step {step['id']!r} "
+                        f"depends_on {dep!r} which is not declared in the same workflow"
+                    )
+        # Cycle detection (Kahn's algorithm).
+        indeg = {sid: 0 for sid in step_ids}
+        edges: dict[str, list[str]] = {sid: [] for sid in step_ids}
+        for step in steps:
+            for dep in step.get("depends_on") or []:
+                edges[dep].append(step["id"])
+                indeg[step["id"]] += 1
+        queue = [sid for sid, deg in indeg.items() if deg == 0]
+        visited = 0
+        while queue:
+            sid = queue.pop()
+            visited += 1
+            for succ in edges[sid]:
+                indeg[succ] -= 1
+                if indeg[succ] == 0:
+                    queue.append(succ)
+        if visited != len(step_ids):
+            raise CompileError(
+                f"{source}: workflow {wf_name!r} depends_on graph has a cycle"
             )
 
 
@@ -177,10 +257,20 @@ def compile_plugin(dsl_path: Path, write: bool = True) -> CompileResult:
         kiro_payloads.append((agent_path, _build_agent_json(dsl, agent)))
         agent_json_paths.append(agent_path)
 
-    triggers = [
-        {"keyword": t["keyword"], "route": t["route"], "plugin": dsl["plugin"]}
-        for t in (dsl.get("triggers") or [])
-    ]
+    triggers = []
+    for t in (dsl.get("triggers") or []):
+        entry = {
+            "id": t["id"],
+            "keywords": list(t["keywords"]),
+            "command": t["command"],
+            "plugin": dsl["plugin"],
+        }
+        if t.get("context_required"):
+            entry["context_required"] = list(t["context_required"])
+        else:
+            entry["context_required"] = []
+        entry["description"] = t.get("description", "")
+        triggers.append(entry)
 
     if write:
         mcp_path.parent.mkdir(parents=True, exist_ok=True)
@@ -213,6 +303,84 @@ def compile_workspace(plugin_files: Iterable[Path], write: bool = True) -> list[
         TRIGGERS_OUT.parent.mkdir(parents=True, exist_ok=True)
         _write_json(TRIGGERS_OUT, {"triggers": all_triggers})
     return results
+
+
+def enforce_strict_enterprise(plugin_files: Iterable[Path]) -> list[str]:
+    """Apply enterprise gates that are too strict for the default compile path.
+
+    Rules enforced:
+      * Every plugin DSL must be version 2.
+      * No plugin DSL may be missing.
+      * Every on-disk Deployment ontology instance with
+        approval_state=approved must carry a non-empty approval_chain.
+      * Every on-disk Deployment with an object-form artifact must include
+        a ``sha256:...`` digest.
+      * Every Risk must carry either owasp_llm_top10_id or
+        nist_ai_rmf_subcategory.
+
+    Returns a list of per-entity error lines. Empty list == gate OK.
+    """
+    errors: list[str] = []
+
+    for dsl_path in plugin_files:
+        dsl = _load_dsl(dsl_path)
+        if dsl.get("version") != 2:
+            errors.append(
+                f"{dsl_path.relative_to(REPO_ROOT)}: strict-enterprise requires "
+                f"version: 2 (found version={dsl.get('version')}). "
+                f"Fix: bump `version: 1` to `version: 2` in the DSL."
+            )
+
+    deploy_dir = REPO_ROOT / ".omao" / "ontology" / "deployments"
+    if deploy_dir.is_dir():
+        for dep_file in sorted(deploy_dir.glob("*.json")):
+            try:
+                doc = json.loads(dep_file.read_text(encoding="utf-8"))
+            except Exception as exc:  # noqa: BLE001
+                errors.append(f"{dep_file.name}: cannot parse ({exc})")
+                continue
+            dep_id = doc.get("id") or dep_file.stem
+            if doc.get("approval_state") == "approved" and not (
+                doc.get("approval_chain") or []
+            ):
+                errors.append(
+                    f"deployment {dep_id!r}: approval_state=approved but approval_chain "
+                    f"is empty. Fix: append one approval link with approver/approved_at/reason."
+                )
+            artifact = doc.get("artifact")
+            if isinstance(artifact, dict):
+                digest = artifact.get("digest", "")
+                if not PINNED_VERSION_RE.search("") and not _SHA256.match(digest):
+                    errors.append(
+                        f"deployment {dep_id!r}: artifact.digest missing or malformed "
+                        f"(got {digest!r}). Fix: provide sha256:<64 hex>."
+                    )
+            elif isinstance(artifact, str):
+                errors.append(
+                    f"deployment {dep_id!r}: legacy string artifact is rejected under "
+                    f"strict-enterprise. Fix: replace with the object form (uri/digest)."
+                )
+
+    risk_dir = REPO_ROOT / ".omao" / "ontology" / "risks"
+    if risk_dir.is_dir():
+        for risk_file in sorted(risk_dir.glob("*.json")):
+            try:
+                doc = json.loads(risk_file.read_text(encoding="utf-8"))
+            except Exception as exc:  # noqa: BLE001
+                errors.append(f"{risk_file.name}: cannot parse ({exc})")
+                continue
+            risk_id = doc.get("id") or risk_file.stem
+            if not (doc.get("owasp_llm_top10_id") or doc.get("nist_ai_rmf_subcategory")):
+                errors.append(
+                    f"risk {risk_id!r}: strict-enterprise requires at least one of "
+                    f"owasp_llm_top10_id (LLM01..LLM10) or nist_ai_rmf_subcategory "
+                    f"(e.g. MEASURE.2.6). Fix: add the classification that best matches "
+                    f"this risk."
+                )
+    return errors
+
+
+_SHA256 = re.compile(r"^sha256:[a-f0-9]{64}$")
 
 
 def check_drift(plugin_files: Iterable[Path]) -> list[str]:

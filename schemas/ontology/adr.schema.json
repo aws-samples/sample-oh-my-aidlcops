@@ -1,0 +1,64 @@
+{
+  "$id": "https://aws-samples.github.io/sample-oh-my-aidlcops/schemas/ontology/adr.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "ADR",
+  "description": "Architecture Decision Record produced during AIDLC Inception or Construction. ADRs constrain Deployments via the adr_refs backlink.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["id", "status", "title", "context", "decision"],
+  "properties": {
+    "id": {
+      "description": "Zero-padded ADR id. Matches the filename under .omao/plans/adr/.",
+      "type": "string",
+      "pattern": "^adr-[0-9]{4}-[a-z0-9-]+$",
+      "maxLength": 128
+    },
+    "status": {
+      "enum": ["proposed", "accepted", "rejected", "deprecated", "superseded"]
+    },
+    "title": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 200
+    },
+    "context": {
+      "description": "Forces in play at the time of the decision.",
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 5000
+    },
+    "decision": {
+      "description": "The decision taken, stated in the active voice.",
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 5000
+    },
+    "consequences": {
+      "description": "Positive, negative, and neutral consequences of the decision.",
+      "type": "string",
+      "maxLength": 5000
+    },
+    "supersedes": {
+      "type": "string",
+      "pattern": "^adr-[0-9]{4}-[a-z0-9-]+$"
+    },
+    "superseded_by": {
+      "type": "string",
+      "pattern": "^adr-[0-9]{4}-[a-z0-9-]+$"
+    },
+    "decided_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "decided_by": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 128
+    },
+    "related_specs": {
+      "type": "array",
+      "items": { "type": "string", "pattern": "^spec-[a-z0-9-]+$" },
+      "uniqueItems": true
+    }
+  }
+}

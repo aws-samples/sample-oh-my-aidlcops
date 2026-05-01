@@ -1,0 +1,102 @@
+{
+  "$id": "https://aws-samples.github.io/sample-oh-my-aidlcops/schemas/audit/event.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "AuditEvent",
+  "description": "One line of .omao/audit.jsonl. Each record captures who did what to which ontology entity in which AIDLC phase, with optional compliance and tracing links. The JSON-L file is written by skills via the tools.oma_audit.append helper.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["timestamp", "actor", "action", "target", "phase"],
+  "properties": {
+    "timestamp": {
+      "description": "ISO 8601 UTC timestamp. Client-provided; non-repudiation requires layered signing (see docs/compliance/slsa-provenance.md).",
+      "type": "string",
+      "format": "date-time",
+      "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}(\\.[0-9]+)?(Z|[+-][0-9]{2}:[0-9]{2})$"
+    },
+    "actor": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id"],
+      "properties": {
+        "id": {
+          "description": "Stable handle of the human, agent, or automation (email, service-account, agent id).",
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        },
+        "role": {
+          "type": "string",
+          "maxLength": 64
+        }
+      }
+    },
+    "action": {
+      "enum": [
+        "approve",
+        "reject",
+        "deploy",
+        "rollback",
+        "budget-breach",
+        "risk-accept",
+        "policy-deny",
+        "gate-pass",
+        "gate-fail",
+        "spec-submit",
+        "adr-record",
+        "incident-open",
+        "incident-close"
+      ]
+    },
+    "target": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["entity_type", "entity_id"],
+      "properties": {
+        "entity_type": {
+          "enum": ["Agent", "Skill", "Deployment", "Incident", "Budget", "Risk", "Spec", "ADR"]
+        },
+        "entity_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        }
+      }
+    },
+    "phase": {
+      "enum": ["inception", "construction", "operations"]
+    },
+    "compliance": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "nist_ai_rmf": {
+          "type": "string",
+          "pattern": "^(GOVERN|MAP|MEASURE|MANAGE)\\.[0-9]+\\.[0-9]+$"
+        },
+        "owasp_llm": {
+          "enum": [
+            "LLM01", "LLM02", "LLM03", "LLM04", "LLM05",
+            "LLM06", "LLM07", "LLM08", "LLM09", "LLM10"
+          ]
+        },
+        "evidence_uri": {
+          "type": "string",
+          "format": "uri"
+        }
+      }
+    },
+    "reason": {
+      "type": "string",
+      "maxLength": 2000
+    },
+    "trace_id": {
+      "description": "OpenTelemetry trace id (hex). Links the audit event to distributed traces.",
+      "type": "string",
+      "pattern": "^[a-f0-9]{32}$"
+    },
+    "span_id": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{16}$"
+    }
+  }
+}

@@ -1,0 +1,50 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "oh-my-aidlcops"
+version = "0.3.0a0"
+description = "AIDLC x AgenticOps marketplace for Claude Code and Kiro harnesses"
+readme = "README.md"
+requires-python = ">=3.10"
+license = { text = "MIT-0" }
+authors = [{ name = "oh-my-aidlcops contributors" }]
+
+# Runtime dependencies consumed by tools/oma_compile and scripts/oma/*.
+# Pinned to the range that keeps legacy RefResolver working (removed in 5.x).
+dependencies = [
+    "jsonschema>=4.18,<5",
+    "pyyaml>=6.0,<7",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.4,<9",
+]
+
+[project.urls]
+Homepage = "https://github.com/aws-samples/sample-oh-my-aidlcops"
+Documentation = "https://aws-samples.github.io/sample-oh-my-aidlcops/"
+Repository = "https://github.com/aws-samples/sample-oh-my-aidlcops"
+
+[tool.setuptools]
+# OMA is primarily a plugin marketplace. Importable Python modules:
+#   - tools.oma_compile  : DSL -> native file compiler
+#   - tools.oma_audit    : validated audit.jsonl append helper (v0.4+)
+# Everything else ships via scripts/.
+packages = ["tools", "tools.oma_compile", "tools.oma_audit"]
+
+[tool.setuptools.package-dir]
+"" = "."
+
+[tool.pytest.ini_options]
+minversion = "7.4"
+testpaths = ["tests"]
+# jsonschema 4.18 deprecated RefResolver; surface the warning in tests but do
+# not fail on it. Proper migration to referencing.Registry is tracked as
+# future work.
+filterwarnings = [
+    "ignore::DeprecationWarning:jsonschema",
+    "ignore::DeprecationWarning:jsonschema._utils",
+]
