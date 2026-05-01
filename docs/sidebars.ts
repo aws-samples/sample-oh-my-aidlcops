@@ -59,6 +59,7 @@ const sidebars: SidebarsConfig = {
       items: [
         'support-policy',
         'telemetry',
+        'releases-pipeline',
       ],
     },
     {
