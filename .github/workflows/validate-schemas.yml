@@ -29,4 +29,4 @@ jobs:
 
       - name: Validate all schemas
         run: |
-          python scripts/validate.py
+          python scripts/dev/validate.py
