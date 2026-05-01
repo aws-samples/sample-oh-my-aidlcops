@@ -326,9 +326,10 @@ def enforce_strict_enterprise(plugin_files: Iterable[Path]) -> list[str]:
         dsl = _load_dsl(dsl_path)
         if dsl.get("version") != 2:
             errors.append(
-                f"{dsl_path.relative_to(REPO_ROOT)}: strict-enterprise requires "
-                f"version: 2 (found version={dsl.get('version')}). "
-                f"Fix: bump `version: 1` to `version: 2` in the DSL."
+                ERR_V1_REJECTED.format(
+                    path=dsl_path.relative_to(REPO_ROOT),
+                    version=dsl.get("version")
+                )
             )
 
     deploy_dir = REPO_ROOT / ".omao" / "ontology" / "deployments"
@@ -343,23 +344,16 @@ def enforce_strict_enterprise(plugin_files: Iterable[Path]) -> list[str]:
             if doc.get("approval_state") == "approved" and not (
                 doc.get("approval_chain") or []
             ):
-                errors.append(
-                    f"deployment {dep_id!r}: approval_state=approved but approval_chain "
-                    f"is empty. Fix: append one approval link with approver/approved_at/reason."
-                )
+                errors.append(ERR_APPROVAL_CHAIN_EMPTY.format(dep_id=dep_id))
             artifact = doc.get("artifact")
             if isinstance(artifact, dict):
                 digest = artifact.get("digest", "")
                 if not PINNED_VERSION_RE.search("") and not _SHA256.match(digest):
                     errors.append(
-                        f"deployment {dep_id!r}: artifact.digest missing or malformed "
-                        f"(got {digest!r}). Fix: provide sha256:<64 hex>."
+                        ERR_ARTIFACT_DIGEST.format(dep_id=dep_id, digest=digest)
                     )
             elif isinstance(artifact, str):
-                errors.append(
-                    f"deployment {dep_id!r}: legacy string artifact is rejected under "
-                    f"strict-enterprise. Fix: replace with the object form (uri/digest)."
-                )
+                errors.append(ERR_ARTIFACT_LEGACY_STRING.format(dep_id=dep_id))
 
     risk_dir = REPO_ROOT / ".omao" / "ontology" / "risks"
     if risk_dir.is_dir():
@@ -371,16 +365,38 @@ def enforce_strict_enterprise(plugin_files: Iterable[Path]) -> list[str]:
                 continue
             risk_id = doc.get("id") or risk_file.stem
             if not (doc.get("owasp_llm_top10_id") or doc.get("nist_ai_rmf_subcategory")):
-                errors.append(
-                    f"risk {risk_id!r}: strict-enterprise requires at least one of "
-                    f"owasp_llm_top10_id (LLM01..LLM10) or nist_ai_rmf_subcategory "
-                    f"(e.g. MEASURE.2.6). Fix: add the classification that best matches "
-                    f"this risk."
-                )
+                errors.append(ERR_RISK_MISSING_CLASSIFICATION.format(risk_id=risk_id))
     return errors
 
 
 _SHA256 = re.compile(r"^sha256:[a-f0-9]{64}$")
+
+# Strict-enterprise error message templates.
+# These are user-visible strings that downstream scripts may grep/alert on.
+# If you need to change the wording, update tests/harness/test_strict_enterprise_snapshots.py
+# in the same commit and bump SNAPSHOT_VERSION.
+ERR_V1_REJECTED = (
+    "{path}: strict-enterprise requires version: 2 (found version={version}). "
+    "Fix: bump `version: 1` to `version: 2` in the DSL."
+)
+ERR_APPROVAL_CHAIN_EMPTY = (
+    "deployment {dep_id!r}: approval_state=approved but approval_chain "
+    "is empty. Fix: append one approval link with approver/approved_at/reason."
+)
+ERR_ARTIFACT_DIGEST = (
+    "deployment {dep_id!r}: artifact.digest missing or malformed "
+    "(got {digest!r}). Fix: provide sha256:<64 hex>."
+)
+ERR_ARTIFACT_LEGACY_STRING = (
+    "deployment {dep_id!r}: legacy string artifact is rejected under "
+    "strict-enterprise. Fix: replace with the object form (uri/digest)."
+)
+ERR_RISK_MISSING_CLASSIFICATION = (
+    "risk {risk_id!r}: strict-enterprise requires at least one of "
+    "owasp_llm_top10_id (LLM01..LLM10) or nist_ai_rmf_subcategory "
+    "(e.g. MEASURE.2.6). Fix: add the classification that best matches "
+    "this risk."
+)
 
 
 def check_drift(plugin_files: Iterable[Path]) -> list[str]:
