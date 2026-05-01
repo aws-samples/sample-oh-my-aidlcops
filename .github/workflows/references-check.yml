@@ -1,0 +1,35 @@
+name: References Check
+
+# Live HTTP verification for every URL in REFERENCES.md. Runs weekly
+# plus on demand via workflow_dispatch. Does NOT gate PRs — lychee
+# covers that lane for *.md across the tree. This workflow is the
+# narrower, more aggressive check against the single reference catalogue.
+
+permissions:
+  contents: read
+
+on:
+  schedule:
+    - cron: '0 9 * * 1'  # Every Monday at 09:00 UTC, matches link-check.
+  workflow_dispatch: {}
+  push:
+    branches: [main]
+    paths:
+      - 'REFERENCES.md'
+      - 'scripts/dev/check-references.py'
+      - '.github/workflows/references-check.yml'
+
+jobs:
+  check:
+    name: verify every REFERENCES.md url
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Run reference HTTP check
+        run: |
+          python scripts/dev/check-references.py --skip-own-pages
