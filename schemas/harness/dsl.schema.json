@@ -33,12 +33,19 @@
       "additionalProperties": { "$ref": "#/definitions/workflow" }
     },
     "telemetry": {
-      "description": "(v2 only) OpenTelemetry Collector wiring reserved for v0.4. Accepted as a free-form object in v0.3b so DSL files that populate it now do not regress later.",
-      "type": "object"
+      "description": "(v2 only) OpenTelemetry Collector wiring. Consumers (autopilot, agenticops) emit spans/metrics/logs to these endpoints; the compiler only validates the shape.",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "traces": { "$ref": "#/definitions/telemetryTraces" },
+        "metrics": { "$ref": "#/definitions/telemetryMetrics" },
+        "logs": { "$ref": "#/definitions/telemetryLogs" }
+      }
     },
     "policies": {
-      "description": "(v2 only) Policy-as-code references (OPA/Rego) reserved for v0.4. Accepted as a free-form array in v0.3b.",
-      "type": "array"
+      "description": "(v2 only) Policy-as-code references. Each entry points to a Rego file the compiler checks for existence; OPA is shelled out by scripts/oma/validate.sh at evaluation time.",
+      "type": "array",
+      "items": { "$ref": "#/definitions/policyRef" }
     },
     "plugin": {
       "description": "Plugin id. Must match the directory name under plugins/.",
@@ -82,88 +89,6 @@
     }
   ],
   "definitions": {
-    "workflow": {
-      "description": "(v2 only) A named DAG of steps referencing declared agents or skills.",
-      "type": "object",
-      "additionalProperties": false,
-      "required": ["steps"],
-      "properties": {
-        "description": { "type": "string", "maxLength": 500 },
-        "steps": {
-          "type": "array",
-          "minItems": 1,
-          "items": { "$ref": "#/definitions/workflowStep" }
-        }
-      }
-    },
-    "workflowStep": {
-      "type": "object",
-      "additionalProperties": false,
-      "required": ["id"],
-      "properties": {
-        "id": {
-          "type": "string",
-          "pattern": "^[a-z][a-z0-9-]*$",
-          "maxLength": 64
-        },
-        "agent_ref": {
-          "description": "Id of an agent declared at agents[].id.",
-          "type": "string",
-          "pattern": "^[a-z][a-z0-9-]*$"
-        },
-        "skill_ref": {
-          "description": "Id of a skill (resolved by the harness; not validated against the plugin file alone).",
-          "type": "string",
-          "pattern": "^[a-z][a-z0-9-]*$"
-        },
-        "depends_on": {
-          "description": "Step ids in the same workflow that must complete first.",
-          "type": "array",
-          "items": { "type": "string", "pattern": "^[a-z][a-z0-9-]*$" },
-          "uniqueItems": true
-        },
-        "on_failure": {
-          "description": "How the harness should react if this step fails.",
-          "enum": ["fail", "rollback", "continue"]
-        }
-      }
-    },
-    "trigger": {
-      "description": "Keyword trigger descriptor compiled into .omao/triggers.json. The workspace hook hooks/user-prompt-submit.sh reads the emitted file to decide whether to surface a Tier-0 command suggestion.",
-      "type": "object",
-      "additionalProperties": false,
-      "required": ["id", "keywords", "command"],
-      "properties": {
-        "id": {
-          "description": "Stable identifier used in hook logs.",
-          "type": "string",
-          "pattern": "^[a-z][a-z0-9-]*$",
-          "maxLength": 64
-        },
-        "keywords": {
-          "description": "Case-insensitive keywords or multi-word phrases. Any single match (with word boundaries for single tokens, substring for multi-word) fires the trigger.",
-          "type": "array",
-          "items": { "type": "string", "minLength": 1, "maxLength": 64 },
-          "minItems": 1,
-          "uniqueItems": true
-        },
-        "context_required": {
-          "description": "Optional additional substrings that must all appear in the user's prompt before the trigger fires. Skipped when the user invokes an explicit slash command.",
-          "type": "array",
-          "items": { "type": "string", "minLength": 1, "maxLength": 64 }
-        },
-        "command": {
-          "description": "Slash command or skill id the keyword resolves to.",
-          "type": "string",
-          "minLength": 1
-        },
-        "description": {
-          "description": "Human-readable one-liner surfaced to the agent when the trigger fires.",
-          "type": "string",
-          "maxLength": 200
-        }
-      }
-    },
     "agent": {
       "type": "object",
       "additionalProperties": false,
@@ -269,6 +194,152 @@
         "timeout_ms": {
           "type": "integer",
           "minimum": 1000
+        }
+      }
+    },
+    "telemetryTraces": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["endpoint"],
+      "properties": {
+        "endpoint": { "type": "string", "format": "uri" },
+        "protocol": { "enum": ["grpc", "http/protobuf"], "default": "grpc" },
+        "sampler": {
+          "enum": ["always_on", "always_off", "parentbased_traceidratio"],
+          "default": "parentbased_traceidratio"
+        },
+        "sampler_ratio": {
+          "type": "number",
+          "minimum": 0.0,
+          "maximum": 1.0
+        }
+      }
+    },
+    "telemetryMetrics": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["endpoint"],
+      "properties": {
+        "endpoint": { "type": "string", "format": "uri" },
+        "interval_seconds": { "type": "integer", "minimum": 10 }
+      }
+    },
+    "telemetryLogs": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["endpoint"],
+      "properties": {
+        "endpoint": { "type": "string", "format": "uri" },
+        "level": { "enum": ["debug", "info", "warn", "error"], "default": "info" }
+      }
+    },
+    "policyRef": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "rego_ref"],
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9-]*$",
+          "maxLength": 64
+        },
+        "rego_ref": {
+          "description": "Path to a .rego file relative to the repository root. Compiler verifies existence.",
+          "type": "string",
+          "pattern": "\\.rego$"
+        },
+        "severity": {
+          "enum": ["advisory", "warning", "blocking"],
+          "default": "blocking"
+        },
+        "phase": {
+          "type": "array",
+          "items": { "enum": ["inception", "construction", "operations"] },
+          "minItems": 1,
+          "uniqueItems": true
+        },
+        "description": { "type": "string", "maxLength": 500 }
+      }
+    },
+    "workflow": {
+      "description": "(v2 only) A named DAG of steps referencing declared agents or skills.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["steps"],
+      "properties": {
+        "description": { "type": "string", "maxLength": 500 },
+        "steps": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "$ref": "#/definitions/workflowStep" }
+        }
+      }
+    },
+    "workflowStep": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id"],
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9-]*$",
+          "maxLength": 64
+        },
+        "agent_ref": {
+          "description": "Id of an agent declared at agents[].id.",
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9-]*$"
+        },
+        "skill_ref": {
+          "description": "Id of a skill (resolved by the harness; not validated against the plugin file alone).",
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9-]*$"
+        },
+        "depends_on": {
+          "description": "Step ids in the same workflow that must complete first.",
+          "type": "array",
+          "items": { "type": "string", "pattern": "^[a-z][a-z0-9-]*$" },
+          "uniqueItems": true
+        },
+        "on_failure": {
+          "description": "How the harness should react if this step fails.",
+          "enum": ["fail", "rollback", "continue"]
+        }
+      }
+    },
+    "trigger": {
+      "description": "Keyword trigger descriptor compiled into .omao/triggers.json. The workspace hook hooks/user-prompt-submit.sh reads the emitted file to decide whether to surface a Tier-0 command suggestion.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "keywords", "command"],
+      "properties": {
+        "id": {
+          "description": "Stable identifier used in hook logs.",
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9-]*$",
+          "maxLength": 64
+        },
+        "keywords": {
+          "description": "Case-insensitive keywords or multi-word phrases. Any single match (with word boundaries for single tokens, substring for multi-word) fires the trigger.",
+          "type": "array",
+          "items": { "type": "string", "minLength": 1, "maxLength": 64 },
+          "minItems": 1,
+          "uniqueItems": true
+        },
+        "context_required": {
+          "description": "Optional additional substrings that must all appear in the user's prompt before the trigger fires. Skipped when the user invokes an explicit slash command.",
+          "type": "array",
+          "items": { "type": "string", "minLength": 1, "maxLength": 64 }
+        },
+        "command": {
+          "description": "Slash command or skill id the keyword resolves to.",
+          "type": "string",
+          "minLength": 1
+        },
+        "description": {
+          "description": "Human-readable one-liner surfaced to the agent when the trigger fires.",
+          "type": "string",
+          "maxLength": 200
         }
       }
     }

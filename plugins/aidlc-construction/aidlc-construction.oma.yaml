@@ -1,0 +1,28 @@
+# OMA Harness DSL for the aidlc-construction plugin (v0.5 DSL v2 migration).
+#
+# aidlc-construction extends awslabs/aidlc-workflows for AIDLC Phase 2
+# (Construction) with component design, code generation, and the
+# TDD-for-agentic test strategy. Consumes Phase 1 artefacts from
+# aidlc-inception.
+
+version: 2
+plugin: aidlc-construction
+
+metadata:
+  labels:
+    aidlc-phase: construction
+
+mcp: {}
+agents: []
+
+triggers:
+  - id: construction
+    keywords: ["construction"]
+    context_required: []
+    command: /oma:construction
+    description: "Run AIDLC Phase 2 only (component design, codegen, agentic TDD)."
+  - id: aidlc-loop
+    keywords: ["aidlc"]
+    context_required: ["feature", "story", "ticket"]
+    command: /oma:aidlc-loop
+    description: "Run a single-feature AIDLC Inception->Construction pass."
