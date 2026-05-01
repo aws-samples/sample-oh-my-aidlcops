@@ -1,4 +1,4 @@
-"""Round-trip test for the agentic-platform DSL.
+"""Round-trip test for the ai-infra DSL.
 
 Compiles the DSL into a temp directory and compares the emitted output to
 the committed .mcp.json / kiro-agents/*.agent.json. A failure here means
@@ -15,13 +15,13 @@ import pytest
 from tools.oma_compile import compile_plugin
 from tools.oma_compile.compile import REPO_ROOT
 
-DSL = REPO_ROOT / "plugins" / "agentic-platform" / "agentic-platform.oma.yaml"
-MCP = REPO_ROOT / "plugins" / "agentic-platform" / ".mcp.json"
-AGENT = REPO_ROOT / "plugins" / "agentic-platform" / "kiro-agents" / "agentic-platform.agent.json"
+DSL = REPO_ROOT / "plugins" / "ai-infra" / "ai-infra.oma.yaml"
+MCP = REPO_ROOT / "plugins" / "ai-infra" / ".mcp.json"
+AGENT = REPO_ROOT / "plugins" / "ai-infra" / "kiro-agents" / "ai-infra.agent.json"
 
 
-@pytest.mark.skipif(not DSL.exists(), reason="agentic-platform DSL not yet migrated")
-def test_agentic_platform_round_trip():
+@pytest.mark.skipif(not DSL.exists(), reason="ai-infra DSL not yet migrated")
+def test_ai_infra_round_trip():
     """Compile the DSL in memory (write=False) and compare to committed files.
 
     We purposely do not copy to tmp: the DSL references hook scripts via
@@ -40,9 +40,9 @@ def test_agentic_platform_round_trip():
     assert expected_mcp == committed_mcp, "DSL output diverged from committed .mcp.json"
 
     kiro_agents = [a for a in dsl.get("agents") or [] if a.get("runtime") == "kiro"]
-    assert kiro_agents, "agentic-platform DSL must declare at least one Kiro agent"
+    assert kiro_agents, "ai-infra DSL must declare at least one Kiro agent"
     expected_agent = _build_agent_json(dsl, kiro_agents[0])
     committed_agent = json.loads(AGENT.read_text(encoding="utf-8"))
     assert expected_agent == committed_agent, "DSL output diverged from committed agent.json"
 
-    assert result.plugin == "agentic-platform"
+    assert result.plugin == "ai-infra"

@@ -21,7 +21,7 @@ def _write(root: Path, dsl: dict) -> Path:
     return out
 
 
-def _base(plugin: str = "agentic-platform") -> dict:
+def _base(plugin: str = "ai-infra") -> dict:
     return {
         "version": 2,
         "plugin": plugin,

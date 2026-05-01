@@ -54,14 +54,14 @@ def test_passes_on_v2_repo():
 
 
 def test_rejects_deployment_without_approval_chain(tmp_path, monkeypatch):
-    plugin_dir = tmp_path / "plugins" / "agentic-platform"
+    plugin_dir = tmp_path / "plugins" / "ai-infra"
     plugin_dir.mkdir(parents=True)
     dsl = {
         "version": 2,
-        "plugin": "agentic-platform",
+        "plugin": "ai-infra",
         "mcp": {"eks": {"command": "uvx", "args": ["awslabs.eks-mcp-server==0.1.28"]}},
     }
-    dsl_path = plugin_dir / "agentic-platform.oma.yaml"
+    dsl_path = plugin_dir / "ai-infra.oma.yaml"
     dsl_path.write_text(yaml.safe_dump(dsl, sort_keys=False), encoding="utf-8")
 
     deploy_dir = tmp_path / ".omao" / "ontology" / "deployments"
@@ -83,12 +83,12 @@ def test_rejects_deployment_without_approval_chain(tmp_path, monkeypatch):
 
 
 def test_rejects_risk_without_classification(tmp_path, monkeypatch):
-    plugin_dir = tmp_path / "plugins" / "agentic-platform"
+    plugin_dir = tmp_path / "plugins" / "ai-infra"
     plugin_dir.mkdir(parents=True)
-    (plugin_dir / "agentic-platform.oma.yaml").write_text(
+    (plugin_dir / "ai-infra.oma.yaml").write_text(
         yaml.safe_dump({
             "version": 2,
-            "plugin": "agentic-platform",
+            "plugin": "ai-infra",
             "mcp": {"eks": {"command": "uvx", "args": ["awslabs.eks-mcp-server==0.1.28"]}},
         }, sort_keys=False),
         encoding="utf-8",
@@ -105,7 +105,7 @@ def test_rejects_risk_without_classification(tmp_path, monkeypatch):
         encoding="utf-8",
     )
     monkeypatch.setattr("tools.oma_compile.compile.REPO_ROOT", tmp_path)
-    dsl_path = plugin_dir / "agentic-platform.oma.yaml"
+    dsl_path = plugin_dir / "ai-infra.oma.yaml"
     errors = enforce_strict_enterprise([dsl_path])
     assert any("legacy-oracle" in e for e in errors), errors
     assert any("owasp_llm_top10_id" in e for e in errors), errors

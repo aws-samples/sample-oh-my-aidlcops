@@ -20,7 +20,7 @@ import pytest
 
 MINI_DSL = {
     "version": 1,
-    "plugin": "agentic-platform",
+    "plugin": "ai-infra",
     "agents": [
         {
             "id": "platform-architect",
@@ -113,7 +113,7 @@ def test_undeclared_mcp_rejected(tmp_path):
 
 MINI_DSL_V2 = {
     "version": 2,
-    "plugin": "agentic-platform",
+    "plugin": "ai-infra",
     "metadata": {"labels": {"aidlc-phase": "construction"}},
     "agents": [
         {
@@ -174,7 +174,7 @@ def test_workspace_merges_triggers(tmp_path):
     assert first["id"] == "platform-bootstrap"
     assert first["keywords"] == ["platform-bootstrap", "eks-agentic"]
     assert first["command"] == "/oma:platform-bootstrap"
-    assert first["plugin"] == "agentic-platform"
+    assert first["plugin"] == "ai-infra"
     # context_required defaults to empty list and description passes through.
     assert first["context_required"] == []
     assert first["description"] == "Bootstrap the platform."

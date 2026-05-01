@@ -89,8 +89,8 @@ def test_opa_absent_fallback_is_non_fatal(tmp_path, monkeypatch):
         "approval_state": "approved",
     }
     path = _write_deployment(tmp_path, doc)
-    result = _run([str(path), "--plugin", "agentic-platform"])
-    # agentic-platform has no policies[] today, so the script exits 0
+    result = _run([str(path), "--plugin", "ai-infra"])
+    # ai-infra has no policies[] today, so the script exits 0
     # without even reaching the opa-absent branch. That is the expected
     # behaviour when no policies are declared.
     assert result.returncode == 0, result.stderr
