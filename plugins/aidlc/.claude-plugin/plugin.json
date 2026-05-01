@@ -1,7 +1,7 @@
 {
   "$schema": "../../../schemas/plugin.schema.json",
-  "name": "aidlc-inception",
-  "description": "AIDLC Phase 1 (Inception) opt-in extensions for awslabs/aidlc-workflows. Covers workspace detection (greenfield vs brownfield), adaptive-depth requirements analysis, conditional user stories, and workflow planning. Contributes only skills and extension rules; does not re-implement aidlc-workflows core.",
+  "name": "aidlc",
+  "description": "AIDLC Phase 1 (Inception) + Phase 2 (Construction) opt-in extensions for awslabs/aidlc-workflows. Inception covers workspace detection (greenfield vs brownfield), adaptive-depth requirements analysis, conditional user stories, and workflow planning. Construction covers component design, code generation with human-gated review, TDD-for-agentic test strategy, 12-category risk discovery, and phase quality gates. Contributes only skills and extension rules; does not re-implement aidlc-workflows core.",
   "version": "0.1.0",
   "author": {
     "name": "aws-samples"
@@ -9,9 +9,16 @@
   "keywords": [
     "aidlc",
     "inception",
+    "construction",
     "requirements",
     "user-stories",
     "workflow-planning",
+    "component-design",
+    "code-generation",
+    "tdd",
+    "agentic-testing",
+    "risk-discovery",
+    "quality-gates",
     "awslabs-aidlc"
   ],
   "license": "Apache-2.0",
