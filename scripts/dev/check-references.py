@@ -25,7 +25,7 @@ from pathlib import Path
 from typing import Iterable
 
 ACCEPTED_STATUS = {200, 201, 203, 204, 301, 302, 303, 307, 308, 429}
-URL_PATTERN = re.compile(r"https?://[^\s\)<>\]\"']+", re.IGNORECASE)
+URL_PATTERN = re.compile(r"https?://[^\s\)<>\]\"'`]+", re.IGNORECASE)
 DEFAULT_TIMEOUT = 15  # seconds
 USER_AGENT = "oma-references-check/1.0 (+https://github.com/aws-samples/sample-oh-my-aidlcops)"
 
@@ -37,7 +37,11 @@ def extract_urls(path: Path) -> list[str]:
     for raw in URL_PATTERN.findall(text):
         # Strip trailing punctuation markdown adds (`.` / `,` / `;`).
         url = raw.rstrip(".,;:!?")
-        # Skip anchor-only fragments that belong to this repo's own pages.
+        # Skip bare protocol strings ("https://" alone in prose) that
+        # carry no host — they match the pattern but are not URLs.
+        host = url.split("://", 1)[1] if "://" in url else ""
+        if not host:
+            continue
         if url in seen:
             continue
         seen.add(url)
@@ -54,8 +58,11 @@ def probe(url: str, timeout: int = DEFAULT_TIMEOUT) -> tuple[int, str]:
             with urllib.request.urlopen(req, timeout=timeout, context=ctx) as resp:
                 return resp.status, f"{method} {resp.status}"
         except urllib.error.HTTPError as exc:
-            # Some servers reject HEAD with 405 or 403 but accept GET.
-            if method == "HEAD" and exc.code in (403, 405, 501):
+            # Some servers reject HEAD with 403/405/501 but accept GET.
+            # Some CDNs (nvlpubs.nist.gov among them) return HEAD 404 for
+            # PDFs that are perfectly reachable via GET — so we fall back
+            # to GET on 404 as well and let the second attempt decide.
+            if method == "HEAD" and exc.code in (403, 404, 405, 501):
                 continue
             return exc.code, f"{method} {exc.code} {exc.reason}"
         except urllib.error.URLError as exc:
