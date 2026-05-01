@@ -14,7 +14,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Setup Python 3.11
         uses: actions/setup-python@v5
@@ -38,7 +38,7 @@ jobs:
         harness: [claude-code, kiro]
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Syntax check install script for ${{ matrix.harness }}
         run: |
