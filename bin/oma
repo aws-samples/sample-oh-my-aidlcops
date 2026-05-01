@@ -59,6 +59,8 @@ Subcommands:
     validate    Validate a Deployment YAML against the ontology + active OPA policies.
     run-workflow Resolve and print workflow DAG execution plan (stub: no invocation yet).
     status      Read .omao/profile.yaml and summarize active mode, budgets, last doctor.
+    enterprise-status
+                Summarize enterprise readiness: probe results + phased-adoption stage counters.
     where       Print the OMA install root and key subdirectories.
     upgrade     git pull + re-run setup --migrate (clone installs only).
     uninstall   Reverse symlinks and surgically remove OMA entries from ~/.claude/settings.json.
