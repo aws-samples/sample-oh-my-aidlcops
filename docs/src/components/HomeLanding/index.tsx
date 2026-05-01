@@ -1,7 +1,124 @@
-import React from 'react';
+import React, { useState } from 'react';
 import Link from '@docusaurus/Link';
 import useBaseUrl from '@docusaurus/useBaseUrl';
 import styles from './styles.module.css';
+
+type Plugin = {
+  name: string;
+  tagline: string;
+  scope: string;
+  skills: string;
+};
+
+const PLUGINS: Plugin[] = [
+  {
+    name: 'ai-infra',
+    tagline: 'Build the runtime.',
+    scope:
+      'AI runtime infrastructure on AWS. Ships EKS + vLLM + Inference Gateway + Langfuse + GPU + guardrails today; Bedrock / SageMaker runtime skills planned. MCP servers pinned to exact PyPI versions — no @latest.',
+    skills:
+      'agentic-eks-bootstrap · vllm-serving-setup · inference-gateway-routing · langfuse-observability · gpu-resource-management · ai-gateway-guardrails',
+  },
+  {
+    name: 'aidlc',
+    tagline: 'Design and build with a spec.',
+    scope:
+      'AIDLC Phase 1 (Inception) + Phase 2 (Construction) opt-in extensions for awslabs/aidlc-workflows. Inception captures workspace, requirements, stories, and the workflow plan. Construction turns that plan into components, code, tests, and risk-discovered quality gates.',
+    skills:
+      'workspace-detection · requirements-analysis · user-stories · workflow-planning · component-design · code-generation · test-strategy · risk-discovery · quality-gates',
+  },
+  {
+    name: 'agenticops',
+    tagline: 'Operate with agents.',
+    scope:
+      'Autonomous operations for production agentic workloads. Incident response, self-improving feedback loops, progressive rollouts with SLO circuit breakers, cost governance with a simpleeval sandbox, and verbatim audit trails.',
+    skills:
+      'self-improving-loop · autopilot-deploy · incident-response · continuous-eval · cost-governance · audit-trail',
+  },
+  {
+    name: 'modernization',
+    tagline: 'Lift legacy onto AWS.',
+    scope:
+      'Brownfield legacy workload modernization using the AWS 6R strategy. Workload assessment with Five Lenses, 6R decision matrix, to-be architecture, containerization hardening, and production cutover planning with rollback triggers.',
+    skills:
+      'workload-assessment · modernization-strategy · to-be-architecture · containerization · cutover-planning',
+  },
+];
+
+type Workflow = {
+  keyword: string;
+  command: string;
+  scope: string;
+};
+
+const WORKFLOWS: Workflow[] = [
+  {
+    keyword: 'autopilot',
+    command: '/oma:autopilot',
+    scope: 'Full AIDLC loop (Inception → Construction → Operations).',
+  },
+  {
+    keyword: 'aidlc-loop',
+    command: '/oma:aidlc-loop',
+    scope: 'Single-feature Inception → Construction pass.',
+  },
+  {
+    keyword: 'inception',
+    command: '/oma:inception',
+    scope: 'AIDLC Phase 1 only — spec, stories, workflow plan.',
+  },
+  {
+    keyword: 'construction',
+    command: '/oma:construction',
+    scope: 'AIDLC Phase 2 only — design, codegen, agentic TDD.',
+  },
+  {
+    keyword: 'agenticops',
+    command: '/oma:agenticops',
+    scope: 'Operations mode: continuous-eval + incident-response + cost-governance.',
+  },
+  {
+    keyword: 'self-improving',
+    command: '/oma:self-improving',
+    scope: 'Langfuse traces → prompt / skill improvement PR.',
+  },
+  {
+    keyword: 'platform-bootstrap',
+    command: '/oma:platform-bootstrap',
+    scope: '5-checkpoint Agentic AI Platform bootstrap on EKS.',
+  },
+  {
+    keyword: 'modernize',
+    command: '/oma:modernize',
+    scope: '6-stage brownfield modernization (assessment → cutover).',
+  },
+  {
+    keyword: 'cancel',
+    command: '/oma:cancel',
+    scope: 'Terminate the active Tier-0 mode.',
+  },
+];
+
+const SUPERPOWERS = [
+  {
+    num: '01',
+    title: 'One command, entire lifecycle.',
+    body:
+      'Spec → design → code → canary deploy → self-healing → cost attribution. /oma:autopilot drives the whole loop and pauses only at explicit approval checkpoints.',
+  },
+  {
+    num: '02',
+    title: 'Self-improving from production traces.',
+    body:
+      'Langfuse traces feed /oma:self-improving. Failure patterns become draft PRs against the skills and prompts that produced them — regression tests run before the PR is opened.',
+  },
+  {
+    num: '03',
+    title: 'Humans approve. Agents execute.',
+    body:
+      'Every Tier-0 workflow sandwiches agent-driven diagnosis, proposal, and execution between explicit human gates. The agent never silently mutates production.',
+  },
+];
 
 type Capability = {
   title: string;
@@ -43,44 +160,11 @@ const CAPABILITIES: Capability[] = [
     variant: 'terminal',
     code: [
       '> /plugin marketplace add https://github.com/aws-samples/sample-oh-my-aidlcops',
-      '> /plugin install agentic-platform agenticops modernization',
+      '> /plugin install ai-infra agenticops aidlc modernization',
       '> /oma:platform-bootstrap',
       '  [1/5] Gather Context  …  ok',
       '  [2/5] Pre-flight      …  ok',
     ],
-  },
-];
-
-const PLUGINS = [
-  {
-    name: 'agentic-platform',
-    tagline: 'Build the platform',
-    body:
-      'EKS + vLLM + Inference Gateway + Langfuse. Skills for bootstrap, GPU planning, routing, observability, and guardrails. MCP servers pinned to exact PyPI versions — no @latest.',
-  },
-  {
-    name: 'agenticops',
-    tagline: 'Operate with agents',
-    body:
-      'self-improving-loop, autopilot-deploy, incident-response, continuous-eval, cost-governance, audit-trail. Humans approve, agents execute.',
-  },
-  {
-    name: 'aidlc-inception',
-    tagline: 'Phase 1 — intent',
-    body:
-      'structured-intake, requirements-analysis, user-stories, workflow-planning. Produces the artifacts Construction consumes as a single source of truth.',
-  },
-  {
-    name: 'aidlc-construction',
-    tagline: 'Phase 2 — build',
-    body:
-      'component-design, code-generation, test-strategy, risk-discovery, quality-gates. LLM calls are mocked in tests; golden evals gate every merge.',
-  },
-  {
-    name: 'modernization',
-    tagline: 'Legacy → AWS',
-    body:
-      'workload-assessment, modernization-strategy (6R), to-be-architecture, containerization, cutover-planning. Uses Kiro-style stage-gated progression.',
   },
 ];
 
@@ -102,6 +186,29 @@ const INTEGRATIONS = [
     icon: 'layers',
     body:
       'Tier-0 mode, project memory, and audit logs live in .omao/. Both harnesses read and write the same directory — switch without losing context.',
+  },
+];
+
+const FAQ = [
+  {
+    q: 'What does "Tech Preview" mean for this repo?',
+    a: 'profile.yaml v1 and the 8 ontology schemas are stable; CLI surfaces and the doctor report shape may still evolve before GA. Breaking changes land in CHANGELOG under an explicit "Breaking" heading. See the support policy for the full stability contract.',
+  },
+  {
+    q: 'Do I have to use both Claude Code and Kiro?',
+    a: 'No. Pick one. The plugin directory, skills, and MCP server pinning are identical across harnesses; only the install script differs. The .omao/ state directory is harness-agnostic, so you can switch later without losing work.',
+  },
+  {
+    q: 'What AWS permissions do I need to run the default workflows?',
+    a: 'The EKS MCP server runs read-only by default (no --allow-write). /oma:platform-bootstrap needs eks:*, ec2:*, and iam:CreateRole against your cluster account. /oma:agenticops reads CloudWatch, Prometheus, and Cost Explorer. No credentials are collected or sent anywhere beyond your shell.',
+  },
+  {
+    q: 'How does OMA relate to awslabs/aidlc-workflows?',
+    a: 'OMA consumes aidlc-workflows as the core AIDLC spec and contributes only *.opt-in.md extension files into it. We do not fork the core workflow. scripts/install/aidlc-extensions.sh clones it at runtime and symlinks our opt-in overlays.',
+  },
+  {
+    q: 'What happens to cost when I turn on /oma:agenticops?',
+    a: 'cost-governance attributes spend per agent and enforces a monthly ceiling via Budget.action_on_breach. When the ceiling is in reach it drafts model-downgrade PRs (Opus → Sonnet → Haiku) and vetoes deploys until approved. No autonomous scaling happens without an explicit approval chain.',
   },
 ];
 
@@ -166,6 +273,44 @@ const Icon = ({ name }: { name: string }) => {
   }
 };
 
+const Faq = ({ items }: { items: typeof FAQ }) => {
+  const [openIndex, setOpenIndex] = useState<number | null>(0);
+  return (
+    <ul className={styles.faqList}>
+      {items.map((item, idx) => {
+        const open = openIndex === idx;
+        return (
+          <li key={item.q} className={`${styles.faqItem} ${open ? styles.faqItemOpen : ''}`}>
+            <button
+              type="button"
+              className={styles.faqTrigger}
+              aria-expanded={open}
+              onClick={() => setOpenIndex(open ? null : idx)}
+            >
+              <span>{item.q}</span>
+              <svg
+                viewBox="0 0 24 24"
+                width="18"
+                height="18"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                className={styles.faqChevron}
+                aria-hidden="true"
+              >
+                <path d="M6 9l6 6 6-6" />
+              </svg>
+            </button>
+            {open && <p className={styles.faqAnswer}>{item.a}</p>}
+          </li>
+        );
+      })}
+    </ul>
+  );
+};
+
 export default function HomeLanding(): React.ReactElement {
   return (
     <div className={styles.wrapper}>
@@ -175,27 +320,28 @@ export default function HomeLanding(): React.ReactElement {
           <div className={styles.heroCopy}>
             <div className={styles.eyebrow}>
               <span className={styles.eyebrowDot} aria-hidden="true" />
-              aws-samples · AgenticOps
+              aws-samples · AIDLC × AgenticOps
             </div>
             <div className={styles.previewBadge} role="note">
               <span className={styles.previewBadgeLabel}>Tech Preview</span>
               <span className={styles.previewBadgeText}>
-                v0.2.0-preview.1 — API may change before GA. See the{' '}
+                v0.3.0-preview.1 — API may change before GA. See the{' '}
                 <Link to={useBaseUrl('/docs/support-policy')}>support policy</Link>.
               </span>
             </div>
             <h1 className={styles.heroTitle}>
-              Autonomous operations<br />
-              for the <span className={styles.accent}>AWS&nbsp;AIDLC</span> loop.
+              The AIDLC operations gap<br />
+              is still <span className={styles.accent}>human glue.</span>
             </h1>
             <p className={styles.heroLede}>
-              Extend Claude Code and Kiro with AgenticOps plugins and skills. OMA closes the
-              loop between design, construction, and operations — humans approve at checkpoints,
-              agents execute everything in between.
+              AIDLC automates design and construction. Operations — deploys, incidents, cost
+              drift, regressions — still fall on the team. OMA is the plugin marketplace that
+              closes the loop with AgenticOps: humans approve, agents execute everything
+              between the checkpoints.
             </p>
             <div className={styles.heroCtaRow}>
               <Link className={styles.ctaPrimary} to={useBaseUrl('/docs/getting-started')}>
-                Get started
+                Install in 30 seconds
                 <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
                   <path d="M5 12h14M13 6l6 6-6 6" />
                 </svg>
@@ -206,21 +352,25 @@ export default function HomeLanding(): React.ReactElement {
                 target="_blank"
                 rel="noreferrer"
               >
-                View on GitHub
+                Star on GitHub
               </a>
             </div>
             <dl className={styles.heroStats}>
               <div>
                 <dt>Plugins</dt>
-                <dd>5</dd>
+                <dd>4</dd>
               </div>
               <div>
                 <dt>Tier-0 workflows</dt>
-                <dd>8</dd>
+                <dd>9</dd>
               </div>
               <div>
                 <dt>AWS MCP servers</dt>
                 <dd>11 pinned</dd>
+              </div>
+              <div>
+                <dt>Ontology entities</dt>
+                <dd>8 schemas</dd>
               </div>
             </dl>
           </div>
@@ -235,25 +385,23 @@ export default function HomeLanding(): React.ReactElement {
               <div className={styles.mockBody}>
                 <p>
                   <span className={styles.muted}>$</span>{' '}
-                  <span className={styles.mono}>claude --use-plugin oma</span>
-                </p>
-                <p className={styles.muted}>Initializing OMA AgenticOps plugin…</p>
-                <p className={styles.mutedLight}>✔ Identity context synced with AWS</p>
-                <p className={styles.mutedLight}>
-                  ✔ MCP servers pinned (eks 0.1.28, cloudwatch 0.0.25, …)
+                  <span className={styles.mono}>claude</span>
                 </p>
                 <p className={styles.mutedLight}>
-                  ✔ Skills: autopilot-deploy, self-improving-loop, cost-governance
+                  &gt; /plugin marketplace add aws-samples/sample-oh-my-aidlcops
+                </p>
+                <p className={styles.mutedLight}>
+                  &gt; /plugin install ai-infra agenticops aidlc modernization
+                </p>
+                <p className={styles.mutedLight}>
+                  ✔ 4 plugins enabled · 11 AWS MCP servers pinned
                 </p>
                 <p className={styles.prompt}>
-                  Claude &gt; <em>"How can I help you today?"</em>
-                </p>
-                <p>
-                  <span className={styles.muted}>$</span>{' '}
-                  <span className={styles.strong}>deploy rag-qa-agent:v2.3.1 to staging</span>
+                  &gt; /oma:autopilot <em>"ship the anomaly detector end to end"</em>
                 </p>
                 <div className={styles.mockCallout}>
-                  OMA · intercepting · analyzing budget, SLOs, and eval baselines before rollout…
+                  OMA · Inception → Construction → Operations.
+                  Approval gates: 4. Agent steps in between: ~40.
                 </div>
               </div>
             </div>
@@ -263,12 +411,63 @@ export default function HomeLanding(): React.ReactElement {
         </div>
       </section>
 
+      {/* PROBLEM -> SOLUTION CONTRAST */}
+      <section className={styles.contrast}>
+        <header className={styles.sectionHead}>
+          <p className={styles.kicker}>The gap</p>
+          <h2 className={styles.sectionTitle}>
+            Most AIDLC implementations stop at merge time.
+          </h2>
+        </header>
+        <div className={styles.contrastGrid}>
+          <article className={`${styles.contrastCard} ${styles.contrastBefore}`}>
+            <h3>Without OMA</h3>
+            <ul>
+              <li>Traces pile up in Langfuse but never become PRs.</li>
+              <li>Incident playbooks live in a wiki no on-call reads at 2am.</li>
+              <li>Cost anomalies surface on the next month's invoice.</li>
+              <li>Every operations decision is a human judgement call.</li>
+            </ul>
+          </article>
+          <article className={`${styles.contrastCard} ${styles.contrastAfter}`}>
+            <h3>With OMA</h3>
+            <ul>
+              <li>Trace patterns open draft PRs against the skills that caused them.</li>
+              <li>SEV1 alarms get diagnosed + mitigated with a human approval gate.</li>
+              <li>Budget breaches throttle or downgrade before the ceiling hits.</li>
+              <li>Humans approve at checkpoints. Agents do the rest.</li>
+            </ul>
+          </article>
+        </div>
+      </section>
+
+      {/* SUPERPOWERS */}
+      <section className={styles.superpowers}>
+        <header className={styles.sectionHead}>
+          <p className={styles.kicker}>What changes</p>
+          <h2 className={styles.sectionTitle}>
+            Three mechanisms that make AIDLC close itself.
+          </h2>
+        </header>
+        <ol className={styles.superpowerList}>
+          {SUPERPOWERS.map((s) => (
+            <li key={s.num}>
+              <span className={styles.superpowerNum}>{s.num}</span>
+              <div>
+                <h3>{s.title}</h3>
+                <p>{s.body}</p>
+              </div>
+            </li>
+          ))}
+        </ol>
+      </section>
+
       {/* INTEGRATION */}
       <section className={styles.integration}>
         <header className={styles.sectionHead}>
-          <p className={styles.kicker}>Seamless integration</p>
+          <p className={styles.kicker}>Drop-in</p>
           <h2 className={styles.sectionTitle}>
-            OMA isn't a separate tool; it's the operational brain inside your favorite AI coding agents.
+            Ship as a plugin inside the tools you already run.
           </h2>
         </header>
         <div className={styles.integrationGrid}>
@@ -288,32 +487,37 @@ export default function HomeLanding(): React.ReactElement {
       <section className={styles.loopSection}>
         <div className={styles.loopCard}>
           <div className={styles.loopCopy}>
-            <h2 className={styles.sectionTitleTight}>The AI Development Lifecycle (AIDLC) loop</h2>
+            <h2 className={styles.sectionTitleTight}>The AIDLC loop, closed.</h2>
+            <p className={styles.loopLede}>
+              Inception and Construction describe <em>what</em> will ship. Operations keeps it
+              alive after it ships — and feeds learnings back to Construction without a human
+              in the loop for routine corrections.
+            </p>
             <ol className={styles.loopList}>
               <li>
                 <span className={styles.loopStep}>1</span>
                 <div>
-                  <h4>Inception</h4>
+                  <h4>Inception · <code>aidlc</code></h4>
                   <p>
-                    Structured intake, requirements, user stories, and workflow planning. Every
-                    artifact is the contract Construction will honor.
+                    Workspace detection, adaptive requirements, user stories, workflow plan.
+                    Output artifacts become the contract Construction must honor.
                   </p>
                 </div>
               </li>
               <li>
                 <span className={styles.loopStep}>2</span>
                 <div>
-                  <h4>Construction</h4>
+                  <h4>Construction · <code>aidlc</code></h4>
                   <p>
-                    Component design, code generation with human-approved gates, risk discovery
-                    across 12 categories, and TDD for agentic systems.
+                    Component design, code generation with human-approved gates, 12-category
+                    risk discovery, TDD for agentic systems, phase quality gates.
                   </p>
                 </div>
               </li>
               <li>
                 <span className={styles.loopStep}>3</span>
                 <div>
-                  <h4>Operations</h4>
+                  <h4>Operations · <code>agenticops</code></h4>
                   <p>
                     Autopilot deploys, continuous eval, incident response, cost governance, and
                     the self-improving loop that feeds learnings back into Construction.
@@ -321,6 +525,10 @@ export default function HomeLanding(): React.ReactElement {
                 </div>
               </li>
             </ol>
+            <p className={styles.loopFoot}>
+              Runtime (<code>ai-infra</code>) and brownfield entry (<code>modernization</code>)
+              sit alongside the loop, not inside it.
+            </p>
           </div>
           <div className={styles.loopVisual} aria-hidden="true">
             <svg viewBox="0 0 360 360" role="presentation">
@@ -398,12 +606,35 @@ export default function HomeLanding(): React.ReactElement {
         </div>
       </section>
 
+      {/* TIER-0 WORKFLOWS */}
+      <section className={styles.workflows}>
+        <header className={styles.sectionHead}>
+          <p className={styles.kicker}>Nine Tier-0 workflows</p>
+          <h2 className={styles.sectionTitle}>
+            Call one slash command. Get a checkpointed plan.
+          </h2>
+        </header>
+        <div className={styles.workflowGrid}>
+          {WORKFLOWS.map((w) => (
+            <article key={w.command} className={styles.workflowCard}>
+              <span className={styles.workflowKeyword}>{w.keyword}</span>
+              <span className={styles.workflowCommand}>{w.command}</span>
+              <p>{w.scope}</p>
+            </article>
+          ))}
+        </div>
+        <p className={styles.workflowFoot}>
+          Keyword triggers auto-suggest the right command when your prompt contains a match.
+          See the <Link to={useBaseUrl('/docs/keyword-triggers')}>trigger catalog</Link>.
+        </p>
+      </section>
+
       {/* PLUGINS */}
       <section className={styles.plugins}>
         <header className={styles.sectionHead}>
-          <p className={styles.kicker}>Five plugins</p>
+          <p className={styles.kicker}>Four plugins</p>
           <h2 className={styles.sectionTitle}>
-            Install only what you need — or all of them with one marketplace command.
+            Install only what you need — or all four with one marketplace command.
           </h2>
         </header>
         <div className={styles.pluginGrid}>
@@ -413,9 +644,49 @@ export default function HomeLanding(): React.ReactElement {
                 <span className={styles.pluginName}>{p.name}</span>
                 <span className={styles.pluginTagline}>{p.tagline}</span>
               </div>
-              <p>{p.body}</p>
+              <p>{p.scope}</p>
+              <p className={styles.pluginSkills}>{p.skills}</p>
             </article>
           ))}
+        </div>
+      </section>
+
+      {/* INSTALL */}
+      <section className={styles.install}>
+        <header className={styles.sectionHead}>
+          <p className={styles.kicker}>30-second install</p>
+          <h2 className={styles.sectionTitle}>Three terminal lines to a working loop.</h2>
+        </header>
+        <div className={styles.installSteps}>
+          <div className={styles.installStep}>
+            <span className={styles.installNum}>1</span>
+            <div>
+              <h4>Register the marketplace</h4>
+              <pre><code>{`claude
+> /plugin marketplace add https://github.com/aws-samples/sample-oh-my-aidlcops`}</code></pre>
+            </div>
+          </div>
+          <div className={styles.installStep}>
+            <span className={styles.installNum}>2</span>
+            <div>
+              <h4>Install the four plugins</h4>
+              <pre><code>{`> /plugin install ai-infra@oh-my-aidlcops
+> /plugin install agenticops@oh-my-aidlcops
+> /plugin install aidlc@oh-my-aidlcops
+> /plugin install modernization@oh-my-aidlcops`}</code></pre>
+            </div>
+          </div>
+          <div className={styles.installStep}>
+            <span className={styles.installNum}>3</span>
+            <div>
+              <h4>Run a Tier-0 workflow</h4>
+              <pre><code>{`> /oma:autopilot "ship the anomaly detector end to end"`}</code></pre>
+              <p className={styles.installHint}>
+                Or start with a safer on-ramp:{' '}
+                <Link to={useBaseUrl('/docs/getting-started')}>getting-started guide</Link>.
+              </p>
+            </div>
+          </div>
         </div>
       </section>
 
@@ -453,11 +724,20 @@ export default function HomeLanding(): React.ReactElement {
         </div>
       </section>
 
+      {/* FAQ */}
+      <section className={styles.faqSection}>
+        <header className={styles.sectionHead}>
+          <p className={styles.kicker}>FAQ</p>
+          <h2 className={styles.sectionTitle}>Common questions before you install.</h2>
+        </header>
+        <Faq items={FAQ} />
+      </section>
+
       {/* CTA */}
       <section className={styles.cta}>
-        <h2 className={styles.ctaTitle}>Ready to automate your AWS AIDLC?</h2>
+        <h2 className={styles.ctaTitle}>Stop running the operations loop by hand.</h2>
         <p className={styles.ctaLede}>
-          Clone the repo, run one install script, and start with a Tier-0 workflow that fits your team.
+          Install once. Approve at the checkpoints. Let agents carry the rest of the AIDLC loop.
         </p>
         <div className={styles.heroCtaRow}>
           <Link className={styles.ctaPrimary} to={useBaseUrl('/docs/getting-started')}>
