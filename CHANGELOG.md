@@ -10,6 +10,17 @@ breaking changes to non-stable surfaces as documented in
 
 ## [Unreleased]
 
+### Added
+- (next release entries go here)
+
+### Changed
+- (next release entries go here)
+
+### Fixed
+- (next release entries go here)
+
+## [0.3.0-preview.1] — 2026-05-01
+
 ### Added — v0.5 Plugin migration + enterprise tooling
 - `plugins/{agenticops,aidlc-inception,aidlc-construction,modernization}/*.oma.yaml`
   bring every first-party plugin under the harness DSL. Triggers merge
@@ -110,6 +121,45 @@ breaking changes to non-stable surfaces as documented in
 - Raw `<oma-repo>` placeholders in docs replaced with concrete commands
   (`oma init`, `oma where`) or the actual `~/.oma` path.
 
+### Added — Follow-up wave (post-merge tooling)
+- `refactor(audit)`: migrate `component-design` SKILL.md writer from
+  `echo >> aidlc-docs/audit.md` to `python -m tools.oma_audit.append` so
+  the JSONL audit log actually gets populated at runtime (PR #6).
+- `feat(harness)`: populate the v2 `workflows`, `telemetry`, and
+  `policies` blocks on `agentic-platform.oma.yaml` and ship
+  `scripts/oma/run-workflow.sh` — a topo-sort stub that prints a DAG
+  execution plan (PR #8).
+- `feat(oma-validate)`: route validation on entity shape for all eight
+  ontology types (Deployment, Incident, Budget, Risk, Agent, Skill,
+  Spec, ADR) with Draft-07 and Draft 2020-12 dispatch (PR #7).
+- `test(strict-enterprise)`: lift the five user-visible error strings
+  emitted by `enforce_strict_enterprise()` into module-level constants
+  and snapshot them so accidental wording drift fails CI (PR #5).
+- `test(installer)` + `ci(pages)`: enterprise smoke bats covering
+  `oma doctor --enterprise` / `oma compile --strict-enterprise` /
+  `oma validate`, plus a bump of `actions/upload-pages-artifact` from
+  v3 to v4 (PR #9).
+- `docs`: expand `CONTRIBUTING.md` with the working-agreement rules
+  and ship a public Docusaurus contributing page under Governance
+  (PR #10).
+
+### Added — Release pipeline automation
+- `/releases` page on GitHub Pages — Docusaurus plugin fetches the
+  GitHub Releases API at build time and bakes the response into a
+  static page (`docs/plugins/releases-loader/`, `docs/src/pages/releases.tsx`).
+- `docs-build.yml` triggers on `release.published / edited / deleted`
+  events in addition to `push` to main, so a tag push refreshes Pages
+  automatically (PR #3).
+- `docs/docs/releases-pipeline.md` documents the tag → release.yml →
+  docs-build.yml → deploy-pages chain with a Mermaid diagram and
+  rollback procedure.
+
+### Security
+- Dependabot alert GHSA-w5hq-g745-h8pq (uuid < 14 buffer bounds check)
+  closed by pinning `uuid: ^14.0.0` via npm `overrides` in
+  `docs/package.json` (PR #4). Exploit path was not reachable in the
+  static-site build pipeline; the pin clears the alert regardless.
+
 ## [0.2.0-preview.1] — 2026-04-30
 
 ### Added — Ontology + harness foundation
@@ -188,6 +238,7 @@ breaking changes to non-stable surfaces as documented in
   langfuse-observability, simpleeval-based cost-governance expressions.
 - MIT-0 license, AWS-samples destination.
 
-[Unreleased]: https://github.com/aws-samples/sample-oh-my-aidlcops/compare/v0.2.0-preview.1...HEAD
+[Unreleased]: https://github.com/aws-samples/sample-oh-my-aidlcops/compare/v0.3.0-preview.1...HEAD
+[0.3.0-preview.1]: https://github.com/aws-samples/sample-oh-my-aidlcops/releases/tag/v0.3.0-preview.1
 [0.2.0-preview.1]: https://github.com/aws-samples/sample-oh-my-aidlcops/releases/tag/v0.2.0-preview.1
 [0.1.0]: https://github.com/aws-samples/sample-oh-my-aidlcops/releases/tag/v0.1.0
