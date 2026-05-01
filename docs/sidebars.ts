@@ -60,6 +60,7 @@ const sidebars: SidebarsConfig = {
         'support-policy',
         'telemetry',
         'contributing',
+        'references',
         'releases-pipeline',
       ],
     },
