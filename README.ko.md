@@ -2,7 +2,7 @@
 
 **AIDLC × AgenticOps** — AI 기반 개발 라이프사이클(AIDLC)을 에이전트 기반 운영 자동화로 완성하는 플러그인 마켓플레이스입니다.
 
-[English README](./README.md) · [문서](./docs/) · [플러그인](./plugins/) · [Steering](./steering/) · [릴리스](https://aws-samples.github.io/sample-oh-my-aidlcops/releases)
+[English README](./README.md) · [문서](./docs/) · [플러그인](./plugins/) · [Steering](./steering/) · [릴리스](https://aws-samples.github.io/sample-oh-my-aidlcops/releases) · [References](./REFERENCES.md)
 
 ---
 
@@ -287,7 +287,9 @@ OMA는 AWS·커뮤니티 기존 작업 위에 쌓아 올리며, 재발명을 피
 | [Atom-oh/oh-my-cloud-skills](https://github.com/Atom-oh/oh-my-cloud-skills) | MIT | eval 스크립트 패턴, Kiro 변환 참고 |
 | [oh-my-claudecode](https://github.com/Yeachan-Heo/oh-my-claudecode) | — | Tier-0 오케스트레이션 철학 및 `.omc/` 상태 관리 계승 |
 
-전체 attribution은 [NOTICE](./NOTICE)에 있습니다.
+전체 attribution 은 [NOTICE](./NOTICE) 에, 외부 스펙·프레임워크·런타임
+도구를 포함한 레퍼런스 카탈로그는 [REFERENCES.md](./REFERENCES.md) 에
+있습니다.
 
 ## 라이선스
 

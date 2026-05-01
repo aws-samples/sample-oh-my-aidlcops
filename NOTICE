@@ -112,8 +112,14 @@ Reuse pattern:
 
 ================================================================================
 
+See also REFERENCES.md for the complete catalogue of every external
+spec, authoritative standard, framework, runtime tool, and upstream
+repository that OMA cites across its code and documentation. NOTICE
+covers legal reuse attribution; REFERENCES.md covers engineering
+traceability.
+
 If you believe a file in this repository infringes your copyright or is
 misattributed, please open an issue at:
 https://github.com/aws-samples/sample-oh-my-aidlcops/issues
 
-Last reviewed: 2026-04-30
+Last reviewed: 2026-05-01
