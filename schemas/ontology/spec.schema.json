@@ -2,7 +2,7 @@
   "$id": "https://aws-samples.github.io/sample-oh-my-aidlcops/schemas/ontology/spec.schema.json",
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "Spec",
-  "description": "AIDLC Phase 1 (Inception) output capturing requirements, scope, and owner. A Spec feeds ADRs and Deployments downstream via the entityRef enum.",
+  "description": "AIDLC Phase 1 (Inception) output capturing requirements, scope, and owner. A Spec feeds ADRs and Deployments downstream via the entityRef enum. The requirements[] shape (id / text / MoSCoW priority) follows the IEEE 830-1998 template and its successor ISO/IEC/IEEE 29148-2018. See REFERENCES.md#ieee-830.",
   "type": "object",
   "additionalProperties": false,
   "required": ["id", "owner", "status"],

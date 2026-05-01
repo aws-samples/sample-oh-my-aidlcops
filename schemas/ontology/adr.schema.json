@@ -2,7 +2,7 @@
   "$id": "https://aws-samples.github.io/sample-oh-my-aidlcops/schemas/ontology/adr.schema.json",
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "ADR",
-  "description": "Architecture Decision Record produced during AIDLC Inception or Construction. ADRs constrain Deployments via the adr_refs backlink.",
+  "description": "Architecture Decision Record produced during AIDLC Inception or Construction. ADRs constrain Deployments via the adr_refs backlink. Field set (context / decision / consequences) and the 5-state status machine follow Michael Nygard's 2011 template; the id format follows the MADR (Markdown Any Decision Records) convention. See REFERENCES.md#nygard-adr and REFERENCES.md#madr.",
   "type": "object",
   "additionalProperties": false,
   "required": ["id", "status", "title", "context", "decision"],

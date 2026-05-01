@@ -112,6 +112,11 @@ MoSCoW priority (`must`/`should`/`may`). Spec supersedes older specs via
 `supersedes[]` and links forward to ADRs via `linked_adrs[]`. Deployments
 reference the spec they satisfy through `Deployment.spec_ref`.
 
+**Source:** the `requirements[]` shape (id / text / MoSCoW priority)
+follows the IEEE Std 830-1998 template and its successor
+ISO/IEC/IEEE 29148-2018. See
+[REFERENCES.md#ieee-830](../REFERENCES.md#ieee-830).
+
 ## ADR
 
 Architecture Decision Record (schema `adr.schema.json`, Draft 2020-12).
@@ -119,6 +124,12 @@ Numbered (`adr-0001-...`), with `context` / `decision` / `consequences`
 sections. An ADR moves from `proposed` -> `accepted` (or `rejected`) and may
 later be `deprecated` or `superseded_by` a later ADR. Deployments reference
 the ADRs they follow via `Deployment.adr_refs[]`.
+
+**Source:** the field set and 5-state status machine trace to Michael
+Nygard's 2011 post "Documenting Architecture Decisions"; the
+`adr-NNNN-<slug>` id format comes from the MADR convention. See
+[REFERENCES.md#nygard-adr](../REFERENCES.md#nygard-adr) and
+[REFERENCES.md#madr](../REFERENCES.md#madr).
 
 ## ApprovalChain
 
