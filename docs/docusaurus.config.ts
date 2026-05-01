@@ -16,6 +16,18 @@ const config: Config = {
   },
   themes: ['@docusaurus/theme-mermaid'],
 
+  // Custom plugin: fetches GitHub Releases at build time so /releases
+  // always reflects the latest published tag without a runtime API call.
+  plugins: [
+    [
+      require.resolve('./plugins/releases-loader'),
+      {
+        repo: 'aws-samples/sample-oh-my-aidlcops',
+        perPage: 20,
+      },
+    ],
+  ],
+
   // Production URL + baseUrl (GitHub Pages).
   url: 'https://aws-samples.github.io',
   baseUrl: '/sample-oh-my-aidlcops/',

@@ -16,6 +16,12 @@ on:
     paths:
       - 'docs/**'
       - '.github/workflows/docs-build.yml'
+  # Refresh the /releases page whenever a new GitHub Release is
+  # published, edited, or deleted. The releases-loader plugin fetches
+  # the API at build time so the static page needs a rebuild for the
+  # new tag to show up.
+  release:
+    types: [published, edited, deleted, released]
   workflow_dispatch: {}
 
 # Allow one concurrent deployment; don't cancel an in-flight deploy when a
@@ -47,20 +53,34 @@ jobs:
         run: npm ci --no-audit --no-fund
 
       - name: Build site
+        # GITHUB_TOKEN raises the GitHub Releases API rate limit from 60
+        # anonymous requests/hour to 5000 authenticated/hour. The
+        # releases-loader plugin reads it when present.
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: npm run build
 
       - name: Verify build output
         run: test -f build/index.html
 
+      - name: Verify releases page built
+        run: test -f build/releases.html
+
       - name: Upload Pages artifact
-        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        if: |
+          (github.event_name == 'push' && github.ref == 'refs/heads/main') ||
+          github.event_name == 'release' ||
+          github.event_name == 'workflow_dispatch'
         uses: actions/upload-pages-artifact@v3
         with:
           path: docs/build
 
   deploy:
     name: Deploy to GitHub Pages
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    if: |
+      (github.event_name == 'push' && github.ref == 'refs/heads/main') ||
+      github.event_name == 'release' ||
+      github.event_name == 'workflow_dispatch'
     needs: build
     runs-on: ubuntu-latest
     permissions:

@@ -59,7 +59,13 @@ const sidebars: SidebarsConfig = {
       items: [
         'support-policy',
         'telemetry',
+        'releases-pipeline',
       ],
+    },
+    {
+      type: 'link',
+      label: 'Releases',
+      href: '/releases',
     },
   ],
 };
