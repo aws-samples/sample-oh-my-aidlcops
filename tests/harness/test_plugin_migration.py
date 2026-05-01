@@ -11,8 +11,6 @@ plugin passes iff its DSL compiles to bytes equal to the committed
 
 from __future__ import annotations
 
-from pathlib import Path
-
 import pytest
 
 from tools.oma_compile.compile import REPO_ROOT, check_drift
