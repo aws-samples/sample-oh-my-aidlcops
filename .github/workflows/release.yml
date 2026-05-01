@@ -13,6 +13,10 @@ on:
       version:
         description: 'Override version tag (e.g., v0.2.0-preview.2)'
         required: false
+      dry_run:
+        description: 'Assemble notes + print to logs without publishing the release'
+        required: false
+        default: 'false'
 
 permissions:
   contents: write
@@ -71,6 +75,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          # Full history so the enrichment step can compute the diff vs the
+          # previous tag (git describe + git log).
+          fetch-depth: 0
       - name: Resolve version
         id: ver
         run: |
@@ -86,30 +94,96 @@ jobs:
           path: dist
       - name: Extract release notes from CHANGELOG
         id: notes
+        env:
+          RELEASE_TAG: ${{ steps.ver.outputs.tag }}
         run: |
           python3 - <<'PY' > body.md
-          import re, sys
-          ver = "${{ steps.ver.outputs.tag }}".lstrip("v")
+          import os, re, sys
+
+          tag = os.environ["RELEASE_TAG"]
+          ver = tag.lstrip("v")
           content = open("CHANGELOG.md", encoding="utf-8").read()
-          pattern = re.compile(rf"## \[{re.escape(ver)}\].*?(?=## \[|\Z)", re.S)
-          m = pattern.search(content)
+
+          # Primary: ## [version] ... section.
+          primary_re = re.compile(rf"## \[{re.escape(ver)}\].*?(?=## \[|\Z)", re.S)
+          m = primary_re.search(content)
+
           if m:
               sys.stdout.write(m.group(0).strip() + "\n")
-          else:
-              sys.stdout.write(f"Release {ver}\n")
+              sys.exit(0)
+
+          # Fallback: promote the [Unreleased] block body, with a warning banner.
+          unreleased_re = re.compile(r"## \[Unreleased\](.*?)(?=## \[|\Z)", re.S)
+          um = unreleased_re.search(content)
+          if um and um.group(1).strip():
+              sys.stdout.write(
+                  f"## [{ver}] (auto-promoted from [Unreleased])\n\n"
+                  "> Note: this release shipped without an explicit CHANGELOG version "
+                  "header. The [Unreleased] block body was used verbatim. "
+                  "Promote it in the next PR to pin the version permanently.\n"
+              )
+              sys.stdout.write(um.group(1).rstrip() + "\n")
+              sys.exit(0)
+
+          # Last-resort fallback.
+          sys.stdout.write(f"Release {ver}\n")
           PY
+
+      - name: Append commits-since-last-tag + contributors
+        env:
+          RELEASE_TAG: ${{ steps.ver.outputs.tag }}
+        run: |
+          set -euo pipefail
+          # Find the previous tag reachable before the one we're publishing. If
+          # the tag is not yet on the remote (normal for a fresh tag push),
+          # 'git describe --tags --abbrev=0 HEAD^' returns the most recent
+          # parent tag; otherwise we scope to the tag itself.
+          if git rev-parse -q --verify "refs/tags/${RELEASE_TAG}" >/dev/null 2>&1; then
+            range_end="${RELEASE_TAG}"
+          else
+            range_end="HEAD"
+          fi
+          prev_tag=$(git describe --tags --abbrev=0 "${range_end}^" 2>/dev/null || echo "")
+          if [ -z "${prev_tag}" ]; then
+            echo "No previous tag found; skipping enrichment." >&2
+            exit 0
+          fi
+
+          {
+            echo
+            echo "<details><summary><strong>Commits since ${prev_tag}</strong></summary>"
+            echo
+            git log "${prev_tag}..${range_end}" --no-merges --pretty="- %s (%h)"
+            echo
+            echo "</details>"
+            echo
+            echo "## Contributors"
+            echo
+            git log "${prev_tag}..${range_end}" --format="- %an" | sort -u
+          } >> body.md
+
+      - name: Dry-run preview (workflow_dispatch with dry_run=true)
+        if: github.event_name == 'workflow_dispatch' && github.event.inputs.dry_run == 'true'
+        run: |
+          echo "=== body.md preview (dry run; no release created) ==="
+          cat body.md
+          exit 0
+
       - name: Delete existing release if present (idempotent re-tag)
+        if: github.event_name != 'workflow_dispatch' || github.event.inputs.dry_run != 'true'
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           gh release delete "${{ steps.ver.outputs.tag }}" --yes --cleanup-tag 2>/dev/null || true
 
       - name: Re-push tag at current commit
+        if: github.event_name != 'workflow_dispatch' || github.event.inputs.dry_run != 'true'
         run: |
           git tag -f "${{ steps.ver.outputs.tag }}"
           git push origin "${{ steps.ver.outputs.tag }}" --force
 
       - name: Create GitHub Release
+        if: github.event_name != 'workflow_dispatch' || github.event.inputs.dry_run != 'true'
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
