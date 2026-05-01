@@ -58,33 +58,73 @@ if ! command -v python3 >/dev/null 2>&1; then
 fi
 
 python3 - "$OMA_ROOT" "$ENTITY_FILE" <<'PY'
-import json, sys
+import json, sys, re
 from pathlib import Path
 
 import yaml
-from jsonschema import Draft7Validator, RefResolver
+from jsonschema import Draft7Validator, Draft202012Validator, RefResolver
 
 repo_root = Path(sys.argv[1])
 entity_path = Path(sys.argv[2])
 
 data = yaml.safe_load(entity_path.read_text(encoding="utf-8"))
-# Heuristic: Deployment has target/artifact/approval_state.
+
+# Entity type detection heuristics (order matters for specificity)
 schema_name = None
-if isinstance(data, dict) and {"target", "artifact", "approval_state"} <= set(data):
-    schema_name = "deployment.schema.json"
+validator_class = Draft7Validator
+
+if isinstance(data, dict):
+    entity_id = data.get("id", "")
+    top_keys = set(data.keys())
+
+    # Spec: id matches ^spec-[a-z0-9-]+$ (Draft 2020-12)
+    if re.match(r"^spec-[a-z0-9-]+$", entity_id):
+        schema_name = "spec.schema.json"
+        validator_class = Draft202012Validator
+    # ADR: id matches ^adr-[0-9]{4}-[a-z0-9-]+$ (Draft 2020-12)
+    elif re.match(r"^adr-[0-9]{4}-[a-z0-9-]+$", entity_id):
+        schema_name = "adr.schema.json"
+        validator_class = Draft202012Validator
+    # Deployment: has target + artifact + approval_state (Draft-07)
+    elif {"target", "artifact", "approval_state"} <= top_keys:
+        schema_name = "deployment.schema.json"
+    # Incident: has severity + alarm_source (Draft-07)
+    elif {"severity", "alarm_source"} <= top_keys:
+        schema_name = "incident.schema.json"
+    # Budget: has scope + limit_usd (Draft-07)
+    elif {"scope", "limit_usd"} <= top_keys:
+        schema_name = "budget.schema.json"
+    # Risk: has category + likelihood + impact (Draft-07)
+    elif {"category", "likelihood", "impact"} <= top_keys:
+        schema_name = "risk.schema.json"
+    # Agent: has runtime (Draft-07)
+    elif "runtime" in top_keys and re.match(r"^[a-z][a-z0-9-]*$", entity_id):
+        schema_name = "agent.schema.json"
+    # Skill: has harness (Draft-07)
+    elif "harness" in top_keys:
+        schema_name = "skill.schema.json"
+
 if schema_name is None:
     print(f"[oma validate] cannot infer entity type for {entity_path}; "
-          "only Deployment schema is wired in v0.4.", file=sys.stderr)
+          "supported: Deployment/Incident/Budget/Risk/Agent/Skill/Spec/ADR", file=sys.stderr)
     sys.exit(0)
 
 schema_dir = repo_root / "schemas" / "ontology"
+common_dir = repo_root / "schemas" / "common"
 schema = json.loads((schema_dir / schema_name).read_text(encoding="utf-8"))
+
+# Build ref store with ontology and common schemas
 store = {}
 for other in schema_dir.glob("*.schema.json"):
     content = json.loads(other.read_text(encoding="utf-8"))
     store[content["$id"]] = content
     store[other.name] = content
-validator = Draft7Validator(schema, resolver=RefResolver.from_schema(schema, store=store))
+for common in common_dir.glob("*.schema.json"):
+    content = json.loads(common.read_text(encoding="utf-8"))
+    store[content["$id"]] = content
+    store[common.name] = content
+
+validator = validator_class(schema, resolver=RefResolver.from_schema(schema, store=store))
 errs = sorted(validator.iter_errors(data), key=lambda e: list(e.absolute_path))
 if errs:
     print(f"[oma validate] {entity_path}: {len(errs)} schema violation(s)", file=sys.stderr)
