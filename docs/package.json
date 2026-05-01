@@ -27,7 +27,8 @@
   "overrides": {
     "serialize-javascript": "7.0.5",
     "webpack-dev-server": "5.2.3",
-    "webpack": "5.105.1"
+    "webpack": "5.105.1",
+    "uuid": "^14.0.0"
   },
   "devDependencies": {
     "@docusaurus/module-type-aliases": "3.9.2",
