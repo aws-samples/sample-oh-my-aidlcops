@@ -3,9 +3,41 @@
 **AIDLC × AgenticOps** — a plugin marketplace that automates the full AI-Driven
 Development Lifecycle with agent-based operations on AWS.
 
-[한국어 README](./README.ko.md) · [Documentation](./docs/) · [Plugins](./plugins/) · [Steering](./steering/)
+[한국어 README](./README.ko.md) · [Documentation](./docs/) · [Plugins](./plugins/) · [Steering](./steering/) · [Releases](https://aws-samples.github.io/sample-oh-my-aidlcops/releases)
 
 ---
+
+## What's new in v0.3
+
+Release `v0.3.0-preview.1` turns OMA's ontology + harness layer into an
+enterprise-grade surface without any breaking changes:
+
+- **Two new ontology entities** — `Spec` and `ADR` (Draft 2020-12),
+  closing the Phase-1 → Construction traceability chain.
+- **Enterprise fields on the six existing schemas** — `approval_chain`,
+  `risk_exceptions`, `owasp_llm_top10_id`, `nist_ai_rmf_subcategory`,
+  `compliance_refs[]`, `trace_id` / `span_id` (OTel), `cost_center_owner`,
+  and more — every field optional so existing fixtures keep validating.
+- **Harness DSL v2** — optional `workflows` (DAG), `telemetry`
+  (OpenTelemetry Collector), `policies` (OPA/Rego), and `metadata.labels`
+  blocks. `version: 1` files keep compiling unchanged.
+- **`oma doctor --enterprise`** — 8 probes (ontology-2020-12, slsa-digest,
+  risk-classification, audit-jsonl, dsl-version, policies-rego,
+  plugin-dsl, mcp-pinned).
+- **`oma compile --strict-enterprise`** — opt-in gate: DSL v2 only,
+  `approval_chain` required on approved deployments, object-form
+  `Deployment.artifact` with `sha256` digest, Risk classified under OWASP
+  or NIST.
+- **`oma validate <entity.yaml>`** — schema + OPA evaluation for all 8
+  ontology entity types with graceful fallback when `opa` is absent.
+- **`oma run-workflow`** — topo-sort and print a DSL v2 workflow's
+  execution plan (stub; runtime invocation lands in a later release).
+- **Audit events as JSON-L** — `python -m tools.oma_audit.append`
+  validates every record against `schemas/audit/event.schema.json` before
+  appending to `.omao/audit.jsonl`.
+
+Full details in [CHANGELOG.md](./CHANGELOG.md) and on the
+[Releases page](https://aws-samples.github.io/sample-oh-my-aidlcops/releases).
 
 ## What is OMA?
 
@@ -65,7 +97,7 @@ seeds the ontology, installs the plugins, and runs `oma doctor` to confirm
 the environment.
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/aws-samples/sample-oh-my-aidlcops/v0.2.0-preview.1/install.sh | bash
+curl -fsSL https://raw.githubusercontent.com/aws-samples/sample-oh-my-aidlcops/v0.3.0-preview.1/install.sh | bash
 cd my-project
 oma setup
 oma doctor
@@ -134,6 +166,50 @@ bash <path-to-oma>/scripts/init-omao.sh
 bash scripts/install/aidlc-extensions.sh
 # Clones awslabs/aidlc-workflows into ~/.aidlc and symlinks OMA's opt-in extensions.
 ```
+
+### Quick start — v0.3 enterprise flags
+
+After `oma setup`, four commands are worth exercising on day one:
+
+```bash
+# 1. Diagnostic only — 8 probes, never changes state.
+oma doctor --enterprise
+# → [doctor:enterprise] 8 probes OK (0 warnings)
+
+# 2. Enforce the gate — rejects DSL v1, missing approval_chain, legacy
+#    string artifacts, and unclassified Risks.
+oma compile --strict-enterprise
+# → compiled agentic-platform: plugins/agentic-platform/.mcp.json ...
+
+# 3. Validate an ontology entity (Spec / ADR / Deployment / Incident /
+#    Budget / Risk / Agent / Skill). OPA is shelled out when declared.
+oma validate path/to/deployment.yaml
+# → [oma validate] path/to/deployment.yaml: schema OK
+
+# 4. Print the execution plan for a DSL v2 workflow (stub: no runtime yet).
+oma run-workflow agentic-platform platform-bootstrap
+# → execution order: preflight -> provision -> verify
+```
+
+Migration from v0.2 is one flag away — every new field is optional
+until you opt in via `--strict-enterprise`. See
+[Enterprise readiness](https://aws-samples.github.io/sample-oh-my-aidlcops/docs/enterprise-readiness)
+for the phased adoption checklist.
+
+### Compliance frameworks
+
+OMA aligns ontology entities with four authoritative references so
+audit-facing conversations work without invented vocabulary:
+
+| Framework | Where it lands in OMA | Docs |
+|---|---|---|
+| [Model Context Protocol v1.0](https://modelcontextprotocol.io) | `Agent.mcp_uri` (canonical MCP server URI) | [Foundation](https://aws-samples.github.io/sample-oh-my-aidlcops/docs/ontology) |
+| [SLSA v1.1 Provenance](https://slsa.dev/spec/v1.1/) | `Deployment.artifact.{digest,provenance_uri,signing}` | [SLSA provenance](https://aws-samples.github.io/sample-oh-my-aidlcops/docs/compliance/slsa-provenance) |
+| [NIST AI RMF (AI 100-1)](https://nvlpubs.nist.gov/nistpubs/ai/NIST.AI.100-1.pdf) | `Risk.nist_ai_rmf_subcategory`, `AuditEvent.compliance.nist_ai_rmf` | [NIST AI RMF mapping](https://aws-samples.github.io/sample-oh-my-aidlcops/docs/compliance/nist-ai-rmf) |
+| [OWASP Top 10 for LLM Apps](https://owasp.org/www-project-top-10-for-large-language-model-applications/) | `Risk.owasp_llm_top10_id` (LLM01..LLM10) | [OWASP LLM Top 10 mapping](https://aws-samples.github.io/sample-oh-my-aidlcops/docs/compliance/owasp-llm-top10) |
+
+OpenTelemetry (traces/metrics/logs) and FinOps Framework cost categories
+feed the DSL v2 `telemetry` and `Budget` surfaces respectively.
 
 ### Liked it? Give the repo a Star
 
@@ -250,10 +326,12 @@ MIT No Attribution (MIT-0). See [LICENSE](./LICENSE).
 
 ## Contributing
 
-OMA is in Tech Preview (`v0.2.0-preview.1`). See [CONTRIBUTING.md](./CONTRIBUTING.md) for the bug
-report and pull request process, and [CODE_OF_CONDUCT.md](./CODE_OF_CONDUCT.md)
-for the Amazon Open Source Code of Conduct. Issues and PRs are especially
-welcome for skill quality, MCP coverage gaps, and Kiro compatibility testing.
+OMA is in Tech Preview (`v0.3.0-preview.1`). See [CONTRIBUTING.md](./CONTRIBUTING.md)
+for the working agreement (English-only artifacts, no AI attribution, commit
+per unit of work) plus the PR/branch-naming guidelines, and
+[CODE_OF_CONDUCT.md](./CODE_OF_CONDUCT.md) for the Amazon Open Source Code of
+Conduct. Issues and PRs are especially welcome for skill quality, MCP coverage
+gaps, and Kiro compatibility testing.
 
 For security issues, do **not** open a public GitHub issue — follow the AWS
 [vulnerability reporting process](https://aws.amazon.com/security/vulnerability-reporting/)
