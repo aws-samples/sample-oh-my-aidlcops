@@ -102,10 +102,17 @@ class RetrievalTool(Protocol):
 
 ### Step 6: 설계 리뷰 요청 및 승인 대기
 
-`design.md` 작성 완료 후 리뷰어에게 검토를 요청합니다. 승인 방식은 PR 코멘트 또는 `aidlc-docs/audit.md` 기록입니다.
+`design.md` 작성 완료 후 리뷰어에게 검토를 요청합니다. 승인 방식은 PR 코멘트 또는 audit log 기록입니다.
+
+Migrated from plain-text audit.md to schema-validated JSONL in v0.5:
 
 ```bash
-echo "[$(date -Iseconds)] design.md submitted for review" >> aidlc-docs/audit.md
+python3 -m tools.oma_audit.append \
+    --actor "$USER" --role skill-component-design \
+    --action gate-pass \
+    --entity-type Skill --entity-id component-design \
+    --phase construction \
+    --reason "design.md submitted for review"
 ```
 
 리뷰어가 승인 전까지 `code-generation`·`test-strategy` skill 실행을 차단합니다.
