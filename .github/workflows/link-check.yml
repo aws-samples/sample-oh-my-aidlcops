@@ -28,8 +28,11 @@ jobs:
             --exclude-path .docusaurus
             --exclude 'file://'
             --exclude 'github\.com/[^/]+/[^/]+/(pull|issues|commit)'
+            --exclude-file .lycheeignore
             --accept 200,204,206,301,302,307,308,429
-            --timeout 15
+            --timeout 20
+            --max-retries 2
+            --retry-wait-time 5
             '**/*.md'
           format: markdown
           fail: true

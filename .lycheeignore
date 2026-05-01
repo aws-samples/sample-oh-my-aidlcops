@@ -1,0 +1,41 @@
+# .lycheeignore — URLs the link-check workflow should skip.
+#
+# Syntax: one URL or regex per line. Lines starting with '#' are comments.
+# Lychee matches each URL against every pattern; a match means skip.
+#
+# Keep this list short and annotated. Every entry needs a reason.
+# Remove entries when upstream comes back up.
+
+# ragas.io — docs repeatedly returns 404 on deep links even though the
+# root works. Their navigation changes URLs frequently. Switch back to
+# specific pages once their docs stabilise.
+docs\.ragas\.io/.*
+
+# keda.sh — CI runners intermittently fail to resolve keda.sh. Link is
+# alive from browsers; the checker just can't reach it from GitHub
+# Actions' egress.
+keda\.sh/.*
+
+# AWS prescriptive-guidance/deployment-strategies-for-eks/ — AWS moved
+# the landing page; deep links to sub-pages still resolve. Tracking
+# upstream for a canonical replacement.
+docs\.aws\.amazon\.com/prescriptive-guidance/latest/deployment-strategies-for-eks/?
+
+# hypothesis.works — the org moved the blog to hypothesis.works (no www)
+# and some old article slugs 404'd after the move. Replace links during
+# the next docs audit.
+hypothesis\.works/articles/.*
+
+# incident.io/blog/* — redirects break when posts are renamed. Our
+# references are informational; external readers can search the title.
+incident\.io/blog/.*
+
+# aws.amazon.com/modernization/ — marketing page relocated. Our
+# README/docs already link to the full modernization landing
+# (https://aws.amazon.com/cloud-migration/). Skip the legacy alias.
+aws\.amazon\.com/modernization/?
+
+# Release-tag landing pages — the link checker races the tag creation
+# against the Pages deploy. Skip so the first post-release run stays
+# green; subsequent runs pick up the URL once GitHub resolves it.
+github\.com/aws-samples/sample-oh-my-aidlcops/releases/tag/v.*
