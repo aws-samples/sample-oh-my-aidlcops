@@ -55,13 +55,13 @@ quick-access list for humans.
 |---|---|---|
 | <a id="mcp-v10"></a>Model Context Protocol v1.0 | https://modelcontextprotocol.io | `Agent.mcp_uri` on `schemas/ontology/agent.schema.json` |
 | <a id="slsa-v11"></a>SLSA v1.1 Provenance | https://slsa.dev/spec/v1.1/ | `Deployment.artifact.{digest,provenance_uri,signing}` |
-| <a id="nist-ai-rmf"></a>NIST AI Risk Management Framework (AI 100-1) | https://nvlpubs.nist.gov/nistpubs/ai/NIST.AI.100-1.pdf | `Risk.nist_ai_rmf_subcategory`; `AuditEvent.compliance.nist_ai_rmf` |
+| <a id="nist-ai-rmf"></a>NIST AI Risk Management Framework (AI 100-1) | https://www.nist.gov/itl/ai-risk-management-framework | `Risk.nist_ai_rmf_subcategory`; `AuditEvent.compliance.nist_ai_rmf` |
 | <a id="owasp-llm-top-10"></a>OWASP Top 10 for Large Language Model Applications | https://owasp.org/www-project-top-10-for-large-language-model-applications/ | `Risk.owasp_llm_top10_id` (LLM01..LLM10) |
 | <a id="json-schema-2020-12"></a>JSON Schema Draft 2020-12 | https://json-schema.org/draft/2020-12/schema | `schemas/ontology/{spec,adr}.schema.json`, `schemas/common/approval-chain.schema.json`, `schemas/audit/event.schema.json` |
 | <a id="opentelemetry-semconv"></a>OpenTelemetry Semantic Conventions | https://opentelemetry.io/docs/specs/semconv/ | `Incident.trace_id`, `Incident.span_id`, DSL v2 `spec.telemetry.traces/metrics/logs` |
 | <a id="oci-image-spec"></a>OCI Image Spec v1.1 | https://github.com/opencontainers/image-spec/blob/main/spec.md | `Deployment.artifact.digest` sha256 pattern |
 | <a id="opa-rego"></a>OPA / Rego | https://www.openpolicyagent.org/docs/latest/ | `spec.policies[].rego_ref`; `scripts/oma/validate.sh` shell-out |
-| <a id="cosign"></a>Sigstore cosign | https://docs.sigstore.dev/signing/quickstart/ | `Deployment.artifact.signing.cosign_bundle_uri` |
+| <a id="cosign"></a>Sigstore cosign | https://docs.sigstore.dev/quickstart/quickstart-cosign/ | `Deployment.artifact.signing.cosign_bundle_uri` |
 | <a id="rfc-3339"></a>RFC 3339 (ISO 8601 profile) | https://datatracker.ietf.org/doc/html/rfc3339 | All `*_at` timestamp fields across ontology |
 | <a id="keep-a-changelog"></a>Keep a Changelog 1.1 | https://keepachangelog.com/en/1.1.0/ | `CHANGELOG.md` section shape |
 | <a id="semver"></a>Semantic Versioning 2.0 | https://semver.org/spec/v2.0.0.html | Git tag naming post-GA |
@@ -76,10 +76,10 @@ quick-access list for humans.
 | Framework | URL | Influence on OMA |
 |---|---|---|
 | <a id="finops-framework"></a>FinOps Framework | https://www.finops.org/framework/ | `Budget.cost_center_owner`, `Budget.approval_gate`, `Budget.scope` enum |
-| <a id="6r"></a>AWS 6R modernization strategy | https://docs.aws.amazon.com/whitepapers/latest/migration-strategy/migration-strategy.html | `Risk.category` enum, `modernization` plugin decision trees |
+| <a id="6r"></a>AWS 6R modernization strategy | https://aws.amazon.com/cloud-migration/ | `Risk.category` enum, `modernization` plugin decision trees |
 | <a id="well-architected"></a>AWS Well-Architected Framework | https://docs.aws.amazon.com/wellarchitected/latest/framework/ | `well-architected-security` MCP server + security posture reviews |
 | <a id="slsa-framework"></a>SLSA Framework | https://slsa.dev/ | Supply-chain integrity for `Deployment.artifact` |
-| <a id="nist-800-53"></a>NIST SP 800-53 Rev. 5 | https://nvlpubs.nist.gov/nistpubs/SpecialPublications/NIST.SP.800-53r5.pdf | `Risk.compliance_refs[].framework=nist-800-53` |
+| <a id="nist-800-53"></a>NIST SP 800-53 Rev. 5 | https://csrc.nist.gov/pubs/sp/800/53/r5/upd1/final | `Risk.compliance_refs[].framework=nist-800-53` |
 | <a id="iso-42001"></a>ISO/IEC 42001 | https://www.iso.org/standard/81230.html | `Risk.compliance_refs[].framework=iso-42001` |
 | <a id="soc-2"></a>AICPA SOC 2 | https://www.aicpa-cima.com/topic/audit-assurance/audit-and-assurance-greater-than-soc-2 | `Risk.compliance_refs[].framework=soc-2` |
 | <a id="mitre-atlas"></a>MITRE ATLAS | https://atlas.mitre.org/ | `Risk.compliance_refs[].framework=mitre-atlas` (attack taxonomy) |
