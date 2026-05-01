@@ -5,6 +5,14 @@ title: Enterprise readiness
 
 # Enterprise readiness
 
+:::tip Aggregate status
+Run `oma enterprise-status` to summarise `doctor --enterprise` probes
+plus the phased-adoption stage counters in one shot. Pass `--json` for
+machine-readable output; the same payload is archived to
+`.omao/status.json` so dashboards can ingest it without re-running the
+probe chain.
+:::
+
 Enterprise readiness in OMA is defined by an **opt-in gate**, not a
 default. Teams that do not need it pay nothing; teams that do enable it
 enforce the full 8-probe contract before any `Deployment.approval_state`
