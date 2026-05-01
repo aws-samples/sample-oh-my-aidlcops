@@ -61,6 +61,11 @@ const sidebars: SidebarsConfig = {
         'telemetry',
       ],
     },
+    {
+      type: 'link',
+      label: 'Releases',
+      href: '/releases',
+    },
   ],
 };
 
