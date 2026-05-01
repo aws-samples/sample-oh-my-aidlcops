@@ -5,6 +5,9 @@
   "private": true,
   "scripts": {
     "docusaurus": "docusaurus",
+    "sync-references": "node scripts/sync-references.mjs",
+    "prebuild": "npm run sync-references",
+    "prestart": "npm run sync-references",
     "start": "docusaurus start",
     "build": "docusaurus build",
     "swizzle": "docusaurus swizzle",

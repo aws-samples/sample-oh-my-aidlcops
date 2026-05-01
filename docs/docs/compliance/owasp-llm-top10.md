@@ -5,6 +5,12 @@ title: OWASP LLM Top 10 mapping
 
 # OWASP Top 10 for Large Language Model Applications — OMA mapping
 
+:::tip External references
+Every upstream spec and framework OMA cites — including OWASP LLM
+Top 10 itself — is catalogued on the [References](/docs/references)
+page.
+:::
+
 `Risk.owasp_llm_top10_id` takes values `LLM01`..`LLM10`. Every Risk that
 relates to LLM application security should carry exactly one of these
 codes; risks spanning multiple categories fan out via
