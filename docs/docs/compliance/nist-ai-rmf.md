@@ -5,6 +5,11 @@ title: NIST AI RMF mapping
 
 # NIST AI Risk Management Framework (AI 100-1) mapping
 
+:::tip External references
+Every upstream spec and framework OMA cites — including NIST AI RMF
+itself — is catalogued on the [References](/docs/references) page.
+:::
+
 OMA uses the NIST AI RMF as its primary AI-specific governance taxonomy.
 Every `Risk` entity can carry an optional
 `nist_ai_rmf_subcategory` of the form

@@ -13,6 +13,12 @@ machine-readable output; the same payload is archived to
 probe chain.
 :::
 
+:::tip External references
+For the authoritative sources behind every probe (NIST AI RMF, OWASP
+LLM Top 10, SLSA v1.1, JSON Schema 2020-12, ADR template, etc.) see
+the [References](/docs/references) page.
+:::
+
 Enterprise readiness in OMA is defined by an **opt-in gate**, not a
 default. Teams that do not need it pay nothing; teams that do enable it
 enforce the full 8-probe contract before any `Deployment.approval_state`

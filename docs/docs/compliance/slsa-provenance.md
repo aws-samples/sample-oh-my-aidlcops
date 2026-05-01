@@ -5,6 +5,11 @@ title: SLSA provenance
 
 # SLSA v1.1 provenance on Deployment.artifact
 
+:::tip External references
+Every upstream spec and framework OMA cites — including SLSA v1.1
+itself — is catalogued on the [References](/docs/references) page.
+:::
+
 `Deployment.artifact` accepts two shapes in v0.4+:
 
 ```yaml
