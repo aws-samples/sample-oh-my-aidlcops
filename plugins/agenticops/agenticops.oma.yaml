@@ -3,7 +3,7 @@
 # agenticops covers the AIDLC Operations phase: self-improving loops,
 # autonomous deploy, continuous evaluation, incident response, and cost
 # governance. The plugin ships no MCP servers of its own — it reuses the
-# agentic-platform MCP catalogue and the hosted awslabs MCP runtime layer.
+# ai-infra MCP catalogue and the hosted awslabs MCP runtime layer.
 #
 # This file exists so that oma-compile has a v2 manifest to validate and
 # so that `oma doctor --enterprise` (v0.5) does not warn about a missing
@@ -18,7 +18,7 @@ metadata:
     tier-0-surface: "true"
 
 # No MCP servers or agents declared at this layer — see
-# plugins/agentic-platform/agentic-platform.oma.yaml for the shared MCP
+# plugins/ai-infra/ai-infra.oma.yaml for the shared MCP
 # catalogue that agenticops skills invoke through Claude Code's merged
 # .mcp.json or through Kiro's resource:// graph.
 mcp: {}

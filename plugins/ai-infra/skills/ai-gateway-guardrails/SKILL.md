@@ -92,7 +92,7 @@ mcpAllowList:
   # deny all others
 tokenPolicy:
   maxLifetimeSeconds: 900
-  audience: agentic-platform
+  audience: ai-infra
 ```
 
 ### Step 7. Audit & 알림

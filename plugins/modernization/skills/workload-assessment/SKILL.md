@@ -17,7 +17,7 @@ allowed-tools: "Read,Grep,Glob,Bash,WebFetch,mcp__aws-documentation,mcp__aws-pri
 ## 언제 사용하지 않나요
 
 - 이미 `.omao/plans/modernization/assessment-report.md` 가 최신 상태로 존재하고 입력 스코프에 변화가 없을 때
-- 그린필드(신규) 프로젝트 — 이 skill 은 기존 자산 분석이 목적이며, 그린필드는 `aidlc-inception/requirements-analysis` 를 사용
+- 그린필드(신규) 프로젝트 — 이 skill 은 기존 자산 분석이 목적이며, 그린필드는 `aidlc/skills/inception/requirements-analysis` 를 사용
 - 단순 라이브러리 버전 업그레이드 — 현대화가 아닌 유지보수 범주는 별도 프로세스로 처리
 
 ## 전제 조건
@@ -128,4 +128,4 @@ aws-samples `assessment-framework.md` 의 5축을 **High/Medium/Low** 로 점수
 ### 관련 문서 (내부)
 - `../../CLAUDE.md` — modernization 플러그인 개요
 - `../modernization-strategy/SKILL.md` — 다음 skill (6R 결정)
-- `/home/ubuntu/workspace/oh-my-aidlcops/plugins/aidlc-construction/CLAUDE.md` — risk-discovery 통합 포인트
+- `/home/ubuntu/workspace/oh-my-aidlcops/plugins/aidlc/CLAUDE.md` — risk-discovery 통합 포인트

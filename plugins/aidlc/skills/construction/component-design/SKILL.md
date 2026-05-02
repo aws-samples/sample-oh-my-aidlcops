@@ -18,7 +18,7 @@ allowed-tools: "Read,Grep,Glob,Bash"
 
 다음 상황에서는 사용하지 않습니다.
 
-- Inception 아티팩트(requirements·user-stories·workflow-plan)가 아직 확정되지 않은 상태 — 먼저 `aidlc-inception` skill들로 상위 단계를 완료해야 합니다.
+- Inception 아티팩트(requirements·user-stories·workflow-plan)가 아직 확정되지 않은 상태 — 먼저 `aidlc` (inception) skill들로 상위 단계를 완료해야 합니다.
 - 단순 버그 픽스·리팩토링 — 설계 문서 갱신이 필요 없는 변경은 `code-generation` skill로 직접 진행합니다.
 
 ## 전제 조건
@@ -159,6 +159,6 @@ def log_trace(payload):
 
 ### 관련 문서 (내부)
 
-- [aidlc-inception plugin](../../../aidlc-inception/CLAUDE.md) — 입력 아티팩트 제공자
+- [aidlc plugin](../../../CLAUDE.md) — 입력 아티팩트 제공자
 - [code-generation skill](../code-generation/SKILL.md) — 본 skill의 후속 실행자
 - [test-strategy skill](../test-strategy/SKILL.md) — 본 skill의 병렬 소비자

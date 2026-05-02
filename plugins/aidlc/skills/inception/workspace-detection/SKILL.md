@@ -111,7 +111,7 @@ allowed-tools: "Read,Grep,Glob,Bash"
 - [awslabs/aidlc-workflows — workspace-detection](https://github.com/awslabs/aidlc-workflows/blob/main/aidlc-rules/aws-aidlc-rule-details/inception/workspace-detection.md) — 원본 워크스페이스 탐지 규칙
 
 ### 관련 문서 (내부)
-- `../../CLAUDE.md` — aidlc-inception 플러그인 개요
+- `../../CLAUDE.md` — aidlc 플러그인 (inception) 개요
 - `../requirements-analysis/SKILL.md` — 다음 단계 스킬
 - `/home/ubuntu/workspace/oh-my-aidlcops/CLAUDE.md` — OMA 전체 철학
-- `/home/ubuntu/workspace/oh-my-aidlcops/plugins/aidlc-construction/CLAUDE.md` — Phase 2 연결
+- `/home/ubuntu/workspace/oh-my-aidlcops/plugins/aidlc/CLAUDE.md` — Phase 2 연결

@@ -1,6 +1,6 @@
 ---
 name: workflow-planning
-description: "Strategic workflow planning for AIDLC Phase 1 close-out. Chooses sequential / parallel-units / iterative execution mode via a decision tree, maps stories to units, and defines checkpoint gates. Produces workflow-plan.md as the hand-off artifact to aidlc-construction."
+description: "Strategic workflow planning for AIDLC Phase 1 close-out. Chooses sequential / parallel-units / iterative execution mode via a decision tree, maps stories to units, and defines checkpoint gates. Produces workflow-plan.md as the hand-off artifact to the aidlc plugin construction phase."
 argument-hint: "[feature slug — same slug used in requirements-analysis and user-stories]"
 user-invocable: true
 model: claude-opus-4-7
@@ -16,7 +16,7 @@ allowed-tools: "Read,Write,Edit,Grep,Glob"
 ## 언제 사용하지 않나요
 
 - 단일 스토리, 단일 커밋 수준 작업 — 오버헤드만 발생
-- 이미 `aidlc-construction` 이 진행 중인 피처의 재계획 — 해당 플러그인에서 수행
+- 이미 `aidlc` (construction) 이 진행 중인 피처의 재계획 — 해당 플러그인에서 수행
 - 운영 장애 대응(AgenticOps 모드) — `agenticops` 플러그인 참조
 
 ## 전제 조건
@@ -74,7 +74,7 @@ allowed-tools: "Read,Write,Edit,Grep,Glob"
 
 ### Step 6. Construction 핸드오프 입력 정의
 
-다음 세 산출물을 `aidlc-construction` 에 전달합니다.
+다음 세 산출물을 `aidlc` (construction) 에 전달합니다.
 
 1. `requirements.md` — 기능/비기능 요구, REQ-ID
 2. `user-stories.md` — 스토리, AC, Traceability(생략된 경우 사유 로그)
@@ -107,6 +107,6 @@ allowed-tools: "Read,Write,Edit,Grep,Glob"
 ### 관련 문서 (내부)
 - `../requirements-analysis/SKILL.md` — REQ-ID 소스
 - `../user-stories/SKILL.md` — 스토리 소스
-- `../../CLAUDE.md` — aidlc-inception 개요
-- `/home/ubuntu/workspace/oh-my-aidlcops/plugins/aidlc-construction/CLAUDE.md` — Phase 2 핸드오프 대상
+- `../../CLAUDE.md` — aidlc 플러그인 개요
+- `/home/ubuntu/workspace/oh-my-aidlcops/plugins/aidlc/CLAUDE.md` — Phase 2 핸드오프 대상
 - `/home/ubuntu/workspace/oh-my-aidlcops/CLAUDE.md` — OMA 전체 철학

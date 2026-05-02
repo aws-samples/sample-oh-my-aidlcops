@@ -106,4 +106,4 @@ echo "[$(date -Iseconds)] structured-intake completed for ${SLUG}" \
 - `../workspace-detection/SKILL.md` — intake 완료 후 코드베이스 스캔을 수행하는 후행 skill
 - `../requirements-analysis/SKILL.md` — `requirements.md` 초안을 REQ-ID 구조로 정제
 - `../user-stories/SKILL.md` — 성공 기준·이해관계자 정보를 소비
-- `../../../aidlc-construction/skills/risk-discovery/SKILL.md` — Construction 진입 시 intake 산출물을 위험 탐지 입력으로 사용
+- `../../construction/risk-discovery/SKILL.md` — Construction 진입 시 intake 산출물을 위험 탐지 입력으로 사용

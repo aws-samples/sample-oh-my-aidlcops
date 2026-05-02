@@ -106,5 +106,5 @@ allowed-tools: "Read,Write,Edit,Grep,Glob"
 ### 관련 문서 (내부)
 - `../requirements-analysis/SKILL.md` — 선행 스킬(REQ-ID 소스)
 - `../workflow-planning/SKILL.md` — 후행 스킬(Unit 매핑)
-- `../../CLAUDE.md` — aidlc-inception 개요
+- `../../CLAUDE.md` — aidlc 플러그인 개요
 - `/home/ubuntu/workspace/oh-my-aidlcops/CLAUDE.md` — OMA 전체 철학

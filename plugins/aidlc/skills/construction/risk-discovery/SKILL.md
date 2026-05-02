@@ -184,7 +184,7 @@ BLOCK 판정이 1개라도 있으면 `.omao/state/gates/construction.json`에 `{
 
 ### 관련 문서 (내부)
 
-- `../../aidlc-inception/skills/structured-intake/SKILL.md` — 입력 intake 생성자
+- `../../inception/structured-intake/SKILL.md` — 입력 intake 생성자
 - `../component-design/SKILL.md` — 본 skill이 분석할 design.md 생성자
 - `../quality-gates/SKILL.md` — BLOCK 판정 시 phase 진입 차단 담당
 - `../../../agenticops/skills/audit-trail/SKILL.md` — 판정 결과를 감사 로그에 기록

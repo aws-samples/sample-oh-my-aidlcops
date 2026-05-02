@@ -195,7 +195,7 @@ blockers_waived:
 ### 관련 문서 (내부)
 
 - `../risk-discovery/SKILL.md` — Construction gate의 핵심 입력 제공자
-- `../../aidlc-inception/skills/requirements-analysis/SKILL.md` — Inception gate의 입력 생성자
+- `../../inception/requirements-analysis/SKILL.md` — Inception gate의 입력 생성자
 - `../../agenticops/skills/continuous-eval/SKILL.md` — Operations gate의 품질 지표 공급자
 - `../../agenticops/skills/cost-governance/SKILL.md` — Operations gate의 비용 판정 공급자
 - `../../agenticops/skills/audit-trail/SKILL.md` — gate 판정 이벤트 감사 로그 기록자

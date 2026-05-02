@@ -1,7 +1,7 @@
 ---
-name: agentic-platform-bootstrap
+name: ai-infra-bootstrap
 description: EKS 클러스터에 Agentic AI Platform 스택(Karpenter, GPU Operator, vLLM, kgateway, Langfuse)을 5-checkpoint로 부트스트랩하고 샘플 추론·trace 검증까지 완료한다.
-plugin: agentic-platform
+plugin: ai-infra
 tier_0_command: /oma:platform-bootstrap
 difficulty: advanced
 estimated_duration: 60 minutes
@@ -19,7 +19,7 @@ estimated_duration: 60 minutes
 - [ ] IAM 권한: EKS, EC2, IAM, VPC, Route53, ACM 필요 권한 보유
 - [ ] Helm v3.x 설치 (`helm version` 확인)
 - [ ] kubectl 설치 및 기본 클러스터 접근 가능 (또는 신규 생성 계획)
-- [ ] OMA 플러그인 설치: `agentic-platform`
+- [ ] OMA 플러그인 설치: `ai-infra`
 - [ ] MCP 서버 접근 가능: `mcp__eks`, `mcp__aws-pricing`, `mcp__aws-documentation`
 - [ ] Security Group 정책 준수: 0.0.0.0/0 인바운드 금지 (CLAUDE.md 규정)
 

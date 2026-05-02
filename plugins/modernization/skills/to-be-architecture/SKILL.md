@@ -152,4 +152,4 @@ LLM 추론 경로가 포함된 경우 **Langfuse v3.x** 를 OpenTelemetry 엔드
 ### 관련 문서 (내부)
 - `../modernization-strategy/SKILL.md` — 선행 skill
 - `../containerization/SKILL.md` — 후속 skill
-- `/home/ubuntu/workspace/oh-my-aidlcops/plugins/agentic-platform/CLAUDE.md` — LLM 경로가 포함된 아키텍처 연계
+- `/home/ubuntu/workspace/oh-my-aidlcops/plugins/ai-infra/CLAUDE.md` — LLM 경로가 포함된 아키텍처 연계

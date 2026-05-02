@@ -43,12 +43,12 @@ Each box is a JSON Schema in `../schemas/ontology/`.
 |-------------|-------------------------------------|--------------------------------|---------------------------------------|
 | Agent       | `agent.schema.json`                 | plugin author                  | Claude Code, Kiro, oma-compile        |
 | Skill       | `skill.schema.json`                 | plugin author                  | Claude Code skill loader              |
-| Deployment  | `deployment.schema.json`            | `aidlc-construction`           | `agenticops.autopilot-deploy`         |
+| Deployment  | `deployment.schema.json`            | `aidlc`           | `agenticops.autopilot-deploy`         |
 | Incident    | `incident.schema.json`              | `agenticops.incident-response` | human approver; auto-rollback path    |
 | Budget      | `budget.schema.json`                | plugin author / finops team    | `agenticops.cost-governance`          |
 | Risk        | `risk.schema.json`                  | `modernization.risk-discovery` | stage-gate-strict mode                |
-| Spec        | `spec.schema.json` (Draft 2020-12)  | `aidlc-inception`              | ADR author; Deployment.spec_ref       |
-| ADR         | `adr.schema.json` (Draft 2020-12)   | `aidlc-inception`/`aidlc-construction` | Deployment.adr_refs; review gates |
+| Spec        | `spec.schema.json` (Draft 2020-12)  | `aidlc`              | ADR author; Deployment.spec_ref       |
+| ADR         | `adr.schema.json` (Draft 2020-12)   | `aidlc`/`aidlc` | Deployment.adr_refs; review gates |
 
 Shared definitions live in `../schemas/common/`:
 - `approval-chain.schema.json` — `$defs.approvalChain` reused by
@@ -59,7 +59,7 @@ Audit events (one line per ISO 8601 action) are described by
 
 ## Relationships
 
-- **Agent produces Deployment.** `aidlc-construction.construction-loop` emits a
+- **Agent produces Deployment.** `aidlc.construction-loop` emits a
   `Deployment` artifact at the Construction->Operations handoff. Every downstream
   AgenticOps skill reads this artifact rather than re-deriving target/artifact
   fields from prose.

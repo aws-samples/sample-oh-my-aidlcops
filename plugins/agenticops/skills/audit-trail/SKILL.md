@@ -204,7 +204,7 @@ done
 
 ### 관련 문서 (내부)
 
-- `../../aidlc-construction/skills/quality-gates/SKILL.md` — gate 판정 이벤트를 본 skill로 기록
-- `../../aidlc-construction/skills/risk-discovery/SKILL.md` — risk 판정 결과를 감사 로그에 push
-- `../../aidlc-inception/skills/structured-intake/SKILL.md` — 사용자 intake 응답을 verbatim 보존
+- `../../construction/quality-gates/SKILL.md` — gate 판정 이벤트를 본 skill로 기록
+- `../../construction/risk-discovery/SKILL.md` — risk 판정 결과를 감사 로그에 push
+- `../../inception/structured-intake/SKILL.md` — 사용자 intake 응답을 verbatim 보존
 - `../incident-response/SKILL.md` — SEV 이벤트를 본 skill로 기록
