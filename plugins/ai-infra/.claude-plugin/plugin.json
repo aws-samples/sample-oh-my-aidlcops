@@ -1,0 +1,27 @@
+{
+  "$schema": "../../../schemas/plugin.schema.json",
+  "name": "ai-infra",
+  "description": "AI runtime infrastructure for AWS agentic workloads. Today ships EKS + vLLM + Inference Gateway (kgateway + Bifrost/LiteLLM) + Langfuse + GPU planning + guardrails as the self-hosted open-source stack. MCP servers for Bedrock AgentCore, Bedrock KB retrieval, and SageMaker AI are wired in; managed-runtime skills are planned for a later release.",
+  "version": "0.1.0",
+  "author": {
+    "name": "aws-samples",
+    "email": "aws-samples.com"
+  },
+  "keywords": [
+    "ai-infra",
+    "eks",
+    "bedrock",
+    "sagemaker",
+    "vllm",
+    "inference-gateway",
+    "langfuse",
+    "kagent",
+    "agentic-ai",
+    "kubernetes",
+    "gpu",
+    "karpenter"
+  ],
+  "license": "Apache-2.0",
+  "homepage": "https://github.com/aws-samples/sample-oh-my-aidlcops",
+  "repository": "https://github.com/aws-samples/sample-oh-my-aidlcops"
+}

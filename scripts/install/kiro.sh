@@ -102,18 +102,42 @@ install_skills() {
         fi
         plugin_target="$skills_target/$plugin"
         ensure_dir "$plugin_target"
+        # Walk one level deep, but if a child has no SKILL.md it is a
+        # grouping directory (e.g. aidlc/skills/inception/) and we
+        # recurse one more level to find the real skills inside.
         for skill_path in "$plugin_skills"/*/; do
             [ -d "$skill_path" ] || continue
             skill_name="$(basename "$skill_path")"
-            dst="$plugin_target/$skill_name"
-            if link_or_refresh "${skill_path%/}" "$dst"; then
-                SKILLS_LINKED=$((SKILLS_LINKED + 1))
-                log "skill linked: $plugin/$skill_name"
+            if [ -f "$skill_path/SKILL.md" ]; then
+                dst="$plugin_target/$skill_name"
+                if link_or_refresh "${skill_path%/}" "$dst"; then
+                    SKILLS_LINKED=$((SKILLS_LINKED + 1))
+                    log "skill linked: $plugin/$skill_name"
+                fi
+                if [ -f "$skill_path/kiro.meta.yaml" ]; then
+                    KIRO_META_FOUND=$((KIRO_META_FOUND + 1))
+                    log "  kiro.meta.yaml sidecar detected for $plugin/$skill_name"
+                fi
+                continue
             fi
-            if [ -f "$skill_path/kiro.meta.yaml" ]; then
-                KIRO_META_FOUND=$((KIRO_META_FOUND + 1))
-                log "  kiro.meta.yaml sidecar detected for $plugin/$skill_name"
-            fi
+            # Grouping directory: descend one level and link each
+            # inner skill as <plugin>/<group>/<skill>.
+            group_name="$skill_name"
+            group_target="$plugin_target/$group_name"
+            ensure_dir "$group_target"
+            for inner_path in "$skill_path"*/; do
+                [ -d "$inner_path" ] || continue
+                inner_name="$(basename "$inner_path")"
+                dst="$group_target/$inner_name"
+                if link_or_refresh "${inner_path%/}" "$dst"; then
+                    SKILLS_LINKED=$((SKILLS_LINKED + 1))
+                    log "skill linked: $plugin/$group_name/$inner_name"
+                fi
+                if [ -f "$inner_path/kiro.meta.yaml" ]; then
+                    KIRO_META_FOUND=$((KIRO_META_FOUND + 1))
+                    log "  kiro.meta.yaml sidecar detected for $plugin/$group_name/$inner_name"
+                fi
+            done
         done
     done < <(jq -r '.plugins[].name' "$MARKETPLACE_JSON")
 }

@@ -11,9 +11,9 @@
   },
   "plugins": [
     {
-      "name": "agentic-platform",
+      "name": "ai-infra",
       "description": "Build and operate agentic AI workloads on EKS with vLLM, Inference Gateway, Langfuse, and Kagent. Covers GPU planning, model serving, routing, observability, and guardrails.",
-      "source": "./plugins/agentic-platform",
+      "source": "./plugins/ai-infra",
       "version": "0.2.0-preview.1",
       "category": "ai-platform",
       "keywords": [
@@ -48,36 +48,27 @@
       "tags": ["operate", "automation", "feedback-loop"]
     },
     {
-      "name": "aidlc-inception",
-      "description": "AIDLC Phase 1 — Inception. Workspace detection, requirements analysis, user stories, and workflow planning as opt-in extensions to awslabs/aidlc-workflows.",
-      "source": "./plugins/aidlc-inception",
+      "name": "aidlc",
+      "description": "AIDLC Phase 1 (Inception) + Phase 2 (Construction) opt-in extensions for awslabs/aidlc-workflows. Inception covers workspace detection, adaptive-depth requirements analysis, user stories, and workflow planning. Construction covers component design, code generation, TDD-for-agentic test strategy, risk discovery, and phase quality gates.",
+      "source": "./plugins/aidlc",
       "version": "0.2.0-preview.1",
       "category": "aidlc",
       "keywords": [
         "aidlc",
         "inception",
+        "construction",
         "requirements",
         "user-stories",
         "workflow-planning",
-        "awslabs-aidlc"
-      ],
-      "tags": ["aidlc", "phase-1", "design"]
-    },
-    {
-      "name": "aidlc-construction",
-      "description": "AIDLC Phase 2 — Construction. Component design, code generation, and test strategy for agentic systems as opt-in extensions to awslabs/aidlc-workflows.",
-      "source": "./plugins/aidlc-construction",
-      "version": "0.2.0-preview.1",
-      "category": "aidlc",
-      "keywords": [
-        "aidlc",
-        "construction",
         "component-design",
         "code-generation",
         "tdd",
-        "agentic-testing"
+        "agentic-testing",
+        "risk-discovery",
+        "quality-gates",
+        "awslabs-aidlc"
       ],
-      "tags": ["aidlc", "phase-2", "build"]
+      "tags": ["aidlc", "design", "build"]
     },
     {
       "name": "modernization",

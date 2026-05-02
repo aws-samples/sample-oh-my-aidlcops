@@ -33,33 +33,33 @@
 - ✓ `.claude-plugin/marketplace.json`
 
 **Plugin Manifests (4)**
-- ✓ `plugins/agentic-platform/.claude-plugin/plugin.json`
+- ✓ `plugins/ai-infra/.claude-plugin/plugin.json`
 - ✓ `plugins/agenticops/.claude-plugin/plugin.json`
-- ✓ `plugins/aidlc-construction/.claude-plugin/plugin.json`
-- ✓ `plugins/aidlc-inception/.claude-plugin/plugin.json`
+- ✓ `plugins/aidlc/.claude-plugin/plugin.json`
+- ✓ `plugins/aidlc/.claude-plugin/plugin.json`
 
 **Skill Frontmatter (18)**
-- ✓ `plugins/agentic-platform/skills/agentic-eks-bootstrap/SKILL.md`
-- ✓ `plugins/agentic-platform/skills/ai-gateway-guardrails/SKILL.md`
-- ✓ `plugins/agentic-platform/skills/gpu-resource-management/SKILL.md`
-- ✓ `plugins/agentic-platform/skills/inference-gateway-routing/SKILL.md`
-- ✓ `plugins/agentic-platform/skills/langfuse-observability/SKILL.md`
-- ✓ `plugins/agentic-platform/skills/vllm-serving-setup/SKILL.md`
+- ✓ `plugins/ai-infra/skills/agentic-eks-bootstrap/SKILL.md`
+- ✓ `plugins/ai-infra/skills/ai-gateway-guardrails/SKILL.md`
+- ✓ `plugins/ai-infra/skills/gpu-resource-management/SKILL.md`
+- ✓ `plugins/ai-infra/skills/inference-gateway-routing/SKILL.md`
+- ✓ `plugins/ai-infra/skills/langfuse-observability/SKILL.md`
+- ✓ `plugins/ai-infra/skills/vllm-serving-setup/SKILL.md`
 - ✓ `plugins/agenticops/skills/autopilot-deploy/SKILL.md`
 - ✓ `plugins/agenticops/skills/continuous-eval/SKILL.md`
 - ✓ `plugins/agenticops/skills/cost-governance/SKILL.md`
 - ✓ `plugins/agenticops/skills/incident-response/SKILL.md`
 - ✓ `plugins/agenticops/skills/self-improving-loop/SKILL.md`
-- ✓ `plugins/aidlc-construction/skills/code-generation/SKILL.md`
-- ✓ `plugins/aidlc-construction/skills/component-design/SKILL.md`
-- ✓ `plugins/aidlc-construction/skills/test-strategy/SKILL.md`
-- ✓ `plugins/aidlc-inception/skills/requirements-analysis/SKILL.md`
-- ✓ `plugins/aidlc-inception/skills/user-stories/SKILL.md`
-- ✓ `plugins/aidlc-inception/skills/workflow-planning/SKILL.md`
-- ✓ `plugins/aidlc-inception/skills/workspace-detection/SKILL.md`
+- ✓ `plugins/aidlc/skills/code-generation/SKILL.md`
+- ✓ `plugins/aidlc/skills/component-design/SKILL.md`
+- ✓ `plugins/aidlc/skills/test-strategy/SKILL.md`
+- ✓ `plugins/aidlc/skills/requirements-analysis/SKILL.md`
+- ✓ `plugins/aidlc/skills/user-stories/SKILL.md`
+- ✓ `plugins/aidlc/skills/workflow-planning/SKILL.md`
+- ✓ `plugins/aidlc/skills/workspace-detection/SKILL.md`
 
 **MCP Configurations (1)**
-- ✓ `plugins/agentic-platform/.mcp.json`
+- ✓ `plugins/ai-infra/.mcp.json`
 
 ## Validation Cross-Check
 

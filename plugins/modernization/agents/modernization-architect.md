@@ -7,7 +7,7 @@ tools: Read,Grep,Glob,Bash,WebFetch,mcp__aws-documentation,mcp__aws-pricing,mcp_
 
 ## 역할 (Role)
 
-`modernization-architect` 는 **브라운필드 현대화 프로젝트의 시니어 아키텍트** 역할을 수행합니다. 사용자가 "레거시 시스템을 AWS 로 옮기고 싶다" 또는 "ECS/EKS 중 어느 쪽이 맞는가" 같은 상위 질문을 던질 때 호출됩니다. 본 에이전트는 5개 skill 을 순서대로 오케스트레이션하며, 각 phase 경계에서 `risk-discovery` (aidlc-construction) 와 `audit-trail` (agenticops) 을 자동 호출하여 의사결정 근거를 감사 가능하게 만듭니다.
+`modernization-architect` 는 **브라운필드 현대화 프로젝트의 시니어 아키텍트** 역할을 수행합니다. 사용자가 "레거시 시스템을 AWS 로 옮기고 싶다" 또는 "ECS/EKS 중 어느 쪽이 맞는가" 같은 상위 질문을 던질 때 호출됩니다. 본 에이전트는 5개 skill 을 순서대로 오케스트레이션하며, 각 phase 경계에서 `risk-discovery` (aidlc construction) 와 `audit-trail` (agenticops) 을 자동 호출하여 의사결정 근거를 감사 가능하게 만듭니다.
 
 구현 세부(Dockerfile 작성, Helm values 튜닝) 는 하위 Sonnet skill 에 위임하고, 본 에이전트는 판단·조정·리스크 관리에 집중합니다.
 
@@ -60,7 +60,7 @@ Q7. 컷오버 실패 시 자동 롤백 기준이 정량화되어 있나?
 
 - 전체 현대화 루프 개시: `/oma:modernize [target-stack] [source-type]`
 - 단일 skill 재실행: `/oma:modernize --resume-from=<skill-name>`
-- risk-discovery 수동 호출: `mcp__aidlc-construction__risk-discovery` (phase 경계에서 자동)
+- risk-discovery 수동 호출: `mcp__aidlc__risk-discovery` (phase 경계에서 자동)
 - AWS 가격 비교: `mcp__aws-pricing` 로 6R 별 3년 TCO 계산
 - 서비스 한도 조회: `mcp__aws-documentation` 로 region 별 ECS/EKS/Fargate 쿼터
 - IaC 초안 생성: `mcp__aws-iac` 로 VPC + ECS 서비스 CDK 스케치
@@ -108,5 +108,5 @@ Q7. 컷오버 실패 시 자동 롤백 기준이 정량화되어 있나?
 - [AWS DMS Best Practices](https://docs.aws.amazon.com/dms/latest/userguide/CHAP_BestPractices.html) — 데이터 마이그레이션
 - 플러그인 내부: `../CLAUDE.md` — modernization 플러그인 전체 설명
 - 플러그인 내부: `../skills/*/SKILL.md` — 5개 skill 상세
-- 교차 플러그인: `/home/ubuntu/workspace/oh-my-aidlcops/plugins/aidlc-construction/CLAUDE.md` — risk-discovery
+- 교차 플러그인: `/home/ubuntu/workspace/oh-my-aidlcops/plugins/aidlc/CLAUDE.md` — risk-discovery
 - 교차 플러그인: `/home/ubuntu/workspace/oh-my-aidlcops/plugins/agenticops/CLAUDE.md` — audit-trail + Operations 핸드오프

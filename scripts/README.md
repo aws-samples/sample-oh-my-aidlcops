@@ -153,7 +153,7 @@ python3 scripts/dev/validate_strict.py        # stricter, uses jsonschema librar
 ```bash
 python3 scripts/dev/eval-skills.py
 python3 scripts/dev/eval-skills.py --strict
-python3 scripts/dev/eval-skills.py --plugin agentic-platform --verbose
+python3 scripts/dev/eval-skills.py --plugin ai-infra --verbose
 ```
 
 ### Regenerate the playbook index

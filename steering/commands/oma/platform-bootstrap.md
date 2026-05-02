@@ -18,7 +18,7 @@ Agentic AI Platform의 기반 인프라(EKS 클러스터, Karpenter, NVIDIA GPU 
 </execution_context>
 
 <process>
-`platform-bootstrap.md` 워크플로우를 그대로 실행하며, agentic-platform 플러그인의 스킬을 순서대로 호출한다.
+`platform-bootstrap.md` 워크플로우를 그대로 실행하며, ai-infra 플러그인의 스킬을 순서대로 호출한다.
 
 1. **Gather Context** — 대상 AWS 리전, 기존 EKS 클러스터, GPU 인스턴스 가용성 조회(`mcp__eks`, `mcp__aws-pricing`)
 2. **Pre-flight Checks** — IAM 권한(EKS/EC2/VPC), 서비스 쿼터, KubeConfig 접근성, Helm v3.x 설치 확인

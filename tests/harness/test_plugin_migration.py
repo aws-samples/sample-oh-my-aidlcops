@@ -16,10 +16,9 @@ import pytest
 from tools.oma_compile.compile import REPO_ROOT, check_drift
 
 PLUGINS_UNDER_DSL = [
-    "agentic-platform",
+    "ai-infra",
     "agenticops",
-    "aidlc-inception",
-    "aidlc-construction",
+    "aidlc",
     "modernization",
 ]
 

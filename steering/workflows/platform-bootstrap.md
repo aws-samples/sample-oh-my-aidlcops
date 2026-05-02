@@ -7,7 +7,7 @@ description: Agentic AI Platform 스택(EKS, Karpenter, GPU Operator, vLLM, kgat
 
 > **Part of:** [OMA Hub](../oma-hub.md)
 > **Command**: `/oma:platform-bootstrap`
-> **Plugin**: `agentic-platform`
+> **Plugin**: `ai-infra`
 > **Lifecycle**: Day 0 — Build
 
 이 워크플로우는 신규 EKS 클러스터에 Agentic AI Platform 스택을 순서 보장된 5단계로 설치합니다. 각 체크포인트에서 사람 승인 없이 다음 단계로 진행하지 않으며, 설치 의존성(GPU 드라이버 → 서빙 엔진 → 라우팅 → 관측성)을 준수합니다.

@@ -21,7 +21,7 @@ AIDLC 3단계(Inception, Construction, Operations)를 순차적으로 자동 실
 워크플로우는 `aws-samples/sample-apex-skills`의 5-checkpoint 구조를 따르며 `aidlc-full-loop.md`에 정의된 단계를 그대로 수행한다.
 
 1. **Gather Context** — workspace 유형(greenfield/brownfield) 감지, `.omao/project-memory.json`과 engineering-playbook 스타일 가이드 로드
-2. **Pre-flight Checks** — awslabs/aidlc-workflows 설치 확인, 플러그인(aidlc-inception, aidlc-construction, agenticops) 존재 검증, 기존 `.omao/plans/` 충돌 여부 점검
+2. **Pre-flight Checks** — awslabs/aidlc-workflows 설치 확인, 플러그인(aidlc, agenticops) 존재 검증, 기존 `.omao/plans/` 충돌 여부 점검
 3. **Plan** — Inception 산출물 3종(spec, stories, workflow plan)과 Construction 분해도, Operations 계측 항목을 한 번에 설계
 4. **Execute** — Inception → **CHECKPOINT** → Construction → **CHECKPOINT** → Operations 순으로 수행
 5. **Validate** — `.omao/plans/` 산출물 완전성, 테스트 통과, Langfuse/OTel 연결 확인

@@ -1,0 +1,67 @@
+{
+  "name": "ai-infra",
+  "description": "AI runtime infrastructure architect for AWS (EKS + vLLM + Inference Gateway + Langfuse today; Bedrock / SageMaker runtime skills planned).",
+  "tools": [
+    "*"
+  ],
+  "mcpServers": {
+    "awslabs.eks-mcp-server": {
+      "command": "uvx",
+      "args": [
+        "awslabs.eks-mcp-server==0.1.28"
+      ],
+      "env": {
+        "FASTMCP_LOG_LEVEL": "ERROR",
+        "AWS_REGION": "us-east-1"
+      },
+      "disabled": false
+    },
+    "awslabs.aws-documentation-mcp-server": {
+      "command": "uvx",
+      "args": [
+        "awslabs.aws-documentation-mcp-server==1.1.21"
+      ],
+      "env": {
+        "FASTMCP_LOG_LEVEL": "ERROR",
+        "AWS_REGION": "us-east-1",
+        "AWS_DOCUMENTATION_PARTITION": "aws"
+      },
+      "disabled": false
+    },
+    "awslabs.aws-pricing-mcp-server": {
+      "command": "uvx",
+      "args": [
+        "awslabs.aws-pricing-mcp-server==1.0.28"
+      ],
+      "env": {
+        "FASTMCP_LOG_LEVEL": "ERROR",
+        "AWS_REGION": "us-east-1"
+      },
+      "disabled": false
+    },
+    "awslabs.cloudwatch-mcp-server": {
+      "command": "uvx",
+      "args": [
+        "awslabs.cloudwatch-mcp-server==0.0.25"
+      ],
+      "env": {
+        "FASTMCP_LOG_LEVEL": "ERROR",
+        "AWS_REGION": "us-east-1"
+      },
+      "disabled": false
+    }
+  },
+  "autoApprove": {
+    "readOnly": true,
+    "fileWrites": false,
+    "bashCommands": false
+  },
+  "resources": [
+    "file://.kiro/steering/oma-hub.md",
+    "skill://.kiro/skills/ai-infra/**/*.md"
+  ],
+  "welcomeMessage": "Hello! I'm the AI Infra Agent 🚀\n\n⚠️  SECURITY NOTE\n  This profile runs the awslabs EKS MCP server in READ-ONLY mode by default.\n  Destructive operations (create/update/delete EKS resources) and access to\n  sensitive fields (secrets, private keys, IAM policy docs) are DISABLED.\n  To enable write + sensitive-data access, export\n    OMA_EKS_MCP_ALLOW_WRITE=1\n    OMA_EKS_MCP_ALLOW_SENSITIVE=1\n  before starting this agent, and add `--allow-write` / `--allow-sensitive-data-access`\n  flags to the eks-mcp-server args. Do NOT enable these for customer-facing demos.\n\n📌 **Capabilities**\n  • Design and architect agentic AI platforms on EKS\n  • Deploy vLLM model serving with GPU optimization\n  • Configure inference gateways (LiteLLM, Bifrost, Helicone)\n  • Set up observability stack (Langfuse, Prometheus, Grafana)\n  • Implement MLOps pipelines and cost governance\n\n📋 **Common Workflows**\n  • Platform Bootstrap: Full EKS + GPU + Karpenter + vLLM stack\n  • Model Deployment: Custom model serving with LoRA/MoE support\n  • Gateway Setup: 2-tier routing with semantic caching\n  • Monitoring: Langfuse + OpenTelemetry integration\n\nLet's build your agentic platform. What would you like to start with?",
+  "_meta": {
+    "eks_mcp_flags": "By default this profile does NOT pass --allow-write or --allow-sensitive-data-access to awslabs.eks-mcp-server. The server therefore runs read-only. `autoApprove.readOnly: true` then accurately reflects what the agent can do. To opt in to destructive operations, edit mcpEnvOverrides.eks or the emitted agent.json — that is an explicit, auditable change, not a silent default."
+  }
+}

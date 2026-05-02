@@ -53,7 +53,7 @@ argument-hint: "[target-stack? (ecs|eks|serverless) source-type? (monolith|micro
 
 각 Stage 종료 직후 다음 교차 플러그인 skill 이 자동 호출됩니다.
 
-- **Stage 1 → 2**: `risk-discovery` (aidlc-construction) — 재무/기술/조직/규정 4축 리스크 평가
+- **Stage 1 → 2**: `risk-discovery` (aidlc construction) — 재무/기술/조직/규정 4축 리스크 평가
 - **Stage 2 → 3**: `risk-discovery` — 6R 결정의 근거 수치 재검증 (cost/time/risk 가 의견이 아닌 데이터에 기반하는지)
 - **Stage 3 → 4**: `risk-discovery` — 아키텍처 일관성 (VPC·IAM·DB·관측성) 과 Compliance Matrix 완전성
 - **Stage 4 → 5**: `risk-discovery` PASS 필수 — 데이터 정합성·롤백 경로·동기화 전략 검증

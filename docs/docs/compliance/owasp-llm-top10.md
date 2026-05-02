@@ -23,7 +23,7 @@ codes; risks spanning multiple categories fan out via
 
 | Code  | OWASP title                            | Primary OMA field / skill                                                 | Typical mitigation                                     |
 |-------|----------------------------------------|---------------------------------------------------------------------------|--------------------------------------------------------|
-| LLM01 | Prompt Injection                       | `agentic-platform.ai-gateway-guardrails` skill; OPA policy `data.oma.deny` | Pre-prompt sanitisation + egress allow-list.           |
+| LLM01 | Prompt Injection                       | `ai-infra.ai-gateway-guardrails` skill; OPA policy `data.oma.deny` | Pre-prompt sanitisation + egress allow-list.           |
 | LLM02 | Sensitive Information Disclosure       | `Budget.notify_targets` redaction; Presidio scan upstream of Langfuse.    | PII scrubbing in trace exports.                        |
 | LLM03 | Supply Chain                           | `Deployment.artifact.provenance_uri` (SLSA v1.1); MCP server pinning.     | Signed provenance + pinned `==X.Y.Z` dependencies.     |
 | LLM04 | Data and Model Poisoning               | `Risk.category=data-migration` with `Risk.evidence[]` lineage.             | Training-set diffs captured as ADRs.                   |
@@ -36,7 +36,7 @@ codes; risks spanning multiple categories fan out via
 
 ## Wiring into skills
 
-- `plugins/agentic-platform/skills/ai-gateway-guardrails/SKILL.md` uses
+- `plugins/ai-infra/skills/ai-gateway-guardrails/SKILL.md` uses
   LLM01/LLM02/LLM06/LLM07 as its primary taxonomy.
 - `plugins/agenticops/skills/cost-governance/SKILL.md` addresses LLM10
   via `Budget.action_on_breach` and enforces `approval_gate` on

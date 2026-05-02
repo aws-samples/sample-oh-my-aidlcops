@@ -24,7 +24,7 @@ Usage: oma run-workflow <plugin> <workflow-name>
 Validates and prints the DAG execution plan for a named workflow.
 
 Example:
-    oma run-workflow agentic-platform platform-bootstrap
+    oma run-workflow ai-infra platform-bootstrap
 
 Environment:
     OMA_REPO_ROOT   Override repo root (default: auto-detect).

@@ -868,3 +868,362 @@
   justify-content: center;
   margin-bottom: 0;
 }
+
+/* ---------- Problem -> Solution contrast ---------- */
+
+.contrast {
+  max-width: 1120px;
+  margin: 0 auto;
+  padding: 5rem 1.5rem 2rem;
+}
+
+.contrastGrid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1.25rem;
+  margin-top: 2rem;
+}
+
+@media (min-width: 820px) {
+  .contrastGrid {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+.contrastCard {
+  border-radius: 20px;
+  padding: 1.75rem;
+  border: var(--oma-ghost-border);
+  background: var(--oma-surface-container-lowest);
+}
+
+.contrastCard h3 {
+  margin: 0 0 0.75rem;
+  font-size: 1.05rem;
+  letter-spacing: 0.01em;
+  font-weight: 700;
+  color: var(--oma-on-surface);
+}
+
+.contrastCard ul {
+  margin: 0;
+  padding-left: 1.1rem;
+  display: grid;
+  gap: 0.55rem;
+  font-size: 0.92rem;
+  color: var(--oma-on-surface-variant);
+  line-height: 1.55;
+}
+
+.contrastBefore {
+  background: color-mix(in srgb, var(--oma-surface-container) 85%, transparent);
+}
+
+.contrastBefore h3 {
+  color: var(--oma-outline);
+}
+
+.contrastAfter {
+  background: var(--oma-surface-container-lowest);
+  box-shadow: var(--oma-ambient);
+}
+
+.contrastAfter h3 {
+  color: var(--oma-primary);
+}
+
+/* ---------- Superpowers ---------- */
+
+.superpowers {
+  max-width: 1120px;
+  margin: 0 auto;
+  padding: 4rem 1.5rem;
+}
+
+.superpowerList {
+  list-style: none;
+  margin: 2rem 0 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1.25rem;
+}
+
+@media (min-width: 960px) {
+  .superpowerList {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+.superpowerList > li {
+  display: flex;
+  gap: 1rem;
+  padding: 1.5rem;
+  border-radius: 20px;
+  border: var(--oma-ghost-border);
+  background: var(--oma-surface-container-lowest);
+}
+
+.superpowerNum {
+  flex: 0 0 auto;
+  font-family: 'SFMono-Regular', 'Menlo', 'Monaco', monospace;
+  font-size: 1.1rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  color: var(--oma-primary);
+  padding-top: 0.1rem;
+}
+
+.superpowerList h3 {
+  margin: 0 0 0.5rem;
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--oma-on-surface);
+  letter-spacing: -0.005em;
+}
+
+.superpowerList p {
+  margin: 0;
+  font-size: 0.9rem;
+  line-height: 1.55;
+  color: var(--oma-on-surface-variant);
+}
+
+/* ---------- Tier-0 workflow cards ---------- */
+
+.workflows {
+  max-width: 1120px;
+  margin: 0 auto;
+  padding: 4rem 1.5rem;
+}
+
+.workflowGrid {
+  margin-top: 2rem;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 0.9rem;
+}
+
+.workflowCard {
+  display: grid;
+  gap: 0.35rem;
+  padding: 1.1rem 1.25rem;
+  border-radius: 14px;
+  border: var(--oma-ghost-border);
+  background: var(--oma-surface-container-lowest);
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.workflowCard:hover {
+  transform: translateY(-1px);
+  box-shadow: var(--oma-ambient);
+}
+
+.workflowKeyword {
+  font-size: 0.72rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--oma-outline);
+  font-weight: 700;
+}
+
+.workflowCommand {
+  font-family: 'SFMono-Regular', 'Menlo', 'Monaco', monospace;
+  font-size: 0.92rem;
+  color: var(--oma-primary);
+  font-weight: 600;
+}
+
+.workflowCard p {
+  margin: 0;
+  font-size: 0.82rem;
+  line-height: 1.5;
+  color: var(--oma-on-surface-variant);
+}
+
+.workflowFoot {
+  margin: 1.5rem 0 0;
+  font-size: 0.88rem;
+  color: var(--oma-on-surface-variant);
+  text-align: center;
+}
+
+/* ---------- Plugin skills strip ---------- */
+
+.pluginSkills {
+  margin: 0.85rem 0 0;
+  padding-top: 0.85rem;
+  border-top: 1px dashed var(--oma-outline-variant);
+  font-family: 'SFMono-Regular', 'Menlo', 'Monaco', monospace;
+  font-size: 0.74rem;
+  line-height: 1.5;
+  color: var(--oma-outline);
+  letter-spacing: 0.005em;
+}
+
+/* ---------- Install 3-step ---------- */
+
+.install {
+  max-width: 1120px;
+  margin: 0 auto;
+  padding: 4rem 1.5rem;
+}
+
+.installSteps {
+  margin-top: 2rem;
+  display: grid;
+  gap: 1.25rem;
+}
+
+.installStep {
+  display: grid;
+  grid-template-columns: 3rem 1fr;
+  gap: 1rem;
+  padding: 1.5rem;
+  border-radius: 20px;
+  border: var(--oma-ghost-border);
+  background: var(--oma-surface-container-lowest);
+  align-items: start;
+}
+
+.installNum {
+  grid-column: 1;
+  width: 2.25rem;
+  height: 2.25rem;
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-family: 'SFMono-Regular', 'Menlo', 'Monaco', monospace;
+  background: var(--oma-primary-fixed);
+  color: var(--oma-primary);
+}
+
+.installStep h4 {
+  margin: 0 0 0.6rem;
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--oma-on-surface);
+}
+
+.installStep pre {
+  margin: 0;
+  padding: 1rem 1.1rem;
+  border-radius: 12px;
+  background: var(--oma-inverse-surface);
+  color: #e8eaed;
+  font-size: 0.85rem;
+  line-height: 1.55;
+  overflow-x: auto;
+}
+
+.installStep pre code {
+  font-family: 'SFMono-Regular', 'Menlo', 'Monaco', monospace;
+  white-space: pre;
+}
+
+.installHint {
+  margin: 0.75rem 0 0;
+  font-size: 0.82rem;
+  color: var(--oma-on-surface-variant);
+}
+
+/* ---------- Loop lede + footer ---------- */
+
+.loopLede {
+  margin: 0.75rem 0 1.5rem;
+  font-size: 0.95rem;
+  color: var(--oma-on-surface-variant);
+  line-height: 1.55;
+}
+
+.loopFoot {
+  margin-top: 1.5rem;
+  padding-top: 1rem;
+  border-top: 1px dashed var(--oma-outline-variant);
+  font-size: 0.82rem;
+  color: var(--oma-outline);
+}
+
+.loopFoot code {
+  font-family: 'SFMono-Regular', 'Menlo', 'Monaco', monospace;
+  font-size: 0.78rem;
+  color: var(--oma-primary);
+}
+
+.loopList code {
+  font-family: 'SFMono-Regular', 'Menlo', 'Monaco', monospace;
+  font-size: 0.82rem;
+  color: var(--oma-primary);
+  background: var(--oma-primary-fixed);
+  padding: 0 0.3rem;
+  border-radius: 4px;
+}
+
+/* ---------- FAQ accordion ---------- */
+
+.faqSection {
+  max-width: 880px;
+  margin: 0 auto;
+  padding: 4rem 1.5rem;
+}
+
+.faqList {
+  list-style: none;
+  margin: 2rem 0 0;
+  padding: 0;
+  display: grid;
+  gap: 0.6rem;
+}
+
+.faqItem {
+  border-radius: 14px;
+  border: var(--oma-ghost-border);
+  background: var(--oma-surface-container-lowest);
+  overflow: hidden;
+  transition: background 0.15s ease;
+}
+
+.faqItemOpen {
+  background: var(--oma-surface-container-low);
+}
+
+.faqTrigger {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1.1rem 1.25rem;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  font-size: 0.98rem;
+  font-weight: 600;
+  color: var(--oma-on-surface);
+  text-align: left;
+}
+
+.faqTrigger:hover {
+  color: var(--oma-primary);
+}
+
+.faqChevron {
+  transition: transform 0.15s ease;
+  color: var(--oma-outline);
+}
+
+.faqItemOpen .faqChevron {
+  transform: rotate(180deg);
+  color: var(--oma-primary);
+}
+
+.faqAnswer {
+  margin: 0;
+  padding: 0 1.25rem 1.25rem;
+  font-size: 0.9rem;
+  line-height: 1.6;
+  color: var(--oma-on-surface-variant);
+}
+

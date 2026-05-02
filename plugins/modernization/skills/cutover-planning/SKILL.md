@@ -23,7 +23,7 @@ allowed-tools: "Read,Write,Edit,Bash,Grep,Glob,mcp__ecs,mcp__eks,mcp__aws-docume
 ## 전제 조건
 
 - `.omao/plans/modernization/containerization-report.md` 존재
-- `aidlc-construction/skills/risk-discovery` 재실행 PASS (DB·세션·외부 연동 리스크 4축)
+- `aidlc/skills/construction/risk-discovery` 재실행 PASS (DB·세션·외부 연동 리스크 4축)
 - ALB v2 또는 Route53 접근 권한, CloudWatch Alarms 생성 권한
 - (DB 이전 시) DMS 복제 인스턴스 프로비저닝 가능 권한
 

@@ -10,7 +10,7 @@ Usage:
     python3 scripts/sync-from-playbook.py
     python3 scripts/sync-from-playbook.py --dry-run
     python3 scripts/sync-from-playbook.py --playbook-dir ~/src/engineering-playbook
-    python3 scripts/sync-from-playbook.py --plugin agentic-platform
+    python3 scripts/sync-from-playbook.py --plugin ai-infra
 
 Default playbook locations probed in order:
     $ENGINEERING_PLAYBOOK_DIR
@@ -18,8 +18,8 @@ Default playbook locations probed in order:
     ../engineering-playbook  (relative to the OMA repo root)
 
 Coverage:
-    docs/agentic-ai-platform/**/*.md → relevant to agentic-platform, agenticops
-    docs/aidlc/**/*.md                → relevant to aidlc-inception, aidlc-construction
+    docs/agentic-ai-platform/**/*.md → relevant to ai-infra, agenticops
+    docs/aidlc/**/*.md                → relevant to aidlc, aidlc
 
 Each indexed entry shows:
     - Title (frontmatter title, or first H1, or filename)
@@ -51,10 +51,10 @@ from typing import Dict, List, Optional, Tuple
 # Plugin → playbook doc subtrees
 # ---------------------------------------------------------------------------
 PLUGIN_COVERAGE: Dict[str, List[str]] = {
-    "agentic-platform": ["docs/agentic-ai-platform"],
+    "ai-infra": ["docs/agentic-ai-platform"],
     "agenticops": ["docs/agentic-ai-platform/operations-mlops"],
-    "aidlc-inception": ["docs/aidlc"],
-    "aidlc-construction": ["docs/aidlc"],
+    "aidlc": ["docs/aidlc"],
+    "aidlc": ["docs/aidlc"],
 }
 
 FRONTMATTER_RE = re.compile(r"^---\s*\n(.*?)\n---\s*(?:\n|$)", re.DOTALL)

@@ -103,7 +103,7 @@ Q5. 전략적 중요도 High + 팀 DevOps 성숙도 Medium 이상?
 
 ### Step 6. risk-discovery 연동
 
-`aidlc-construction/skills/risk-discovery` 를 호출하여 선택된 패턴의 리스크 4축(재무·기술·조직·규정) 을 재검증합니다. PASS 가 아니면 본 skill 은 중단하고 대안 패턴을 제시합니다.
+`aidlc/skills/construction/risk-discovery` 를 호출하여 선택된 패턴의 리스크 4축(재무·기술·조직·규정) 을 재검증합니다. PASS 가 아니면 본 skill 은 중단하고 대안 패턴을 제시합니다.
 
 ### Step 7. 사용자 승인 체크포인트
 
@@ -135,4 +135,4 @@ Q5. 전략적 중요도 High + 팀 DevOps 성숙도 Medium 이상?
 ### 관련 문서 (내부)
 - `../workload-assessment/SKILL.md` — 선행 skill
 - `../to-be-architecture/SKILL.md` — 후속 skill
-- `/home/ubuntu/workspace/oh-my-aidlcops/plugins/aidlc-construction/CLAUDE.md` — risk-discovery 제공
+- `/home/ubuntu/workspace/oh-my-aidlcops/plugins/aidlc/CLAUDE.md` — risk-discovery 제공

@@ -1,0 +1,43 @@
+# OMA Harness DSL for the aidlc plugin.
+#
+# aidlc bundles AIDLC Phase 1 (Inception) and Phase 2 (Construction)
+# into a single marketplace entry. Skills live under two sub-folders
+# that mirror the phase boundary:
+#
+#   plugins/aidlc/skills/inception/     (workspace detection, intake,
+#                                         requirements, user stories,
+#                                         workflow planning)
+#   plugins/aidlc/skills/construction/  (component design, codegen,
+#                                         test strategy, risk discovery,
+#                                         quality gates)
+#
+# Contributes only skills and opt-in extensions for
+# awslabs/aidlc-workflows; ships no MCP servers or Kiro agent profiles
+# (phase orchestration happens through the /oma:* slash commands).
+
+version: 2
+plugin: aidlc
+
+metadata:
+  labels:
+    aidlc-phase: inception,construction
+
+mcp: {}
+agents: []
+
+triggers:
+  - id: inception
+    keywords: ["inception"]
+    context_required: []
+    command: /oma:inception
+    description: "Run AIDLC Phase 1 only (workspace detection, requirements, user stories, workflow plan)."
+  - id: construction
+    keywords: ["construction"]
+    context_required: []
+    command: /oma:construction
+    description: "Run AIDLC Phase 2 only (component design, codegen, agentic TDD)."
+  - id: aidlc-loop
+    keywords: ["aidlc"]
+    context_required: ["feature", "story", "ticket"]
+    command: /oma:aidlc-loop
+    description: "Run a single-feature AIDLC Inception->Construction pass."

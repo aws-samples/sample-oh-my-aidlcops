@@ -116,14 +116,14 @@ def test_enforce_strict_enterprise_uses_err_v1_rejected(tmp_path, monkeypatch):
 
 def test_enforce_strict_enterprise_uses_err_approval_chain_empty(tmp_path, monkeypatch):
     """Integration: enforce_strict_enterprise emits ERR_APPROVAL_CHAIN_EMPTY."""
-    plugin_dir = tmp_path / "plugins" / "agentic-platform"
+    plugin_dir = tmp_path / "plugins" / "ai-infra"
     plugin_dir.mkdir(parents=True)
     dsl = {
         "version": 2,
-        "plugin": "agentic-platform",
+        "plugin": "ai-infra",
         "mcp": {"eks": {"command": "uvx", "args": ["awslabs.eks-mcp-server==0.1.28"]}},
     }
-    dsl_path = plugin_dir / "agentic-platform.oma.yaml"
+    dsl_path = plugin_dir / "ai-infra.oma.yaml"
     dsl_path.write_text(yaml.safe_dump(dsl, sort_keys=False), encoding="utf-8")
 
     deploy_dir = tmp_path / ".omao" / "ontology" / "deployments"
@@ -147,14 +147,14 @@ def test_enforce_strict_enterprise_uses_err_approval_chain_empty(tmp_path, monke
 
 def test_enforce_strict_enterprise_uses_err_artifact_digest(tmp_path, monkeypatch):
     """Integration: enforce_strict_enterprise emits ERR_ARTIFACT_DIGEST."""
-    plugin_dir = tmp_path / "plugins" / "agentic-platform"
+    plugin_dir = tmp_path / "plugins" / "ai-infra"
     plugin_dir.mkdir(parents=True)
     dsl = {
         "version": 2,
-        "plugin": "agentic-platform",
+        "plugin": "ai-infra",
         "mcp": {"eks": {"command": "uvx", "args": ["awslabs.eks-mcp-server==0.1.28"]}},
     }
-    dsl_path = plugin_dir / "agentic-platform.oma.yaml"
+    dsl_path = plugin_dir / "ai-infra.oma.yaml"
     dsl_path.write_text(yaml.safe_dump(dsl, sort_keys=False), encoding="utf-8")
 
     deploy_dir = tmp_path / ".omao" / "ontology" / "deployments"
@@ -178,14 +178,14 @@ def test_enforce_strict_enterprise_uses_err_artifact_digest(tmp_path, monkeypatc
 
 def test_enforce_strict_enterprise_uses_err_artifact_legacy_string(tmp_path, monkeypatch):
     """Integration: enforce_strict_enterprise emits ERR_ARTIFACT_LEGACY_STRING."""
-    plugin_dir = tmp_path / "plugins" / "agentic-platform"
+    plugin_dir = tmp_path / "plugins" / "ai-infra"
     plugin_dir.mkdir(parents=True)
     dsl = {
         "version": 2,
-        "plugin": "agentic-platform",
+        "plugin": "ai-infra",
         "mcp": {"eks": {"command": "uvx", "args": ["awslabs.eks-mcp-server==0.1.28"]}},
     }
-    dsl_path = plugin_dir / "agentic-platform.oma.yaml"
+    dsl_path = plugin_dir / "ai-infra.oma.yaml"
     dsl_path.write_text(yaml.safe_dump(dsl, sort_keys=False), encoding="utf-8")
 
     deploy_dir = tmp_path / ".omao" / "ontology" / "deployments"
@@ -208,14 +208,14 @@ def test_enforce_strict_enterprise_uses_err_artifact_legacy_string(tmp_path, mon
 
 def test_enforce_strict_enterprise_uses_err_risk_missing_classification(tmp_path, monkeypatch):
     """Integration: enforce_strict_enterprise emits ERR_RISK_MISSING_CLASSIFICATION."""
-    plugin_dir = tmp_path / "plugins" / "agentic-platform"
+    plugin_dir = tmp_path / "plugins" / "ai-infra"
     plugin_dir.mkdir(parents=True)
     dsl = {
         "version": 2,
-        "plugin": "agentic-platform",
+        "plugin": "ai-infra",
         "mcp": {"eks": {"command": "uvx", "args": ["awslabs.eks-mcp-server==0.1.28"]}},
     }
-    dsl_path = plugin_dir / "agentic-platform.oma.yaml"
+    dsl_path = plugin_dir / "ai-infra.oma.yaml"
     dsl_path.write_text(yaml.safe_dump(dsl, sort_keys=False), encoding="utf-8")
 
     risks_dir = tmp_path / ".omao" / "ontology" / "risks"

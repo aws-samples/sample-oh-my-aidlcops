@@ -45,6 +45,6 @@ teardown() {
     # .mcp.json is not an entity YAML, so validate should handle it without
     # crashing. We check exit 0 (graceful fallback), not exact message.
     run bash "$OMA_REPO_ROOT/bin/oma" validate \
-        "$OMA_REPO_ROOT/plugins/agentic-platform/.mcp.json"
+        "$OMA_REPO_ROOT/plugins/ai-infra/.mcp.json"
     [ "$status" -eq 0 ]
 }

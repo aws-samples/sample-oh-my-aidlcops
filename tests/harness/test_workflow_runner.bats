@@ -7,16 +7,16 @@ setup() {
     export NO_COLOR=1
 }
 
-@test "run-workflow on agentic-platform platform-bootstrap returns clean DAG" {
-    run bash "$OMA_REPO_ROOT/scripts/oma/run-workflow.sh" agentic-platform platform-bootstrap
+@test "run-workflow on ai-infra platform-bootstrap returns clean DAG" {
+    run bash "$OMA_REPO_ROOT/scripts/oma/run-workflow.sh" ai-infra platform-bootstrap
     [ "$status" -eq 0 ]
     [[ "$output" =~ "execution order: preflight -> provision -> verify" ]]
-    [[ "$output" =~ "agent_ref: agentic-platform" ]]
+    [[ "$output" =~ "agent_ref: ai-infra" ]]
     [[ "$output" =~ "skill_ref: agentic-eks-bootstrap" ]]
 }
 
 @test "run-workflow with missing workflow name exits 1" {
-    run bash "$OMA_REPO_ROOT/scripts/oma/run-workflow.sh" agentic-platform nonexistent-workflow
+    run bash "$OMA_REPO_ROOT/scripts/oma/run-workflow.sh" ai-infra nonexistent-workflow
     [ "$status" -eq 1 ]
     [[ "$output" =~ "not found" ]]
 }

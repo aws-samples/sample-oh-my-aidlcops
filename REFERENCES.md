@@ -104,7 +104,7 @@ quick-access list for humans.
 |---|---|---|
 | <a id="awslabs-agent-plugins-readme"></a>awslabs/agent-plugins README (governance model) | https://github.com/awslabs/agent-plugins/blob/main/README.md | Canonical definition of the plugin / skill / marketplace contract OMA adopts |
 | <a id="awslabs-aidlc-workflows-readme"></a>awslabs/aidlc-workflows README | https://github.com/awslabs/aidlc-workflows/blob/main/README.md | AIDLC 3-phase loop definition OMA extends via `*.opt-in.md` files |
-| <a id="aws-well-arch-genai-lens"></a>AWS Well-Architected Generative AI Lens | https://docs.aws.amazon.com/wellarchitected/latest/generative-ai-lens/generative-ai-lens.html | Design review checklist OMA's `agentic-platform` plugin aligns with |
+| <a id="aws-well-arch-genai-lens"></a>AWS Well-Architected Generative AI Lens | https://docs.aws.amazon.com/wellarchitected/latest/generative-ai-lens/generative-ai-lens.html | Design review checklist OMA's `ai-infra` plugin aligns with |
 | <a id="aws-agentic-ai-blog"></a>AWS blog — Build an agentic AI assistant on AWS (reference architecture) | https://aws.amazon.com/blogs/machine-learning/ | General entry point; individual posts rotate — follow the blog index rather than pin a single URL |
 | <a id="aws-modernization"></a>AWS Cloud Migration landing (was aws.amazon.com/modernization/) | https://aws.amazon.com/cloud-migration/ | Updated canonical URL after the modernization alias was retired; used by `plugins/modernization` |
 
@@ -122,7 +122,7 @@ quick-access list for humans.
 | <a id="lychee"></a>lycheeverse/lychee-action | https://github.com/lycheeverse/lychee-action | Link-check CI (see `.github/workflows/link-check.yml` and `.lycheeignore`) |
 | <a id="opa-tool"></a>OPA binary | https://www.openpolicyagent.org/docs/latest/#running-opa | `scripts/oma/validate.sh` policy evaluation shell-out |
 | <a id="mermaid"></a>Mermaid | https://mermaid.js.org/ | Flow diagrams in docs (`theme-mermaid` plugin) |
-| <a id="hypothesis"></a>Hypothesis (property-based testing) | https://hypothesis.readthedocs.io/ | Referenced by `plugins/aidlc-construction` agentic TDD rules; property-based invariant generator |
+| <a id="hypothesis"></a>Hypothesis (property-based testing) | https://hypothesis.readthedocs.io/ | Referenced by `plugins/aidlc` agentic TDD rules; property-based invariant generator |
 | <a id="kiro"></a>Kiro | https://kiro.dev/ | Secondary agent harness alongside Claude Code; `scripts/install/kiro.sh` target |
 | <a id="gh-cli"></a>GitHub CLI (`gh`) | https://cli.github.com/ | Release create, PR open, workflow dispatch across release pipeline |
 

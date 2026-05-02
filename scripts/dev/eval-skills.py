@@ -14,7 +14,7 @@ License: MIT (see NOTICE).
 Usage:
     python3 scripts/eval-skills.py
     python3 scripts/eval-skills.py --strict
-    python3 scripts/eval-skills.py --plugin agentic-platform
+    python3 scripts/eval-skills.py --plugin ai-infra
     python3 scripts/eval-skills.py --skill agentic-eks-bootstrap
 
 Checks per SKILL.md

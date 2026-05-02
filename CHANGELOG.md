@@ -10,14 +10,54 @@ breaking changes to non-stable surfaces as documented in
 
 ## [Unreleased]
 
+### Breaking
+- **Plugin rename: `agentic-platform` → `ai-infra`.** The directory,
+  DSL filename, Kiro agent profile filename, marketplace entry, and
+  every doc/test reference move. Install IDs change accordingly:
+  `/plugin install ai-infra@oh-my-aidlcops`. The broader
+  `ai-infra` name signals that this plugin covers the AWS AI
+  runtime surface (EKS today; Bedrock / SageMaker runtime skills
+  planned). Slash commands (`/oma:platform-bootstrap`) are unchanged.
+- **Plugin merge: `aidlc-inception` + `aidlc-construction` → `aidlc`.**
+  A single plugin now groups the AIDLC Phase 1 and Phase 2 skills under
+  `plugins/aidlc/skills/inception/` and `plugins/aidlc/skills/construction/`.
+  Install IDs change to `/plugin install aidlc@oh-my-aidlcops`; the
+  two prior ids are retired. `.omao/triggers.json` keeps the
+  `inception`, `construction`, and `aidlc-loop` keywords pointing at
+  the existing slash commands -- only the `plugin:` attribution flips
+  to `aidlc`. Kiro installer now descends into the two skill groups
+  and links them as `~/.kiro/skills/aidlc/{inception,construction}/<skill>/`.
+
 ### Added
-- (next release entries go here)
+- Landing page (`docs/src/components/HomeLanding`) restructured to a
+  pain -> mechanism -> install narrative with a "Problem vs OMA"
+  contrast block, a numbered "three mechanisms" strip, a Tier-0
+  workflow card grid, a 3-step terminal install section, and an
+  inline FAQ accordion. Styles added under the existing `--oma-*`
+  token palette; no token files change.
+- `docs/docs/intro.md` rewritten to open with project goal, problem,
+  approach, and approach mechanism before diving into catalog. Four
+  plugins reflected in the catalog; nine Tier-0 commands in the
+  workflow table.
+- `docs/docs/philosophy-aidlc-meets-agenticops.md` reintegrates
+  `modernization` as a brownfield entry path, expands the AgenticOps
+  skill table to six (adds `audit-trail`), and replaces the
+  unresolved Self-Improving Loop ADR placeholders with canonical
+  in-repo pointers.
 
 ### Changed
-- (next release entries go here)
+- `scripts/install/kiro.sh` now walks nested skill groups. Skills
+  carrying `SKILL.md` at depth 1 keep the flat layout; grouping
+  directories (no `SKILL.md` present) descend one more level so the
+  merged `aidlc` plugin's inception/construction skills link
+  correctly.
 
 ### Fixed
-- (next release entries go here)
+- Every doc, test, steering file, install script, eval scenario,
+  skill cross-ref, and marketplace entry now uses the new plugin
+  ids (`ai-infra`, `aidlc`). Old ids only survive in historical
+  CHANGELOG entries for the 0.1.0 / 0.2.0-preview.1 / 0.3.0-preview.1
+  releases.
 
 ## [0.3.0-preview.1] — 2026-05-01
 
@@ -171,7 +211,7 @@ breaking changes to non-stable surfaces as documented in
   enforcement and declared-MCP resolution.
 - `tools/oma_compile/` compiler that emits `.mcp.json` and
   `kiro-agents/*.agent.json` from a single `<plugin>.oma.yaml` source.
-- First DSL migration: `plugins/agentic-platform/agentic-platform.oma.yaml`;
+- First DSL migration: `plugins/ai-infra/agentic-platform.oma.yaml`;
   committed native files regenerated and byte-for-byte tested.
 
 ### Added — Easy button

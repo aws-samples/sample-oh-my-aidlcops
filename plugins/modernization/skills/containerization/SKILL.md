@@ -23,7 +23,7 @@ allowed-tools: "Read,Write,Edit,Bash,Grep,Glob,mcp__ecs,mcp__eks,mcp__aws-docume
 ## 전제 조건
 
 - `.omao/plans/modernization/to-be-architecture.md` 존재 및 `compute` 필드 확정
-- `aidlc-construction/skills/risk-discovery` PASS (데이터 정합성, 롤백 경로 검증 완료)
+- `aidlc/skills/construction/risk-discovery` PASS (데이터 정합성, 롤백 경로 검증 완료)
 - Docker 24+ 설치, `docker buildx` 플러그인 활성화
 - AWS CLI + ECR 푸시 권한 (IRSA 또는 로컬 profile)
 - Trivy v0.48+ 또는 grype 설치 (보안 스캔용)
@@ -257,4 +257,4 @@ spec:
 ### 관련 문서 (내부)
 - `../to-be-architecture/SKILL.md` — 선행 skill
 - `../cutover-planning/SKILL.md` — 후속 skill
-- `/home/ubuntu/workspace/oh-my-aidlcops/plugins/aidlc-construction/CLAUDE.md` — risk-discovery 제공
+- `/home/ubuntu/workspace/oh-my-aidlcops/plugins/aidlc/CLAUDE.md` — risk-discovery 제공

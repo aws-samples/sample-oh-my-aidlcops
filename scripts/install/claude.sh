@@ -229,20 +229,20 @@ EOF
 
         claude
         > /plugin marketplace add https://github.com/aws-samples/sample-oh-my-aidlcops
-        > /plugin install agentic-platform@oh-my-aidlcops
+        > /plugin install ai-infra@oh-my-aidlcops
         > /plugin install agenticops@oh-my-aidlcops
-        > /plugin install aidlc-inception@oh-my-aidlcops
-        > /plugin install aidlc-construction@oh-my-aidlcops
+        > /plugin install aidlc@oh-my-aidlcops
+        > /plugin install aidlc@oh-my-aidlcops
         > /plugin install modernization@oh-my-aidlcops
         > /plugin list
 
     Or as a shell one-liner:
         claude <<'EOF2'
         /plugin marketplace add https://github.com/aws-samples/sample-oh-my-aidlcops
-        /plugin install agentic-platform@oh-my-aidlcops
+        /plugin install ai-infra@oh-my-aidlcops
         /plugin install agenticops@oh-my-aidlcops
-        /plugin install aidlc-inception@oh-my-aidlcops
-        /plugin install aidlc-construction@oh-my-aidlcops
+        /plugin install aidlc@oh-my-aidlcops
+        /plugin install aidlc@oh-my-aidlcops
         /plugin install modernization@oh-my-aidlcops
         /plugin list
         EOF2

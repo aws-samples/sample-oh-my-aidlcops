@@ -26,7 +26,7 @@ def _validator() -> Draft7Validator:
 
 MINIMAL_OK = {
     "version": 1,
-    "plugin": "agentic-platform",
+    "plugin": "ai-infra",
     "agents": [
         {
             "id": "platform-architect",
@@ -62,7 +62,7 @@ BAD_PLUGIN_NAME = {"version": 1, "plugin": "Agentic_Platform"}
 # v2 fixtures — workflow DAG, metadata, reserved telemetry/policies slots.
 V2_OK = {
     "version": 2,
-    "plugin": "agentic-platform",
+    "plugin": "ai-infra",
     "metadata": {"labels": {"aidlc-phase": "construction"}},
     "agents": [
         {"id": "platform-architect", "runtime": "kiro", "mcp": ["eks"]},
