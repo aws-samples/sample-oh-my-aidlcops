@@ -65,10 +65,10 @@ closes itself without human execution at every step.
 
 | Plugin | What it does | Example skills |
 |---|---|---|
-| **`agentic-platform`** | Build & run the Agentic AI Platform on EKS | `agentic-eks-bootstrap`, `vllm-serving-setup`, `inference-gateway-routing`, `langfuse-observability`, `gpu-resource-management`, `ai-gateway-guardrails` |
+| **`ai-infra`** | Build & run the Agentic AI Platform on EKS | `agentic-eks-bootstrap`, `vllm-serving-setup`, `inference-gateway-routing`, `langfuse-observability`, `gpu-resource-management`, `ai-gateway-guardrails` |
 | **`agenticops`** | Operate it with agents | `self-improving-loop`, `autopilot-deploy`, `incident-response`, `continuous-eval`, `cost-governance`, `audit-trail` |
-| **`aidlc-inception`** | AIDLC Phase 1 extensions | `structured-intake`, `requirements-analysis`, `user-stories`, `workflow-planning` |
-| **`aidlc-construction`** | AIDLC Phase 2 extensions | `component-design`, `code-generation`, `test-strategy`, `risk-discovery`, `quality-gates` |
+| **`aidlc`** | AIDLC Phase 1 extensions | `structured-intake`, `requirements-analysis`, `user-stories`, `workflow-planning` |
+| **`aidlc`** | AIDLC Phase 2 extensions | `component-design`, `code-generation`, `test-strategy`, `risk-discovery`, `quality-gates` |
 | **`modernization`** | Legacy workload modernization to AWS (6R strategy) | `workload-assessment`, `modernization-strategy`, `to-be-architecture`, `containerization`, `cutover-planning` |
 
 ## Tier-0 workflows
@@ -121,10 +121,10 @@ Inside the Claude Code session:
 
 ```text
 /plugin marketplace add https://github.com/aws-samples/sample-oh-my-aidlcops
-/plugin install agentic-platform@oh-my-aidlcops
+/plugin install ai-infra@oh-my-aidlcops
 /plugin install agenticops@oh-my-aidlcops
-/plugin install aidlc-inception@oh-my-aidlcops
-/plugin install aidlc-construction@oh-my-aidlcops
+/plugin install aidlc@oh-my-aidlcops
+/plugin install aidlc@oh-my-aidlcops
 /plugin install modernization@oh-my-aidlcops
 /plugin list
 ```
@@ -179,7 +179,7 @@ oma doctor --enterprise
 # 2. Enforce the gate — rejects DSL v1, missing approval_chain, legacy
 #    string artifacts, and unclassified Risks.
 oma compile --strict-enterprise
-# → compiled agentic-platform: plugins/agentic-platform/.mcp.json ...
+# → compiled ai-infra: plugins/ai-infra/.mcp.json ...
 
 # 3. Validate an ontology entity (Spec / ADR / Deployment / Incident /
 #    Budget / Risk / Agent / Skill). OPA is shelled out when declared.
@@ -187,7 +187,7 @@ oma validate path/to/deployment.yaml
 # → [oma validate] path/to/deployment.yaml: schema OK
 
 # 4. Print the execution plan for a DSL v2 workflow (stub: no runtime yet).
-oma run-workflow agentic-platform platform-bootstrap
+oma run-workflow ai-infra platform-bootstrap
 # → execution order: preflight -> provision -> verify
 ```
 
@@ -229,10 +229,10 @@ Tier-0 trigger  ─── matches keyword? ──▶ /oma:<workflow>
     ▼
 Plugin dispatch
     │
-    ├─▶ agentic-platform    (build)
+    ├─▶ ai-infra    (build)
     ├─▶ agenticops          (operate)
-    ├─▶ aidlc-inception     (Phase 1)
-    ├─▶ aidlc-construction  (Phase 2)
+    ├─▶ aidlc     (Phase 1)
+    ├─▶ aidlc  (Phase 2)
     └─▶ modernization       (legacy → AWS)
     │
     ▼

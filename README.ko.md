@@ -55,10 +55,10 @@
 
 | 플러그인 | 역할 | 예시 스킬 |
 |---|---|---|
-| **`agentic-platform`** | EKS 위 Agentic AI Platform 구축·운영 | `agentic-eks-bootstrap`, `vllm-serving-setup`, `inference-gateway-routing`, `langfuse-observability`, `gpu-resource-management`, `ai-gateway-guardrails` |
+| **`ai-infra`** | EKS 위 Agentic AI Platform 구축·운영 | `agentic-eks-bootstrap`, `vllm-serving-setup`, `inference-gateway-routing`, `langfuse-observability`, `gpu-resource-management`, `ai-gateway-guardrails` |
 | **`agenticops`** | 에이전트 기반 운영 자동화 | `self-improving-loop`, `autopilot-deploy`, `incident-response`, `continuous-eval`, `cost-governance`, `audit-trail` |
-| **`aidlc-inception`** | AIDLC Phase 1 확장 | `structured-intake`, `requirements-analysis`, `user-stories`, `workflow-planning` |
-| **`aidlc-construction`** | AIDLC Phase 2 확장 | `component-design`, `code-generation`, `test-strategy`, `risk-discovery`, `quality-gates` |
+| **`aidlc`** | AIDLC Phase 1 확장 | `structured-intake`, `requirements-analysis`, `user-stories`, `workflow-planning` |
+| **`aidlc`** | AIDLC Phase 2 확장 | `component-design`, `code-generation`, `test-strategy`, `risk-discovery`, `quality-gates` |
 | **`modernization`** | 레거시 워크로드 AWS 이전 (6R 전략) | `workload-assessment`, `modernization-strategy`, `to-be-architecture`, `containerization`, `cutover-planning` |
 
 ## Tier-0 워크플로우
@@ -110,10 +110,10 @@ Claude Code 세션 안에서:
 
 ```text
 /plugin marketplace add https://github.com/aws-samples/sample-oh-my-aidlcops
-/plugin install agentic-platform@oh-my-aidlcops
+/plugin install ai-infra@oh-my-aidlcops
 /plugin install agenticops@oh-my-aidlcops
-/plugin install aidlc-inception@oh-my-aidlcops
-/plugin install aidlc-construction@oh-my-aidlcops
+/plugin install aidlc@oh-my-aidlcops
+/plugin install aidlc@oh-my-aidlcops
 /plugin install modernization@oh-my-aidlcops
 /plugin list
 ```
@@ -167,7 +167,7 @@ oma doctor --enterprise
 # 2. 엄격 게이트 — DSL v1 / 비어 있는 approval_chain /
 #    레거시 문자열 artifact / 분류 없는 Risk 를 거부
 oma compile --strict-enterprise
-# → compiled agentic-platform: plugins/agentic-platform/.mcp.json ...
+# → compiled ai-infra: plugins/ai-infra/.mcp.json ...
 
 # 3. 온톨로지 엔티티 검증 (Spec / ADR / Deployment / Incident /
 #    Budget / Risk / Agent / Skill). policies 선언 시 OPA 호출
@@ -175,7 +175,7 @@ oma validate path/to/deployment.yaml
 # → [oma validate] path/to/deployment.yaml: schema OK
 
 # 4. DSL v2 워크플로우 실행 순서 출력 (stub: 실제 invocation 미포함)
-oma run-workflow agentic-platform platform-bootstrap
+oma run-workflow ai-infra platform-bootstrap
 # → execution order: preflight -> provision -> verify
 ```
 
@@ -217,10 +217,10 @@ Tier-0 트리거 ── 키워드 매칭? ──▶ /oma:<workflow>
     ▼
 플러그인 디스패치
     │
-    ├─▶ agentic-platform    (구축)
+    ├─▶ ai-infra    (구축)
     ├─▶ agenticops          (운영)
-    ├─▶ aidlc-inception     (Phase 1)
-    ├─▶ aidlc-construction  (Phase 2)
+    ├─▶ aidlc     (Phase 1)
+    ├─▶ aidlc  (Phase 2)
     └─▶ modernization       (레거시 → AWS)
     │
     ▼
