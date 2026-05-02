@@ -10,6 +10,17 @@ breaking changes to non-stable surfaces as documented in
 
 ## [Unreleased]
 
+### Added
+- (next release entries go here)
+
+### Changed
+- (next release entries go here)
+
+### Fixed
+- (next release entries go here)
+
+## [0.4.0-preview.1] — 2026-05-02
+
 ### Breaking
 - **Plugin rename: `agentic-platform` → `ai-infra`.** The directory,
   DSL filename, Kiro agent profile filename, marketplace entry, and
@@ -278,7 +289,8 @@ breaking changes to non-stable surfaces as documented in
   langfuse-observability, simpleeval-based cost-governance expressions.
 - MIT-0 license, AWS-samples destination.
 
-[Unreleased]: https://github.com/aws-samples/sample-oh-my-aidlcops/compare/v0.3.0-preview.1...HEAD
+[Unreleased]: https://github.com/aws-samples/sample-oh-my-aidlcops/compare/v0.4.0-preview.1...HEAD
+[0.4.0-preview.1]: https://github.com/aws-samples/sample-oh-my-aidlcops/releases/tag/v0.4.0-preview.1
 [0.3.0-preview.1]: https://github.com/aws-samples/sample-oh-my-aidlcops/releases/tag/v0.3.0-preview.1
 [0.2.0-preview.1]: https://github.com/aws-samples/sample-oh-my-aidlcops/releases/tag/v0.2.0-preview.1
 [0.1.0]: https://github.com/aws-samples/sample-oh-my-aidlcops/releases/tag/v0.1.0

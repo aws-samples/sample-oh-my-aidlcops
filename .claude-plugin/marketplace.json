@@ -2,8 +2,8 @@
   "$schema": "../schemas/marketplace.schema.json",
   "name": "oh-my-aidlcops",
   "metadata": {
-    "description": "AIDLC × AgenticOps — plugin marketplace that automates the full AI-Driven Development Lifecycle with agent-based operations on AWS.",
-    "version": "0.2.0-preview.1"
+    "description": "AIDLC \u00d7 AgenticOps \u2014 plugin marketplace that automates the full AI-Driven Development Lifecycle with agent-based operations on AWS.",
+    "version": "0.4.0-preview.1"
   },
   "owner": {
     "name": "aws-samples",
@@ -14,7 +14,7 @@
       "name": "ai-infra",
       "description": "Build and operate agentic AI workloads on EKS with vLLM, Inference Gateway, Langfuse, and Kagent. Covers GPU planning, model serving, routing, observability, and guardrails.",
       "source": "./plugins/ai-infra",
-      "version": "0.2.0-preview.1",
+      "version": "0.4.0-preview.1",
       "category": "ai-platform",
       "keywords": [
         "eks",
@@ -27,13 +27,19 @@
         "gpu",
         "karpenter"
       ],
-      "tags": ["aws", "eks", "agentic-ai", "build", "operate"]
+      "tags": [
+        "aws",
+        "eks",
+        "agentic-ai",
+        "build",
+        "operate"
+      ]
     },
     {
       "name": "agenticops",
-      "description": "Agentic operations layer for AIDLC — self-improving loops, autonomous deploys, continuous evaluation, incident response, and cost governance.",
+      "description": "Agentic operations layer for AIDLC \u2014 self-improving loops, autonomous deploys, continuous evaluation, incident response, and cost governance.",
       "source": "./plugins/agenticops",
-      "version": "0.2.0-preview.1",
+      "version": "0.4.0-preview.1",
       "category": "operations",
       "keywords": [
         "aidlc",
@@ -45,13 +51,17 @@
         "incident-response",
         "cost-governance"
       ],
-      "tags": ["operate", "automation", "feedback-loop"]
+      "tags": [
+        "operate",
+        "automation",
+        "feedback-loop"
+      ]
     },
     {
       "name": "aidlc",
       "description": "AIDLC Phase 1 (Inception) + Phase 2 (Construction) opt-in extensions for awslabs/aidlc-workflows. Inception covers workspace detection, adaptive-depth requirements analysis, user stories, and workflow planning. Construction covers component design, code generation, TDD-for-agentic test strategy, risk discovery, and phase quality gates.",
       "source": "./plugins/aidlc",
-      "version": "0.2.0-preview.1",
+      "version": "0.4.0-preview.1",
       "category": "aidlc",
       "keywords": [
         "aidlc",
@@ -68,13 +78,17 @@
         "quality-gates",
         "awslabs-aidlc"
       ],
-      "tags": ["aidlc", "design", "build"]
+      "tags": [
+        "aidlc",
+        "design",
+        "build"
+      ]
     },
     {
       "name": "modernization",
-      "description": "Legacy workload modernization to AWS — 6R strategy, workload assessment, to-be architecture, containerization, and cutover planning. Adapted from aws-samples/sample-ai-driven-modernization-with-kiro (MIT-0).",
+      "description": "Legacy workload modernization to AWS \u2014 6R strategy, workload assessment, to-be architecture, containerization, and cutover planning. Adapted from aws-samples/sample-ai-driven-modernization-with-kiro (MIT-0).",
       "source": "./plugins/modernization",
-      "version": "0.2.0-preview.1",
+      "version": "0.4.0-preview.1",
       "category": "modernization",
       "keywords": [
         "modernization",
@@ -87,7 +101,11 @@
         "cutover",
         "brownfield"
       ],
-      "tags": ["aws", "modernization", "brownfield"]
+      "tags": [
+        "aws",
+        "modernization",
+        "brownfield"
+      ]
     }
   ]
 }

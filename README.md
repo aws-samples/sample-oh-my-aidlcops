@@ -97,7 +97,7 @@ seeds the ontology, installs the plugins, and runs `oma doctor` to confirm
 the environment.
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/aws-samples/sample-oh-my-aidlcops/v0.3.0-preview.1/install.sh | bash
+curl -fsSL https://raw.githubusercontent.com/aws-samples/sample-oh-my-aidlcops/v0.4.0-preview.1/install.sh | bash
 cd my-project
 oma setup
 oma doctor
@@ -329,7 +329,7 @@ MIT No Attribution (MIT-0). See [LICENSE](./LICENSE).
 
 ## Contributing
 
-OMA is in Tech Preview (`v0.3.0-preview.1`). See [CONTRIBUTING.md](./CONTRIBUTING.md)
+OMA is in Tech Preview (`v0.4.0-preview.1`). See [CONTRIBUTING.md](./CONTRIBUTING.md)
 for the working agreement (English-only artifacts, no AI attribution, commit
 per unit of work) plus the PR/branch-naming guidelines, and
 [CODE_OF_CONDUCT.md](./CODE_OF_CONDUCT.md) for the Amazon Open Source Code of
