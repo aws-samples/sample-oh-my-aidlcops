@@ -22,7 +22,7 @@ because a human re-interpreted. The ontology closes that gap.
 |--------------|--------------------------------------------------|-------------------------------------|--------------------------------------------|
 | `Agent`      | `schemas/ontology/agent.schema.json`             | plugin author                       | Claude Code, Kiro, oma-compile             |
 | `Skill`      | `schemas/ontology/skill.schema.json`             | plugin author                       | Claude Code skill loader                   |
-| `Deployment` | `schemas/ontology/deployment.schema.json`        | `aidlc-construction`                | `agenticops.autopilot-deploy`              |
+| `Deployment` | `schemas/ontology/deployment.schema.json`        | `aidlc`                | `agenticops.autopilot-deploy`              |
 | `Incident`   | `schemas/ontology/incident.schema.json`          | `agenticops.incident-response`      | human approver; auto-rollback              |
 | `Budget`     | `schemas/ontology/budget.schema.json`            | plugin author / finops              | `agenticops.cost-governance`               |
 | `Risk`       | `schemas/ontology/risk.schema.json`              | `modernization.risk-discovery`      | stage-gate-strict mode                     |

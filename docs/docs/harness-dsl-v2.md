@@ -35,7 +35,7 @@ Example — adding a workflow DAG:
 
 ```yaml
 version: 2
-plugin: agentic-platform
+plugin: ai-infra
 
 metadata:
   labels:
@@ -91,5 +91,5 @@ resolved at runtime by the harness.
 - **v0.4** fills in the body schemas for `telemetry` and `policies` and
   wires `scripts/oma/validate.sh` to shell out to `opa eval` when a
   plugin declares policies.
-- **v0.5** regenerates `agentic-platform.oma.yaml`'s native outputs as a
+- **v0.5** regenerates `ai-infra.oma.yaml`'s native outputs as a
   byte-diff baseline and migrates the remaining four plugins to v2.

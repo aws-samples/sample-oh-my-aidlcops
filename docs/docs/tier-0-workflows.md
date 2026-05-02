@@ -61,7 +61,7 @@ flowchart LR
 - 팀 전환 시 같은 feature를 OMA 표준으로 재구축
 
 ### 의존성
-- `aidlc-inception` + `aidlc-construction` + `agenticops` 플러그인 활성화
+- `aidlc` + `aidlc` + `agenticops` 플러그인 활성화
 - `eks-mcp-server`, `cloudwatch-mcp-server`, `aws-iac-mcp-server` MCP 연결
 
 ## `/oma:aidlc-loop` — 단일 feature 1회전
@@ -194,7 +194,7 @@ Agentic AI Platform을 EKS 위에 **5단계 체크포인트**로 구축합니다
 5. **에이전트 레이어** — Kagent + Ragas 평가 파이프라인
 
 ### 의존성
-- `agentic-platform` 플러그인 활성화
+- `ai-infra` 플러그인 활성화
 - `eks-mcp-server`, `prometheus-mcp-server`, `aws-iac-mcp-server` 연결
 - 충분한 EKS 권한(최소 `eks:*`, `ec2:*`, `iam:CreateRole`)
 

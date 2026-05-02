@@ -13,7 +13,7 @@ sidebar_position: 2
 | Claude Code CLI | 최신 stable | `claude --version` |
 | jq | 1.6+ | 설치 스크립트가 JSON 병합에 사용 |
 | bash | 4+ | macOS 기본 bash 3.2는 `brew install bash` 권장 |
-| AWS 자격 증명 | — | `agentic-platform` 워크플로우에서 EKS·CloudWatch·S3 접근 필요 |
+| AWS 자격 증명 | — | `ai-infra` 워크플로우에서 EKS·CloudWatch·S3 접근 필요 |
 | (선택) Kubernetes CLI | kubectl v1.32+ | `platform-bootstrap` 실행 시 |
 
 ## ⚡ `oma` CLI 설치 (선택, AgenticOps 용)
@@ -71,10 +71,10 @@ Claude Code 세션 안에서:
 
 ```text
 /plugin marketplace add https://github.com/aws-samples/sample-oh-my-aidlcops
-/plugin install agentic-platform@oh-my-aidlcops
+/plugin install ai-infra@oh-my-aidlcops
 /plugin install agenticops@oh-my-aidlcops
-/plugin install aidlc-inception@oh-my-aidlcops
-/plugin install aidlc-construction@oh-my-aidlcops
+/plugin install aidlc@oh-my-aidlcops
+/plugin install aidlc@oh-my-aidlcops
 /plugin install modernization@oh-my-aidlcops
 /plugin list
 ```
@@ -88,10 +88,10 @@ Claude Code `/plugin install` 자체는 한 번에 하나의 플러그인만 받
 ```bash
 claude <<'EOF'
 /plugin marketplace add https://github.com/aws-samples/sample-oh-my-aidlcops
-/plugin install agentic-platform@oh-my-aidlcops
+/plugin install ai-infra@oh-my-aidlcops
 /plugin install agenticops@oh-my-aidlcops
-/plugin install aidlc-inception@oh-my-aidlcops
-/plugin install aidlc-construction@oh-my-aidlcops
+/plugin install aidlc@oh-my-aidlcops
+/plugin install aidlc@oh-my-aidlcops
 /plugin install modernization@oh-my-aidlcops
 /plugin list
 EOF
@@ -101,10 +101,10 @@ EOF
 `/plugin list` 결과에 5 개 플러그인이 전부 `enabled` 로 보이면 성공입니다.
 
 ```text
-agentic-platform      v0.2.0-preview.1  enabled
+ai-infra      v0.2.0-preview.1  enabled
 agenticops            v0.2.0-preview.1  enabled
-aidlc-inception       v0.2.0-preview.1  enabled
-aidlc-construction    v0.2.0-preview.1  enabled
+aidlc       v0.2.0-preview.1  enabled
+aidlc    v0.2.0-preview.1  enabled
 modernization         v0.2.0-preview.1  enabled
 ```
 

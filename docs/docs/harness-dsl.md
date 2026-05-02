@@ -27,9 +27,9 @@ marketplace works even on machines that have never seen the compiler.
 ## Example
 
 ```yaml
-# plugins/agentic-platform/agentic-platform.oma.yaml
+# plugins/ai-infra/ai-infra.oma.yaml
 version: 1
-plugin: agentic-platform
+plugin: ai-infra
 
 agents:
   - id: autopilot-deploy
@@ -75,7 +75,7 @@ triggers:
 
 ```bash
 # Compile one plugin
-python -m tools.oma_compile plugins/agentic-platform/agentic-platform.oma.yaml
+python -m tools.oma_compile plugins/ai-infra/ai-infra.oma.yaml
 
 # Compile every plugin that has a *.oma.yaml
 python -m tools.oma_compile --all
