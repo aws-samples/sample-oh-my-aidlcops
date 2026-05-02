@@ -29,10 +29,9 @@ Inside the Claude Code session, paste (or enter) the six lines below:
 
 ```text
 /plugin marketplace add https://github.com/aws-samples/sample-oh-my-aidlcops
-/plugin install agentic-platform@oh-my-aidlcops
+/plugin install ai-infra@oh-my-aidlcops
 /plugin install agenticops@oh-my-aidlcops
-/plugin install aidlc-inception@oh-my-aidlcops
-/plugin install aidlc-construction@oh-my-aidlcops
+/plugin install aidlc@oh-my-aidlcops
 /plugin install modernization@oh-my-aidlcops
 /plugin list
 ```
@@ -42,10 +41,9 @@ To script the whole sequence from a shell one-liner use a here-doc:
 ```bash
 claude <<'EOF'
 /plugin marketplace add https://github.com/aws-samples/sample-oh-my-aidlcops
-/plugin install agentic-platform@oh-my-aidlcops
+/plugin install ai-infra@oh-my-aidlcops
 /plugin install agenticops@oh-my-aidlcops
-/plugin install aidlc-inception@oh-my-aidlcops
-/plugin install aidlc-construction@oh-my-aidlcops
+/plugin install aidlc@oh-my-aidlcops
 /plugin install modernization@oh-my-aidlcops
 /plugin list
 EOF
@@ -55,11 +53,10 @@ Expected `/plugin list` output:
 
 ```bash
 > /plugin list
-# agentic-platform     0.2.0-preview.1   enabled
-# agenticops           0.2.0-preview.1   enabled
-# aidlc-inception      0.2.0-preview.1   enabled
-# aidlc-construction   0.2.0-preview.1   enabled
-# modernization        0.2.0-preview.1   enabled
+# ai-infra       0.4.0-preview.1   enabled
+# agenticops     0.4.0-preview.1   enabled
+# aidlc          0.4.0-preview.1   enabled
+# modernization  0.4.0-preview.1   enabled
 ```
 
 This path updates `~/.claude/installed_plugins.json` and merges each
@@ -176,7 +173,7 @@ This command creates `.omao/plans/`, `.omao/state/`, `.omao/notepad.md`, `.omao/
 
 ## AIDLC Extensions (opt-in)
 
-The `aidlc-inception` and `aidlc-construction` plugins follow the opt-in extension structure of awslabs/aidlc-workflows. To activate extensions, run:
+The `aidlc` and `aidlc` plugins follow the opt-in extension structure of awslabs/aidlc-workflows. To activate extensions, run:
 
 ```bash
 bash scripts/install/aidlc-extensions.sh
@@ -279,15 +276,15 @@ chmod -R u+w .omao/
 For native marketplace installation:
 
 ```bash
-> /plugin uninstall agentic-platform agenticops aidlc-inception aidlc-construction
+> /plugin uninstall ai-infra agenticops aidlc
 > /plugin marketplace remove oh-my-aidlcops
 ```
 
 For manual installation, remove symlinks and manually delete relevant entries from `settings.json`.
 
 ```bash
-rm ~/.claude/plugins/agentic-platform ~/.claude/plugins/agenticops \
-   ~/.claude/plugins/aidlc-inception ~/.claude/plugins/aidlc-construction
+rm ~/.claude/plugins/ai-infra ~/.claude/plugins/agenticops \
+   ~/.claude/plugins/aidlc ~/.claude/plugins/aidlc
 rm ~/.claude/commands/oma
 # Manually clean OMA entries from mcpServers and hooks in ~/.claude/settings.json
 ```

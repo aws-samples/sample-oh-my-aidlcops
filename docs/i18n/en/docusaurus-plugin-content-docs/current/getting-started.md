@@ -13,7 +13,7 @@ This document is a 5-minute Quickstart for users new to `oh-my-aidlcops` (OMA). 
 | Claude Code CLI | latest stable | `claude --version` |
 | jq | 1.6+ | Installation scripts use it for JSON merging |
 | bash | 4+ | macOS default 3.2 is outdated; run `brew install bash` |
-| AWS credentials | — | `agentic-platform` workflows require EKS, CloudWatch, and S3 access |
+| AWS credentials | — | `ai-infra` workflows require EKS, CloudWatch, and S3 access |
 | (Optional) Kubernetes CLI | kubectl v1.32+ | Needed for `platform-bootstrap` |
 
 ## Optional: Install the `oma` CLI (for AgenticOps)
@@ -33,7 +33,7 @@ required**, and `oma setup` is only needed **when you plan to use AgenticOps**.
 
 ```bash
 # Install the OMA CLI (only if you plan to use AgenticOps)
-curl -fsSL https://raw.githubusercontent.com/aws-samples/sample-oh-my-aidlcops/v0.2.0-preview.1/install.sh | bash
+curl -fsSL https://raw.githubusercontent.com/aws-samples/sample-oh-my-aidlcops/v0.4.0-preview.1/install.sh | bash
 cd my-project
 oma setup      # writes .omao/profile.yaml + seed ontology
 oma doctor     # environment probes
@@ -73,15 +73,14 @@ Inside the Claude Code session:
 
 ```text
 /plugin marketplace add https://github.com/aws-samples/sample-oh-my-aidlcops
-/plugin install agentic-platform@oh-my-aidlcops
+/plugin install ai-infra@oh-my-aidlcops
 /plugin install agenticops@oh-my-aidlcops
-/plugin install aidlc-inception@oh-my-aidlcops
-/plugin install aidlc-construction@oh-my-aidlcops
+/plugin install aidlc@oh-my-aidlcops
 /plugin install modernization@oh-my-aidlcops
 /plugin list
 ```
 
-:::info Installing all five at once
+:::info Installing all four at once
 `/plugin install` itself takes a single plugin id per invocation
 (space-separated arguments are **not** supported). Pasting the six lines
 above lets Claude Code run them sequentially. If you prefer to script
@@ -90,24 +89,22 @@ installation from a shell one-liner, use a here-doc:
 ```bash
 claude <<'EOF'
 /plugin marketplace add https://github.com/aws-samples/sample-oh-my-aidlcops
-/plugin install agentic-platform@oh-my-aidlcops
+/plugin install ai-infra@oh-my-aidlcops
 /plugin install agenticops@oh-my-aidlcops
-/plugin install aidlc-inception@oh-my-aidlcops
-/plugin install aidlc-construction@oh-my-aidlcops
+/plugin install aidlc@oh-my-aidlcops
 /plugin install modernization@oh-my-aidlcops
 /plugin list
 EOF
 ```
 :::
 
-`/plugin list` should show all five as `enabled`:
+`/plugin list` should show all four as `enabled`:
 
 ```text
-agentic-platform      v0.2.0-preview.1  enabled
-agenticops            v0.2.0-preview.1  enabled
-aidlc-inception       v0.2.0-preview.1  enabled
-aidlc-construction    v0.2.0-preview.1  enabled
-modernization         v0.2.0-preview.1  enabled
+ai-infra       v0.4.0-preview.1  enabled
+agenticops     v0.4.0-preview.1  enabled
+aidlc          v0.4.0-preview.1  enabled
+modernization  v0.4.0-preview.1  enabled
 ```
 
 :::caution `bash scripts/install/claude.sh` alone does NOT work

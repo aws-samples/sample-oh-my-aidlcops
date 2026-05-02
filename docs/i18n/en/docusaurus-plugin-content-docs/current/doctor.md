@@ -48,7 +48,7 @@ oma doctor --project /path/to/project   # Check target directory instead of curr
 ```jsonc
 {
   "version": "1",
-  "oma_version": "0.2.0-preview.1",
+  "oma_version": "0.4.0-preview.1",
   "generated_at": "2026-04-30T02:05:11Z",
   "summary": { "pass": 11, "warn": 1, "fail": 0, "skipped": 0 },
   "probes": [

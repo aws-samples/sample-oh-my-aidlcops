@@ -61,7 +61,7 @@ flowchart LR
 - Rebuilding a feature under OMA standards during team transitions
 
 ### Dependencies
-- `aidlc-inception` + `aidlc-construction` + `agenticops` plugins active
+- `aidlc` + `aidlc` + `agenticops` plugins active
 - `eks-mcp-server`, `cloudwatch-mcp-server`, `aws-iac-mcp-server` MCP connections
 
 ## `/oma:aidlc-loop` — Single Feature One-Pass
@@ -194,7 +194,7 @@ Build an Agentic AI Platform on EKS with **5-stage checkpoints**. Covers full st
 5. **Agent Layer** — Deploy Kagent + Ragas evaluation pipeline
 
 ### Dependencies
-- `agentic-platform` plugin active
+- `ai-infra` plugin active
 - `eks-mcp-server`, `prometheus-mcp-server`, `aws-iac-mcp-server` connections
 - Sufficient EKS permissions (minimum `eks:*`, `ec2:*`, `iam:CreateRole`)
 

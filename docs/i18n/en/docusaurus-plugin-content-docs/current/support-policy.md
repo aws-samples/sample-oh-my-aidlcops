@@ -6,7 +6,7 @@ sidebar_position: 50
 
 # Support Policy — Tech Preview
 
-OMA `v0.2.0-preview.1` is a **Tech Preview** release. It does not provide production SLA. Support scope is confirmed by the criteria below.
+OMA `v0.4.0-preview.1` is a **Tech Preview** release. It does not provide production SLA. Support scope is confirmed by the criteria below.
 
 ## Stability contract
 

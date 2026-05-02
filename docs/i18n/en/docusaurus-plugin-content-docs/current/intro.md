@@ -15,10 +15,10 @@ AWS's official [awslabs/aidlc-workflows](https://github.com/awslabs/aidlc-workfl
 
 | Plugin | Role | Example Skills |
 |---|---|---|
-| `agentic-platform` | Build and operate Agentic AI Platform on EKS | `agentic-eks-bootstrap`, `vllm-serving-setup`, `inference-gateway-routing`, `langfuse-observability`, `gpu-resource-management`, `ai-gateway-guardrails` |
+| `ai-infra` | Build and operate Agentic AI Platform on EKS | `agentic-eks-bootstrap`, `vllm-serving-setup`, `inference-gateway-routing`, `langfuse-observability`, `gpu-resource-management`, `ai-gateway-guardrails` |
 | `agenticops` | Agent-driven operations automation | `self-improving-loop`, `autopilot-deploy`, `incident-response`, `continuous-eval`, `cost-governance` |
-| `aidlc-inception` | AIDLC Phase 1 extensions (opt-in) | `workspace-detection`, `requirements-analysis`, `user-stories`, `workflow-planning` |
-| `aidlc-construction` | AIDLC Phase 2 extensions (opt-in) | `component-design`, `code-generation`, `test-strategy` |
+| `aidlc` | AIDLC Phase 1 extensions (opt-in) | `workspace-detection`, `requirements-analysis`, `user-stories`, `workflow-planning` |
+| `aidlc` | AIDLC Phase 2 extensions (opt-in) | `component-design`, `code-generation`, `test-strategy` |
 
 Detailed plugin definitions are in the repository root at [`.claude-plugin/marketplace.json`](https://github.com/aws-samples/sample-oh-my-aidlcops/blob/main/.claude-plugin/marketplace.json).
 
@@ -47,10 +47,10 @@ flowchart LR
     U[User Request] --> T[Tier-0 Trigger]
     T -->|keyword matching| C["/oma:&lt;workflow&gt;"]
     C --> D[Plugin Dispatch]
-    D --> P1[agentic-platform]
+    D --> P1[ai-infra]
     D --> P2[agenticops]
-    D --> P3[aidlc-inception]
-    D --> P4[aidlc-construction]
+    D --> P3[aidlc]
+    D --> P4[aidlc]
     P1 --> S[Skill Execution]
     P2 --> S
     P3 --> S
