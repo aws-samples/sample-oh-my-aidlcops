@@ -74,16 +74,15 @@ Claude Code 세션 안에서:
 /plugin install ai-infra@oh-my-aidlcops
 /plugin install agenticops@oh-my-aidlcops
 /plugin install aidlc@oh-my-aidlcops
-/plugin install aidlc@oh-my-aidlcops
 /plugin install modernization@oh-my-aidlcops
 /plugin list
 ```
 
 :::info 여러 플러그인을 한 번에 설치하고 싶다면
 Claude Code `/plugin install` 자체는 한 번에 하나의 플러그인만 받습니다
-(공백 구분 여러 인자 **미지원**). 위처럼 5줄을 붙여넣으면 Claude Code 가
-순차적으로 각 줄을 실행해 줍니다. 혹은 쉘에서 한 번에 다섯 세션을 띄우고
-싶다면 아래처럼 here-doc 을 사용할 수도 있습니다.
+(공백 구분 여러 인자 **미지원**). 위처럼 6줄을 붙여넣으면 Claude Code 가
+순차적으로 각 줄을 실행해 줍니다. 혹은 쉘에서 한 번에 모든 플러그인을
+설치하고 싶다면 아래처럼 here-doc 을 사용할 수도 있습니다.
 
 ```bash
 claude <<'EOF'
@@ -91,21 +90,19 @@ claude <<'EOF'
 /plugin install ai-infra@oh-my-aidlcops
 /plugin install agenticops@oh-my-aidlcops
 /plugin install aidlc@oh-my-aidlcops
-/plugin install aidlc@oh-my-aidlcops
 /plugin install modernization@oh-my-aidlcops
 /plugin list
 EOF
 ```
 :::
 
-`/plugin list` 결과에 5 개 플러그인이 전부 `enabled` 로 보이면 성공입니다.
+`/plugin list` 결과에 4 개 플러그인이 전부 `enabled` 로 보이면 성공입니다.
 
 ```text
-ai-infra      v0.2.0-preview.1  enabled
-agenticops            v0.2.0-preview.1  enabled
-aidlc       v0.2.0-preview.1  enabled
-aidlc    v0.2.0-preview.1  enabled
-modernization         v0.2.0-preview.1  enabled
+ai-infra       v0.4.0-preview.1  enabled
+agenticops     v0.4.0-preview.1  enabled
+aidlc          v0.4.0-preview.1  enabled
+modernization  v0.4.0-preview.1  enabled
 ```
 
 :::caution `bash scripts/install/claude.sh` 단독 실행은 동작하지 않습니다

@@ -329,7 +329,6 @@ if [ -n "$CLAUDE_MAJOR" ] && [ "$CLAUDE_MAJOR" -ge 2 ] 2>/dev/null; then
        /plugin install ai-infra@oh-my-aidlcops
        /plugin install agenticops@oh-my-aidlcops
        /plugin install aidlc@oh-my-aidlcops
-       /plugin install aidlc@oh-my-aidlcops
        /plugin install modernization@oh-my-aidlcops
        /plugin list
        MARKET

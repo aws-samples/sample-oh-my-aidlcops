@@ -52,6 +52,6 @@ rm ~/.local/bin/oma
 다음 네 항목이 모두 충족되면 GA (`v1.0.0`) 로 진입합니다.
 
 1. 두 harness (Claude Code, Kiro) 에서 E2E 시나리오 3 개 이상 재현 가능.
-2. 5 개 플러그인 모두 DSL 이주 완료.
+2. 4 개 플러그인 모두 DSL 이주 완료.
 3. 다운스트림 사용자 bug 리포트 0 critical / 90 일.
 4. 릴리스 artifact supply-chain 검증 (sha256 + SBOM + signed commit) 자동화 완료.

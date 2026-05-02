@@ -124,7 +124,6 @@ Inside the Claude Code session:
 /plugin install ai-infra@oh-my-aidlcops
 /plugin install agenticops@oh-my-aidlcops
 /plugin install aidlc@oh-my-aidlcops
-/plugin install aidlc@oh-my-aidlcops
 /plugin install modernization@oh-my-aidlcops
 /plugin list
 ```

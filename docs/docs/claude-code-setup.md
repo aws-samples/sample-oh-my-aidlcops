@@ -32,7 +32,6 @@ Claude Code 세션 안에서 다음을 순서대로 입력(또는 통째로 붙�
 /plugin install ai-infra@oh-my-aidlcops
 /plugin install agenticops@oh-my-aidlcops
 /plugin install aidlc@oh-my-aidlcops
-/plugin install aidlc@oh-my-aidlcops
 /plugin install modernization@oh-my-aidlcops
 /plugin list
 ```
@@ -45,7 +44,6 @@ claude <<'EOF'
 /plugin install ai-infra@oh-my-aidlcops
 /plugin install agenticops@oh-my-aidlcops
 /plugin install aidlc@oh-my-aidlcops
-/plugin install aidlc@oh-my-aidlcops
 /plugin install modernization@oh-my-aidlcops
 /plugin list
 EOF
@@ -55,11 +53,10 @@ EOF
 
 ```bash
 > /plugin list
-# ai-infra     0.2.0-preview.1   enabled
-# agenticops           0.2.0-preview.1   enabled
-# aidlc      0.2.0-preview.1   enabled
-# aidlc   0.2.0-preview.1   enabled
-# modernization        0.2.0-preview.1   enabled
+# ai-infra       0.4.0-preview.1   enabled
+# agenticops     0.4.0-preview.1   enabled
+# aidlc          0.4.0-preview.1   enabled
+# modernization  0.4.0-preview.1   enabled
 ```
 
 이 경로는 Claude Code 가 내부적으로 `~/.claude/installed_plugins.json` 을
