@@ -46,7 +46,7 @@ Expected output after script execution:
 [install-kiro] OMA repo : /.../oh-my-aidlcops
 [install-kiro] KIRO_HOME: /home/user/.kiro
 [install-kiro] OMA_OWNER: aws-samples
-[install-kiro] skill linked: agentic-platform/vllm-serving-setup
+[install-kiro] skill linked: ai-infra/vllm-serving-setup
 [install-kiro] skill linked: agenticops/self-improving-loop
 ...
 [install-kiro] steering linked: /home/user/.kiro/steering
@@ -63,9 +63,9 @@ After installation, the Kiro home directory has the following structure:
 ```
 ~/.kiro/
 ├── skills/
-│   ├── agentic-platform/
-│   │   ├── agentic-eks-bootstrap       -> <repo>/plugins/agentic-platform/skills/agentic-eks-bootstrap
-│   │   ├── vllm-serving-setup          -> <repo>/plugins/agentic-platform/skills/vllm-serving-setup
+│   ├── ai-infra/
+│   │   ├── agentic-eks-bootstrap       -> <repo>/plugins/ai-infra/skills/agentic-eks-bootstrap
+│   │   ├── vllm-serving-setup          -> <repo>/plugins/ai-infra/skills/vllm-serving-setup
 │   │   ├── inference-gateway-routing   -> ...
 │   │   └── ...
 │   ├── agenticops/
@@ -74,13 +74,13 @@ After installation, the Kiro home directory has the following structure:
 │   │   ├── incident-response           -> ...
 │   │   ├── continuous-eval             -> ...
 │   │   └── cost-governance             -> ...
-│   ├── aidlc-inception/
-│   └── aidlc-construction/
+│   ├── aidlc/
+│   └── aidlc/
 ├── steering                             -> <repo>/steering
 ├── guides/                              # NEW: stage-by-stage safety guides (per-plugin directory)
-│   └── agentic-platform/                -> <repo>/plugins/agentic-platform/guides
+│   └── ai-infra/                -> <repo>/plugins/ai-infra/guides
 ├── agents/                              # NEW: Kiro agent profiles
-│   └── agentic-platform.agent.json      -> <repo>/plugins/agentic-platform/kiro-agents/agentic-platform.agent.json
+│   └── ai-infra.agent.json      -> <repo>/plugins/ai-infra/kiro-agents/ai-infra.agent.json
 └── settings/                            # NEW: CLI settings
     └── cli.json                         # Default template (user-editable)
 ```
@@ -100,8 +100,8 @@ Each symlink points to the original directory in the OMA repository. Thus, updat
 Some Claude Code SKILL.md frontmatter fields are not directly interpreted by Kiro. Some skills provide Kiro-specific metadata as a `kiro.meta.yaml` sidecar file; the install script detects and logs this.
 
 ```
-[install-kiro] skill linked: agentic-platform/vllm-serving-setup
-[install-kiro]   kiro.meta.yaml sidecar detected for agentic-platform/vllm-serving-setup
+[install-kiro] skill linked: ai-infra/vllm-serving-setup
+[install-kiro]   kiro.meta.yaml sidecar detected for ai-infra/vllm-serving-setup
 ```
 
 Example sidecar structure:
@@ -161,7 +161,7 @@ Symlinks plugin `guides/` directories to `~/.kiro/guides/<plugin>/` form. Guides
 
 ```
 ~/.kiro/guides/
-└── agentic-platform/       -> <repo>/plugins/agentic-platform/guides
+└── ai-infra/       -> <repo>/plugins/ai-infra/guides
     ├── aws-practices/      # AWS Well-Architected-based guides
     ├── common/             # Common safety baselines
     └── stages/             # Stage-by-stage checkpoint guides
@@ -180,11 +180,11 @@ Symlinks plugin `kiro-agents/*.json` files to `~/.kiro/agents/` directory. Each 
 - **Auto-approval Rules** — Read-only / file write / bash command approval policies
 - **Resource Loading** — Steering files and skill paths to load on agent startup
 
-Example: `agentic-platform.agent.json`
+Example: `ai-infra.agent.json`
 
 ```json
 {
-  "name": "agentic-platform",
+  "name": "ai-infra",
   "description": "Agentic AI Platform architect for EKS + vLLM + Inference Gateway + Langfuse on AWS.",
   "mcpServers": {
     "awslabs.eks-mcp-server": { "command": "uvx", "args": ["awslabs.eks-mcp-server==0.1.28"] },
@@ -196,7 +196,7 @@ Example: `agentic-platform.agent.json`
 }
 ```
 
-In Kiro runtime, activate the profile in the form `@agentic-platform`.
+In Kiro runtime, activate the profile in the form `@ai-infra`.
 
 ### 5. settings/ — CLI Default Configuration
 
@@ -259,10 +259,10 @@ KIRO_HOME=/opt/kiro-ci bash scripts/install/kiro.sh
 ```bash
 # 1. Check skill directory
 ls ~/.kiro/skills/
-# agentic-platform/  agenticops/  aidlc-inception/  aidlc-construction/
+# ai-infra/  agenticops/  aidlc/  aidlc/
 
 # 2. Skill count per plugin
-for p in agentic-platform agenticops aidlc-inception aidlc-construction; do
+for p in ai-infra agenticops aidlc; do
     echo "$p: $(ls ~/.kiro/skills/$p/ 2>/dev/null | wc -l) skills"
 done
 
@@ -290,8 +290,8 @@ find ~/.kiro/skills/ -maxdepth 2 -type l | head
 If symlinks are broken, reinstall.
 
 ```bash
-rm -rf ~/.kiro/skills/agentic-platform ~/.kiro/skills/agenticops \
-       ~/.kiro/skills/aidlc-inception ~/.kiro/skills/aidlc-construction
+rm -rf ~/.kiro/skills/ai-infra ~/.kiro/skills/agenticops \
+       ~/.kiro/skills/aidlc/inception ~/.kiro/skills/aidlc/construction
 bash ~/.oma/scripts/install/kiro.sh
 ```
 
@@ -349,8 +349,8 @@ Kiro stores execution logs in `~/.kiro/logs/`. OMA does not separately collect t
 
 ```bash
 # Remove skill symlinks
-rm -rf ~/.kiro/skills/agentic-platform ~/.kiro/skills/agenticops \
-       ~/.kiro/skills/aidlc-inception ~/.kiro/skills/aidlc-construction
+rm -rf ~/.kiro/skills/ai-infra ~/.kiro/skills/agenticops \
+       ~/.kiro/skills/aidlc/inception ~/.kiro/skills/aidlc/construction
 
 # Remove steering symlink
 rm ~/.kiro/steering

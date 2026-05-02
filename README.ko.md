@@ -113,7 +113,6 @@ Claude Code 세션 안에서:
 /plugin install ai-infra@oh-my-aidlcops
 /plugin install agenticops@oh-my-aidlcops
 /plugin install aidlc@oh-my-aidlcops
-/plugin install aidlc@oh-my-aidlcops
 /plugin install modernization@oh-my-aidlcops
 /plugin list
 ```

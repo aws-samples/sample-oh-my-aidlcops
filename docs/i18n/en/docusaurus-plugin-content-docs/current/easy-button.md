@@ -7,7 +7,7 @@ sidebar_position: 1.5
 # Easy Button — 3-command install
 
 :::caution Tech Preview
-`oma setup` / `oma doctor` are **Tech Preview** (`v0.2.0-preview.1`).
+`oma setup` / `oma doctor` are **Tech Preview** (`v0.4.0-preview.1`).
 Only `profile.yaml` v1 is considered stable; other surfaces may change before GA.
 See [Support Policy](./support-policy.md) for details.
 :::
@@ -16,7 +16,7 @@ OMA aims to be the "AIDLC × AgenticOps easy button." Installation through first
 
 ```bash
 # 1. Remote install — download release tarball, install to ~/.oma, symlink ~/.local/bin/oma
-curl -fsSL https://raw.githubusercontent.com/aws-samples/sample-oh-my-aidlcops/v0.2.0-preview.1/install.sh | bash
+curl -fsSL https://raw.githubusercontent.com/aws-samples/sample-oh-my-aidlcops/v0.4.0-preview.1/install.sh | bash
 
 # 2. Project setup — create profile, seed ontology, install plugins
 cd my-project

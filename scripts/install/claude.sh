@@ -232,7 +232,6 @@ EOF
         > /plugin install ai-infra@oh-my-aidlcops
         > /plugin install agenticops@oh-my-aidlcops
         > /plugin install aidlc@oh-my-aidlcops
-        > /plugin install aidlc@oh-my-aidlcops
         > /plugin install modernization@oh-my-aidlcops
         > /plugin list
 
@@ -241,7 +240,6 @@ EOF
         /plugin marketplace add https://github.com/aws-samples/sample-oh-my-aidlcops
         /plugin install ai-infra@oh-my-aidlcops
         /plugin install agenticops@oh-my-aidlcops
-        /plugin install aidlc@oh-my-aidlcops
         /plugin install aidlc@oh-my-aidlcops
         /plugin install modernization@oh-my-aidlcops
         /plugin list

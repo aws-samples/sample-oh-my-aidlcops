@@ -33,7 +33,7 @@ Through the `agenticops` plugin, OMA injects five skills into the operations pha
 
 | Skill | Role | Key Input | Key Output |
 |---|---|---|---|
-| `self-improving-loop` | Trace-based skill and prompt improvement | Langfuse traces, failure patterns | PR to `aidlc-construction` |
+| `self-improving-loop` | Trace-based skill and prompt improvement | Langfuse traces, failure patterns | PR to `aidlc` |
 | `autopilot-deploy` | Autonomous deployment of validated artifacts | CI success artifacts, policy gates | GitOps commits, rollout events |
 | `incident-response` | Alarm → diagnosis → proposal → action | PagerDuty, CloudWatch alarms | RCA draft, auto-mitigation actions |
 | `continuous-eval` | Sustained quality assessment | Ragas metrics, regression datasets | Quality report, rollback signals |
