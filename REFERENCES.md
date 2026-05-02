@@ -135,7 +135,7 @@ quick-access list for humans.
 | Release list (Pages) | https://aws-samples.github.io/sample-oh-my-aidlcops/releases |
 | GitHub Releases | https://github.com/aws-samples/sample-oh-my-aidlcops/releases |
 | Issue tracker | https://github.com/aws-samples/sample-oh-my-aidlcops/issues |
-| Install one-liner (current tag) | https://raw.githubusercontent.com/aws-samples/sample-oh-my-aidlcops/v0.3.0-preview.1/install.sh |
+| Install one-liner (current tag) | https://raw.githubusercontent.com/aws-samples/sample-oh-my-aidlcops/v0.4.0-preview.1/install.sh |
 
 Programmatic references also exist inline in each skill / plugin; this
 file intentionally only captures the **external** surface.
