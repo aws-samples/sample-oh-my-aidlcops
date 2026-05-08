@@ -25,7 +25,7 @@ allowed-tools: "Read,Grep,Bash,mcp__cloudwatch,mcp__prometheus,mcp__eks"
 
 - **awslabs.cloudwatch-mcp-server==0.0.25** — 과거 메트릭 조회.
 - **awslabs.prometheus-mcp-server==0.2.15** — 시계열 데이터.
-- **awslabs.eks-mcp-server** — HPA/Deployment 현재 설정 조회 및 업데이트.
+- **awslabs.eks-mcp-server==0.1.28** — HPA/Deployment 현재 설정 조회 및 업데이트 (`@latest` 금지, PyPI 버전 pin 필수).
 - 과거 트래픽 데이터: 최소 14일, 권장 30일 이상.
 - 스케일링 정의: `.omao/plans/scaling/targets/${service}.yaml`.
 - `cost-governance` 예산 파일 접근 — 비용 상한 내 스케일링 보장.

@@ -24,7 +24,7 @@ allowed-tools: "Read,Grep,Bash,mcp__cloudwatch,mcp__prometheus,mcp__eks"
 
 - **awslabs.cloudwatch-mcp-server==0.0.25** — 로그/메트릭 조회.
 - **awslabs.prometheus-mcp-server==0.2.15** — 시계열 쿼리.
-- **awslabs.eks-mcp-server** — EKS 클러스터 이벤트/리소스 조회.
+- **awslabs.eks-mcp-server==0.1.28** — EKS 클러스터 이벤트/리소스 조회 (`@latest` 금지, PyPI 버전 pin 필수).
 - `incident-response`가 생성한 인시던트 상태 파일 (`.omao/state/incident/`).
 - 변경 이력 소스: Git log, ArgoCD sync history, CloudTrail.
 - 서비스 의존성 맵: `.omao/plans/observability/dependency-map.yaml`.

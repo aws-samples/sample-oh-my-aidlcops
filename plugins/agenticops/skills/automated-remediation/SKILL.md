@@ -23,7 +23,7 @@ allowed-tools: "Read,Grep,Bash,mcp__cloudwatch,mcp__prometheus,mcp__eks"
 ## Prerequisites
 
 - **Runbook 저장소**: `.omao/plans/runbooks/` 에 패턴별 `${pattern-name}.yaml` 형식.
-- **awslabs.eks-mcp-server** — Pod restart, scale-out 등 K8s 조작.
+- **awslabs.eks-mcp-server==0.1.28** — Pod restart, scale-out 등 K8s 조작 (`@latest` 금지, PyPI 버전 pin 필수).
 - **awslabs.cloudwatch-mcp-server==0.0.25** — 복구 전/후 메트릭 비교.
 - **awslabs.prometheus-mcp-server==0.2.15** — 복구 검증 메트릭 조회.
 - `incident-response` 상태 파일 접근 (`.omao/state/incident/`).
