@@ -9,12 +9,19 @@
   "keywords": [
     "aidlc",
     "agenticops",
+    "aiops",
     "self-improving",
     "observability",
     "continuous-evaluation",
     "autonomous-deploy",
     "incident-response",
-    "cost-governance"
+    "cost-governance",
+    "anomaly-detection",
+    "root-cause-analysis",
+    "automated-remediation",
+    "slo",
+    "error-budget",
+    "predictive-scaling"
   ],
   "license": "Apache-2.0",
   "homepage": "https://github.com/aws-samples/sample-oh-my-aidlcops",
