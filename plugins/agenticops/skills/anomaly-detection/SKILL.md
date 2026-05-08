@@ -269,8 +269,8 @@ def classify_anomaly(value: float, baseline: Baseline,
     """단일 데이터 포인트의 이상 여부 판정 및 severity 분류."""
     
     # 계절성 보정
-    adjusted_value, factor = seasonal_adjust(value, timestamp, baseline.seasonal_profile)
-    adjusted_mean = baseline.mean  # 이미 전체 평균 기준
+    adjusted_value, seasonal_mean = seasonal_adjust(value, timestamp, baseline.seasonal_profile, baseline.mean)
+    adjusted_mean = baseline.mean
     
     if baseline.std == 0:
         return None

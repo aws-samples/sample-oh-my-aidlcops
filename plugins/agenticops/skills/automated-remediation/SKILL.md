@@ -174,7 +174,7 @@ import os
 import yaml
 import json
 from glob import glob
-from datetime import datetime
+from datetime import datetime, timedelta
 from dataclasses import dataclass, field
 
 @dataclass
@@ -346,7 +346,6 @@ def is_cooldown_elapsed(incident_id: str, runbook_name: str,
     if latest_time is None:
         return True
     
-    from datetime import timedelta
     elapsed = datetime.utcnow() - latest_time.replace(tzinfo=None)
     return elapsed > timedelta(minutes=cooldown_minutes)
 ```

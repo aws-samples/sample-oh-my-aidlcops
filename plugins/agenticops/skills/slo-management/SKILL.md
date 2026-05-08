@@ -234,11 +234,10 @@ def collect_sli(slo_config: dict) -> tuple[int, int]:
         return int(good), int(total)
     
     elif sli["type"] == "gauge":
-        # Gauge: 시간 기반 — target 이상인 시간 비율
-        values = query_prometheus_range(sli["query"], window_seconds, step=3600)
-        target = slo_config["target"]
-        good_hours = sum(1 for v in values if v >= target)
-        return good_hours, len(values)
+        # Gauge: 시간 기반 — target 이상인 시간 비율 (query_good/query_total 사용)
+        good = query_prometheus_scalar(sli["query_good"], window_seconds)
+        total = query_prometheus_scalar(sli["query_total"], window_seconds)
+        return int(good), int(total)
     
     return 0, 0
 

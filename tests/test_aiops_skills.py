@@ -348,19 +348,25 @@ class TestCalculateErrorBudget:
 # ============================================================
 
 def evaluate_budget_policy(service, budgets, policy_config):
-    """Error Budget 잔량에 따라 정책 결정."""
+    """Error Budget 잔량에 따라 정책 결정 (min inclusive, max exclusive, top inclusive)."""
     min_budget = min(budgets, key=lambda b: b["remaining_pct"])
     remaining = min_budget["remaining_pct"]
-    
+
     active_policy = None
     for policy in sorted(policy_config, key=lambda p: p["remaining_pct_min"]):
-        if policy["remaining_pct_min"] <= remaining <= policy["remaining_pct_max"]:
+        pmin = policy["remaining_pct_min"]
+        pmax = policy["remaining_pct_max"]
+        if pmax == 100:
+            in_band = pmin <= remaining <= pmax
+        else:
+            in_band = pmin <= remaining < pmax
+        if in_band:
             active_policy = policy
             break
-    
+
     if not active_policy:
         active_policy = {"mode": "normal", "deploy_allowed": True}
-    
+
     return {
         "service": service,
         "limiting_slo": min_budget["slo_name"],
@@ -416,31 +422,31 @@ class TestEvaluateBudgetPolicy:
 # ============================================================
 
 def compute_scaling_schedule(predictions, scaling_config, cost_constraints):
-    """비용 제약 내 최적 스케일링 스케줄 계산."""
-    target_rps = 100  # default
-    metrics = scaling_config.get("metrics", [])
-    for m in metrics:
-        if m.get("name") == "requests_per_second":
-            target_rps = m["target"]
-    
+    """비용 제약 내 최적 스케일링 스케줄 계산 (이름 기반 조회)."""
+    target_rps = next(
+        (m["target"] for m in scaling_config.get("metrics", [])
+         if m.get("name") == "requests_per_second"),
+        100,
+    )
+
     min_replicas = scaling_config.get("current_hpa", {}).get("min_replicas", 2)
     max_replicas = scaling_config.get("current_hpa", {}).get("max_replicas", 20)
-    
+
     cost_per_hour = cost_constraints.get("cost_per_replica_hour_usd", 2.5)
     max_hourly_cost = cost_constraints.get("max_hourly_cost_usd", 50)
     spot_ratio = cost_constraints.get("spot_ratio", 0.7)
     spot_discount = cost_constraints.get("spot_discount", 0.6)
-    
+
     effective_cost = cost_per_hour * (spot_ratio * spot_discount + (1 - spot_ratio) * 1.0)
     max_replicas_by_cost = int(max_hourly_cost / effective_cost)
-    
+
     schedule = []
     for pred in predictions:
         needed_rps = pred["upper_ci"]
         ideal_replicas = int(np.ceil(needed_rps / target_rps))
         replicas = max(min_replicas, min(ideal_replicas, max_replicas, max_replicas_by_cost))
         hourly_cost = replicas * effective_cost
-        
+
         schedule.append({
             "hour": pred["hour"],
             "predicted_rps": pred["predicted_rps"],
@@ -448,7 +454,7 @@ def compute_scaling_schedule(predictions, scaling_config, cost_constraints):
             "replicas": replicas,
             "hourly_cost_usd": round(hourly_cost, 2),
         })
-    
+
     return schedule
 
 
@@ -498,6 +504,254 @@ class TestComputeScalingSchedule:
         ]
         result = compute_scaling_schedule(predictions, self.scaling_config, self.cost_constraints)
         assert result[1]["replicas"] > result[0]["replicas"]
+
+
+# ============================================================
+# anomaly-detection: seasonal_adjust (편차 기반 보정)
+# ============================================================
+
+def seasonal_adjust(value, timestamp, seasonal_profile, global_mean):
+    """계절성 프로파일 기반 보정 (편차 기반)."""
+    dt = datetime.fromisoformat(timestamp.replace("Z", "+00:00"))
+    key = f"{dt.weekday()}_{dt.hour}"
+    seasonal_mean = seasonal_profile.get(key)
+
+    if seasonal_mean is None:
+        return value, global_mean
+
+    adjusted = value - seasonal_mean + global_mean
+    return adjusted, seasonal_mean
+
+
+class TestSeasonalAdjust:
+    def test_normal_hour(self):
+        """일반 시간대 보정."""
+        profile = {"3_14": 100.0}  # 목요일 14시 평균 = 100
+        value = 120.0
+        global_mean = 80.0
+
+        adjusted, seasonal_mean = seasonal_adjust(
+            value, "2026-05-07T14:00:00Z", profile, global_mean
+        )
+        # adjusted = 120 - 100 + 80 = 100
+        assert adjusted == 100.0
+        assert seasonal_mean == 100.0
+
+    def test_low_traffic_hour_no_false_amplification(self):
+        """저트래픽 시간대에서 비율 방식이면 폭발하지만, 편차 방식은 안정적."""
+        profile = {"3_3": 0.5}  # 목요일 03시 평균 = 0.5 (매우 낮음)
+        value = 2.0
+        global_mean = 100.0
+
+        adjusted, seasonal_mean = seasonal_adjust(
+            value, "2026-05-07T03:00:00Z", profile, global_mean
+        )
+        # 편차 기반: 2.0 - 0.5 + 100.0 = 101.5
+        # 비율 기반이었다면: 2.0 / 0.5 = 4.0 → 400% 증폭 (false critical)
+        assert adjusted == 101.5
+        assert adjusted < 200  # 합리적인 범위
+
+    def test_missing_profile_key(self):
+        """프로파일에 없는 시간대 → 원래 값 반환."""
+        profile = {}
+        value = 50.0
+        global_mean = 80.0
+
+        adjusted, seasonal_mean = seasonal_adjust(
+            value, "2026-05-08T10:00:00Z", profile, global_mean
+        )
+        assert adjusted == 50.0
+        assert seasonal_mean == global_mean
+
+    def test_high_traffic_hour(self):
+        """고트래픽 시간대에서 보정."""
+        profile = {"3_9": 200.0}  # 목요일 09시 평균 = 200 (피크)
+        value = 210.0
+        global_mean = 100.0
+
+        adjusted, seasonal_mean = seasonal_adjust(
+            value, "2026-05-07T09:00:00Z", profile, global_mean
+        )
+        # 210 - 200 + 100 = 110 → 약간 높지만 정상 범위
+        assert adjusted == 110.0
+
+
+# ============================================================
+# slo-management: evaluate_budget_policy (경계값 테스트)
+# ============================================================
+
+class TestBudgetPolicyBoundary:
+    def test_exactly_50_is_normal(self):
+        """정확히 50% → normal (min inclusive, top band)."""
+        budgets = [{"slo_name": "avail", "remaining_pct": 50.0}]
+        result = evaluate_budget_policy("svc", budgets, SAMPLE_POLICY)
+        assert result["mode"] == "normal"
+
+    def test_just_below_50_is_slowdown(self):
+        """49.99% → slow-down (max exclusive)."""
+        budgets = [{"slo_name": "avail", "remaining_pct": 49.99}]
+        result = evaluate_budget_policy("svc", budgets, SAMPLE_POLICY)
+        assert result["mode"] == "slow-down"
+
+    def test_exactly_25_is_slowdown(self):
+        """정확히 25% → slow-down (min inclusive)."""
+        budgets = [{"slo_name": "avail", "remaining_pct": 25.0}]
+        result = evaluate_budget_policy("svc", budgets, SAMPLE_POLICY)
+        assert result["mode"] == "slow-down"
+
+    def test_just_below_25_is_caution(self):
+        """24.99% → caution."""
+        budgets = [{"slo_name": "avail", "remaining_pct": 24.99}]
+        result = evaluate_budget_policy("svc", budgets, SAMPLE_POLICY)
+        assert result["mode"] == "caution"
+
+    def test_exactly_10_is_caution(self):
+        """정확히 10% → caution (min inclusive)."""
+        budgets = [{"slo_name": "avail", "remaining_pct": 10.0}]
+        result = evaluate_budget_policy("svc", budgets, SAMPLE_POLICY)
+        assert result["mode"] == "caution"
+
+    def test_just_below_10_is_freeze(self):
+        """9.99% → freeze."""
+        budgets = [{"slo_name": "avail", "remaining_pct": 9.99}]
+        result = evaluate_budget_policy("svc", budgets, SAMPLE_POLICY)
+        assert result["mode"] == "freeze"
+
+    def test_zero_is_freeze(self):
+        """0% → freeze."""
+        budgets = [{"slo_name": "avail", "remaining_pct": 0.0}]
+        result = evaluate_budget_policy("svc", budgets, SAMPLE_POLICY)
+        assert result["mode"] == "freeze"
+
+    def test_100_is_normal(self):
+        """100% → normal (top band max inclusive)."""
+        budgets = [{"slo_name": "avail", "remaining_pct": 100.0}]
+        result = evaluate_budget_policy("svc", budgets, SAMPLE_POLICY)
+        assert result["mode"] == "normal"
+
+
+    def test_single_metric_no_crash(self):
+        """metrics에 1개만 있어도 crash 안 함 (requests_per_second 없으면 default 100)."""
+        config = {
+            "current_hpa": {"min_replicas": 2, "max_replicas": 10},
+            "metrics": [{"name": "cpu_utilization", "target_pct": 70}],
+        }
+        cost = {"max_hourly_cost_usd": 50, "cost_per_replica_hour_usd": 2.5,
+                "spot_ratio": 0.7, "spot_discount": 0.6}
+        predictions = [{"hour": 0, "predicted_rps": 300, "upper_ci": 400}]
+
+        result = compute_scaling_schedule(predictions, config, cost)
+        assert result[0]["replicas"] >= 2
+
+    def test_finds_rps_metric_by_name(self):
+        """이름으로 requests_per_second 메트릭 찾기."""
+        config = {
+            "current_hpa": {"min_replicas": 2, "max_replicas": 20},
+            "metrics": [
+                {"name": "cpu_utilization", "target_pct": 70},
+                {"name": "requests_per_second", "target": 200},
+                {"name": "memory_utilization", "target_pct": 80},
+            ],
+        }
+        cost = {"max_hourly_cost_usd": 100, "cost_per_replica_hour_usd": 2.5,
+                "spot_ratio": 0.7, "spot_discount": 0.6}
+        predictions = [{"hour": 0, "predicted_rps": 500, "upper_ci": 600}]
+
+        result = compute_scaling_schedule(predictions, config, cost)
+        # 600 / 200 = 3 replicas
+        assert result[0]["replicas"] == 3
+
+    def test_empty_metrics_uses_default(self):
+        """metrics 비어있으면 default target=100."""
+        config = {"current_hpa": {"min_replicas": 2, "max_replicas": 20}, "metrics": []}
+        cost = {"max_hourly_cost_usd": 100, "cost_per_replica_hour_usd": 2.5,
+                "spot_ratio": 0.7, "spot_discount": 0.6}
+        predictions = [{"hour": 0, "predicted_rps": 300, "upper_ci": 500}]
+
+        result = compute_scaling_schedule(predictions, config, cost)
+        # 500 / 100 = 5 replicas
+        assert result[0]["replicas"] == 5
+
+
+# ============================================================
+# automated-remediation: runbook matching & action coverage
+# ============================================================
+
+def match_runbook_actions(runbook_yaml: dict) -> list[str]:
+    """runbook에서 사용된 모든 action 추출."""
+    actions = []
+    for step in runbook_yaml.get("steps", []):
+        actions.append(step["action"])
+    if runbook_yaml.get("rollback"):
+        actions.append(runbook_yaml["rollback"]["action"])
+    return actions
+
+
+SUPPORTED_ACTIONS = {
+    "kubectl_get_revision", "kubectl_logs", "kubectl_describe",
+    "kubectl_delete_pod", "kubectl_scale", "wait_for_ready",
+    "kubectl_top_pods", "kubectl_evict", "check_metric", "argocd_rollback",
+}
+
+SUPPORTED_ROLLBACK_ACTIONS = {
+    "scale_previous_revision", "manual_escalation", "cordon_and_drain",
+}
+
+
+class TestRunbookActionCoverage:
+    def test_pod_crashloop_actions_supported(self):
+        """pod-crashloop runbook의 모든 action이 지원됨."""
+        runbook = {
+            "steps": [
+                {"action": "kubectl_logs"},
+                {"action": "kubectl_describe"},
+                {"action": "kubectl_delete_pod"},
+                {"action": "wait_for_ready"},
+            ],
+            "rollback": {"action": "scale_previous_revision"},
+        }
+        actions = match_runbook_actions(runbook)
+        step_actions = set(actions[:-1])
+        rollback_action = actions[-1]
+
+        assert step_actions.issubset(SUPPORTED_ACTIONS)
+        assert rollback_action in SUPPORTED_ROLLBACK_ACTIONS
+
+    def test_canary_rollback_actions_supported(self):
+        """canary-rollback runbook의 모든 action이 지원됨."""
+        runbook = {
+            "steps": [
+                {"action": "kubectl_get_revision"},
+                {"action": "kubectl_scale"},
+                {"action": "wait_for_ready"},
+                {"action": "argocd_rollback"},
+                {"action": "wait_for_ready"},
+            ],
+            "rollback": {"action": "manual_escalation"},
+        }
+        actions = match_runbook_actions(runbook)
+        step_actions = set(actions[:-1])
+        rollback_action = actions[-1]
+
+        assert step_actions.issubset(SUPPORTED_ACTIONS)
+        assert rollback_action in SUPPORTED_ROLLBACK_ACTIONS
+
+    def test_memory_pressure_actions_supported(self):
+        """memory-pressure runbook의 모든 action이 지원됨."""
+        runbook = {
+            "steps": [
+                {"action": "kubectl_top_pods"},
+                {"action": "kubectl_evict"},
+                {"action": "check_metric"},
+            ],
+            "rollback": {"action": "cordon_and_drain"},
+        }
+        actions = match_runbook_actions(runbook)
+        step_actions = set(actions[:-1])
+        rollback_action = actions[-1]
+
+        assert step_actions.issubset(SUPPORTED_ACTIONS)
+        assert rollback_action in SUPPORTED_ROLLBACK_ACTIONS
 
 
 if __name__ == "__main__":

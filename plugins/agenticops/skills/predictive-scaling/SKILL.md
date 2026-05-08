@@ -88,21 +88,10 @@ events_calendar:
 시계열을 트렌드, 계절성, 잔차로 분해합니다.
 
 ```python
+import os
 import numpy as np
+import yaml
 from datetime import datetime, timedelta
-from dataclasses import dataclass, field
-
-@dataclass
-class ForecastResult:
-    service: str
-    generated_at: str
-    forecast_hours: int
-    hourly_predictions: list[dict]  # [{hour, predicted_rps, upper_ci, lower_ci, replicas}]
-    daily_cost_estimate_usd: float
-    peak_hour: int
-    peak_replicas: int
-    trough_hour: int
-    trough_replicas: int
 
 def seasonal_forecast(historical_data: list[float], 
                       timestamps: list[str],
@@ -254,7 +243,11 @@ def compute_scaling_schedule(predictions: list[dict],
     - 비용 상한 초과 시 target_utilization을 높여 replica 감소
     - spot 인스턴스 비율 적용
     """
-    target_rps_per_replica = scaling_config.get("metrics", [{}])[1].get("target", 100)
+    target_rps_per_replica = next(
+        (m["target"] for m in scaling_config.get("metrics", [])
+         if m.get("name") == "requests_per_second"),
+        100,
+    )
     min_replicas = scaling_config.get("current_hpa", {}).get("min_replicas", 2)
     max_replicas = scaling_config.get("current_hpa", {}).get("max_replicas", 20)
     
