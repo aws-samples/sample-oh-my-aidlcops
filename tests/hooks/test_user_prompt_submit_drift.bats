@@ -17,8 +17,10 @@ setup() {
 JSON
     FAKE_HOME="$(mktemp -d)"
     mkdir -p "$FAKE_HOME/.claude"
-    : > "$FAKE_HOME/.claude/settings.json"
-    touch -t 202401010000 "$FAKE_HOME/.claude/settings.json"
+    # Stale OMA sentinel — install ran a long time ago so any newly-touched
+    # overlay below will look "newer".
+    : > "$FAKE_HOME/.claude/.oma-permissions-applied-at"
+    touch -t 202401010000 "$FAKE_HOME/.claude/.oma-permissions-applied-at"
 }
 
 teardown() {
@@ -43,12 +45,12 @@ YAML
     echo "$output" | jq -e '.additionalContext | contains("OMA_PERMISSIONS_DRIFT")'
 }
 
-@test "no drift line when settings.json is newer than overlay" {
+@test "no drift line when sentinel is newer than overlay" {
     cat > "$PROJECT/.omao/permissions.yaml" <<'YAML'
 version: 1
 YAML
     touch -t 202401010000 "$PROJECT/.omao/permissions.yaml"
-    : > "$FAKE_HOME/.claude/settings.json"   # current mtime, newer
+    : > "$FAKE_HOME/.claude/.oma-permissions-applied-at"   # current mtime, newer
 
     run_hook 'just a normal question'
     [ "$status" -eq 0 ]

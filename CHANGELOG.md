@@ -181,6 +181,17 @@ breaking changes to non-stable surfaces as documented in
   (`.omao/project-memory.json`), ontology status block
   (`.omao/ontology/`), and the budget warning
   (`.omao/ontology/budgets/`).
+- `perms_overlay_drift` now compares `.omao/permissions.yaml` against
+  OMA-owned sentinel files (`<harness_home>/.oma-permissions-applied-at`)
+  instead of the harness config (`settings.json` / `cli.json`). Both
+  Claude Code and Kiro touch their own settings files for unrelated
+  reasons (session telemetry, model cache); using their mtime caused
+  the drift hook to silently false-negative as soon as the harness
+  bumped its config timestamp. install_permissions in both install
+  scripts now stamps a sentinel after a successful merge, and a harness
+  with no sentinel is treated as "never installed" — no false-positive
+  alerts on Kiro-less workstations either. Bats coverage updated to
+  exercise the sentinel mtime semantics.
 - `scripts/lib/permissions.sh` `merge_one`: child template's explicit
   `auto_approve.{read_only,file_writes,bash_commands}: false` now
   overrides a parent's `true`. The previous `(child.k // parent.k)`

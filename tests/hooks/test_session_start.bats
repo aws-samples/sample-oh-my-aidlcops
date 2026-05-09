@@ -78,7 +78,7 @@ teardown() {
     echo "$output" | jq -e '.hookSpecificOutput.additionalContext' >/dev/null
 }
 
-@test "session-start emits OMA_PERMISSIONS_DRIFT when overlay newer than settings.json" {
+@test "session-start emits OMA_PERMISSIONS_DRIFT when overlay newer than sentinel" {
     cat > "$PROJECT/.omao/permissions.yaml" <<'YAML'
 version: 1
 deny:
@@ -87,9 +87,9 @@ deny:
 YAML
     fake_home=$(mktemp -d)
     mkdir -p "$fake_home/.claude"
-    : > "$fake_home/.claude/settings.json"
-    # Backdate the harness config so the overlay is "newer".
-    touch -t 202401010000 "$fake_home/.claude/settings.json"
+    : > "$fake_home/.claude/.oma-permissions-applied-at"
+    # Backdate the OMA sentinel so the overlay is "newer".
+    touch -t 202401010000 "$fake_home/.claude/.oma-permissions-applied-at"
 
     cd "$PROJECT"
     HOME="$fake_home" run bash "$HOOK"
@@ -99,14 +99,14 @@ YAML
     rm -rf "$fake_home"
 }
 
-@test "no drift line when settings.json is newer than overlay" {
+@test "no drift line when sentinel is newer than overlay" {
     cat > "$PROJECT/.omao/permissions.yaml" <<'YAML'
 version: 1
 YAML
     touch -t 202401010000 "$PROJECT/.omao/permissions.yaml"
     fake_home=$(mktemp -d)
     mkdir -p "$fake_home/.claude"
-    : > "$fake_home/.claude/settings.json"   # current mtime, newer
+    : > "$fake_home/.claude/.oma-permissions-applied-at"   # current mtime, newer
 
     cd "$PROJECT"
     HOME="$fake_home" run bash "$HOOK"
@@ -122,8 +122,8 @@ version: 1
 YAML
     fake_home=$(mktemp -d)
     mkdir -p "$fake_home/.claude"
-    : > "$fake_home/.claude/settings.json"
-    touch -t 202401010000 "$fake_home/.claude/settings.json"
+    : > "$fake_home/.claude/.oma-permissions-applied-at"
+    touch -t 202401010000 "$fake_home/.claude/.oma-permissions-applied-at"
 
     cd "$PROJECT"
     HOME="$fake_home" OMA_DISABLE_PERMISSIONS_DRIFT=1 run bash "$HOOK"
@@ -133,15 +133,36 @@ YAML
     rm -rf "$fake_home"
 }
 
-@test "no harness config: drift detection silently skips" {
+@test "no sentinel: drift detection silently skips (never installed)" {
     cat > "$PROJECT/.omao/permissions.yaml" <<'YAML'
 version: 1
 YAML
-    fake_home=$(mktemp -d)   # no .claude or .kiro
+    fake_home=$(mktemp -d)   # no sentinel — install never ran
     cd "$PROJECT"
     HOME="$fake_home" run bash "$HOOK"
     [ "$status" -eq 0 ]
     run jq -e '.additionalContext | contains("OMA_PERMISSIONS_DRIFT") | not' <<<"$output"
+    [ "$status" -eq 0 ]
+    rm -rf "$fake_home"
+}
+
+@test "kiro sentinel absent: only claude drift surfaces" {
+    cat > "$PROJECT/.omao/permissions.yaml" <<'YAML'
+version: 1
+YAML
+    fake_home=$(mktemp -d)
+    # Only Claude sentinel exists, with stale mtime → claude drift expected.
+    # No Kiro sentinel → must NOT mention kiro path.
+    mkdir -p "$fake_home/.claude"
+    : > "$fake_home/.claude/.oma-permissions-applied-at"
+    touch -t 202401010000 "$fake_home/.claude/.oma-permissions-applied-at"
+
+    cd "$PROJECT"
+    HOME="$fake_home" run bash "$HOOK"
+    [ "$status" -eq 0 ]
+    echo "$output" | jq -e '.additionalContext | contains("OMA_PERMISSIONS_DRIFT")'
+    # Drift body must NOT reference the kiro sentinel path.
+    run jq -e '.additionalContext | contains(".kiro/.oma-permissions-applied-at") | not' <<<"$output"
     [ "$status" -eq 0 ]
     rm -rf "$fake_home"
 }

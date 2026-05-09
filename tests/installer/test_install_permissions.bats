@@ -78,6 +78,21 @@ YAML
     [ "$first" -eq "$second" ]
 }
 
+@test "claude.sh stamps the OMA permissions sentinel after a successful install" {
+    write_profile sandbox
+    bash "$CLAUDE_INSTALL" >/dev/null 2>&1
+    [ -f "$CLAUDE_HOME/.oma-permissions-applied-at" ]
+    # Sentinel mtime should not be older than the overlay file we'd compare it against.
+    sentinel_mtime=$(stat -f %m "$CLAUDE_HOME/.oma-permissions-applied-at" 2>/dev/null || stat -c %Y "$CLAUDE_HOME/.oma-permissions-applied-at")
+    [ "$sentinel_mtime" -gt 0 ]
+}
+
+@test "kiro.sh stamps the OMA permissions sentinel after a successful install" {
+    write_profile prod
+    bash "$KIRO_INSTALL" >/dev/null 2>&1
+    [ -f "$KIRO_HOME/.oma-permissions-applied-at" ]
+}
+
 @test "claude.sh preserves user-authored permissions.deny entries" {
     write_profile sandbox
     mkdir -p "$CLAUDE_HOME"

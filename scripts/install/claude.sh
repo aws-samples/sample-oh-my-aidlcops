@@ -275,6 +275,14 @@ install_permissions() {
 
     PERMISSIONS_ADDED="$added_count"
     log "permissions: $added_count new deny entries appended (total $(jq '.permissions.deny | length' "$settings"))"
+
+    # Stamp the OMA sentinel so the drift hook compares against our own
+    # timestamp, not against settings.json (which Claude itself touches
+    # for unrelated reasons). Sentinel lives at <CLAUDE_HOME>/.oma-permissions-applied-at.
+    sentinel="$CLAUDE_HOME/.oma-permissions-applied-at"
+    mkdir -p "$(dirname "$sentinel")"
+    : > "$sentinel"
+    log "permissions: stamped $sentinel"
 }
 
 detect_claude_version() {

@@ -288,28 +288,39 @@ perms_to_kiro_autoapprove() {
     '
 }
 
-# perms_overlay_drift <project_dir> [<harness_home_dir>]
-# Compare .omao/permissions.yaml mtime against ~/.claude/settings.json and
-# ~/.kiro/settings/cli.json. Print a comma-separated list of harness configs
-# that pre-date the overlay (newer overlay → drift) on stdout. Empty stdout
-# means "no drift".
+# perms_overlay_drift <project_dir> [<user_home>]
+# Compare .omao/permissions.yaml mtime against OMA-owned sentinels created
+# by install_permissions:
 #
-# Pure mtime check — no YAML parsing, no install side effects. Safe to call
-# from any hook on every keystroke.
+#   <user_home>/.claude/.oma-permissions-applied-at   (claude install)
+#   <user_home>/.kiro/.oma-permissions-applied-at     (kiro install)
 #
-# <harness_home_dir> defaults to $HOME so callers can stub it for tests.
+# Print a comma-separated list of sentinels that pre-date the overlay
+# (overlay newer → drift) on stdout. Empty stdout means "no drift".
+#
+# Why a sentinel instead of comparing against settings.json: Claude Code
+# and Kiro both touch their own settings files for unrelated reasons
+# (session telemetry, model cache, last-used timestamps). A sentinel
+# OMA owns is the only mtime that genuinely tracks "when did
+# install_permissions last apply the overlay". A harness with no
+# sentinel is treated as "never installed" — no false-positive drift
+# alerts on a Kiro-less workstation.
+#
+# Pure mtime check — no YAML parsing, no side effects.
 perms_overlay_drift() {
     project_dir="${1:-$PWD}"
-    harness_home="${2:-$HOME}"
+    user_home="${2:-$HOME}"
     overlay="$project_dir/.omao/permissions.yaml"
     [ -f "$overlay" ] || return 0
     overlay_mtime=$(stat -f %m "$overlay" 2>/dev/null || stat -c %Y "$overlay" 2>/dev/null || echo 0)
     drifted=""
-    for cfg in "$harness_home/.claude/settings.json" "$harness_home/.kiro/settings/cli.json"; do
-        [ -f "$cfg" ] || continue
-        cfg_mtime=$(stat -f %m "$cfg" 2>/dev/null || stat -c %Y "$cfg" 2>/dev/null || echo 0)
-        if [ "$overlay_mtime" -gt "$cfg_mtime" ]; then
-            label="${cfg/#$harness_home/~}"
+    for sentinel in \
+        "$user_home/.claude/.oma-permissions-applied-at" \
+        "$user_home/.kiro/.oma-permissions-applied-at"; do
+        [ -f "$sentinel" ] || continue   # never installed for this harness
+        sentinel_mtime=$(stat -f %m "$sentinel" 2>/dev/null || stat -c %Y "$sentinel" 2>/dev/null || echo 0)
+        if [ "$overlay_mtime" -gt "$sentinel_mtime" ]; then
+            label="${sentinel/#$user_home/~}"
             drifted+="${drifted:+, }$label"
         fi
     done

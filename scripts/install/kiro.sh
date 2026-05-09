@@ -363,6 +363,14 @@ install_permissions() {
             fi
         done
     done < <(jq -r '.plugins[].name' "$MARKETPLACE_JSON")
+
+    # Stamp the OMA sentinel so the drift hook compares against our own
+    # timestamp, not against cli.json (which Kiro itself touches for
+    # unrelated reasons). Sentinel: <KIRO_HOME>/.oma-permissions-applied-at.
+    sentinel="$KIRO_HOME/.oma-permissions-applied-at"
+    mkdir -p "$(dirname "$sentinel")"
+    : > "$sentinel"
+    log "permissions: stamped $sentinel"
 }
 
 summary() {
