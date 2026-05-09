@@ -77,6 +77,38 @@ resolve_jq() {
     done
 }
 
+@test "child template can override parent auto_approve true to false" {
+    # Regression for the jq `//` falsy collapse: if the merge uses
+    # `(child.k // parent.k)`, a child setting `false` against a parent set
+    # to `true` produces `true` (jq treats `false` as a null alternative).
+    # The fix uses explicit `has(k)` so the child's literal `false` is
+    # honored.
+    tmpl_dir="$(mktemp -d)"
+    cat > "$tmpl_dir/common.yaml" <<'EOF'
+version: 1
+deny: { bash: [], edit: [], write: [], mcp: [] }
+auto_approve: { read_only: true, file_writes: true, bash_commands: true }
+EOF
+    cat > "$tmpl_dir/sandbox.yaml" <<'EOF'
+version: 1
+extends: ["common.yaml"]
+deny: { bash: [], edit: [], write: [], mcp: [] }
+auto_approve: { read_only: true, file_writes: false, bash_commands: false }
+EOF
+
+    out=$(bash -c "
+        . '$LIB'
+        perms_template_dir() { printf '%s' '$tmpl_dir'; }
+        perms_resolve sandbox | jq -c '.auto_approve'
+    ")
+    rm -rf "$tmpl_dir"
+
+    [ "$out" = '{"read_only":true,"file_writes":false,"bash_commands":false}' ] || {
+        echo "got: $out"
+        return 1
+    }
+}
+
 @test "prod deny set is a strict superset of staging" {
     staging=$(bash -c ". '$LIB' && perms_resolve staging | jq -r '.deny.bash[]'")
     prod=$(bash    -c ". '$LIB' && perms_resolve prod    | jq -r '.deny.bash[]'")

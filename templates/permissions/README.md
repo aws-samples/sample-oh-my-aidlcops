@@ -105,3 +105,21 @@ resolver based on `.omao/profile.yaml` `aws.environment` (or the
 Skip the step entirely with `--skip-permissions` or
 `OMA_SKIP_PERMISSIONS=1`. Hand-edited agent.json copies (no
 `_meta.oma_permissions_env`) are refused — delete the file to re-apply.
+
+## Known limitations
+
+- **Env downgrade leaves stale entries on the Claude side.** Switching
+  `aws.environment` from `prod` back to `sandbox` and re-running `oma
+  setup` adds the sandbox entries but does NOT remove the prod-only
+  entries already in `~/.claude/settings.json`. The merge is
+  append-uniq, never subtractive. To clean up, delete the unwanted
+  lines from `~/.claude/settings.json` by hand (or `oma uninstall` then
+  re-install). The Kiro side rewrites each agent copy from source on
+  every run so it self-heals; only Claude is sticky.
+- **Deny rules are user-global, not project-scoped.** `oma setup`
+  writes to `~/.claude/settings.json` rather than
+  `<project>/.claude/settings.local.json`. Two projects on the same
+  machine share whichever env was last installed.
+- **`extends` is single-level.** `<env>.yaml` may extend
+  `common.yaml`, but a base template's own `extends` chain is not
+  followed. Adequate for the four-template tree shipped today.

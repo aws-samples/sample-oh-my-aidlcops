@@ -279,8 +279,11 @@ detect_claude_version() {
         CLAUDE_MAJOR_VERSION=""
         return 0
     fi
-    # Expected output shape: "2.1.123 (Claude Code)"
-    raw="$(claude --version 2>/dev/null | head -1 | awk '{print $1}')"
+    # Expected output shape: "2.1.123 (Claude Code)". Trailing `|| true`
+    # keeps the silent-fallback intent under `set -euo pipefail`: a wrapper
+    # `claude` (toolbox/asdf-style) that exits non-zero on stale state must
+    # not abort the entire installer here.
+    raw="$(claude --version 2>/dev/null | head -1 | awk '{print $1}' || true)"
     CLAUDE_MAJOR_VERSION="${raw%%.*}"
     if [ -n "$CLAUDE_MAJOR_VERSION" ] && [ "$CLAUDE_MAJOR_VERSION" -ge 2 ] 2>/dev/null; then
         CLAUDE_SUPPORTS_NATIVE=1

@@ -98,6 +98,13 @@ $extends_list
 EOF
 
     # Merge: scalar override (last wins), arrays union+uniq+sort.
+    #
+    # auto_approve flags are tri-valued from jq's perspective: `true`, `false`,
+    # or "key absent". The naive `(child.k // parent.k)` collapses both `false`
+    # and missing into the parent value because jq's `//` treats `false` as a
+    # null alternative. That blocks any child template from overriding `true`
+    # back to `false` once a parent set it. Use explicit `has(k)` so a
+    # `false` literal in the child is honored.
     final_json="$(jq -n \
         --argjson bases "$bases_json" \
         --argjson main "$main_json" \
@@ -106,12 +113,15 @@ EOF
         '
         def union_uniq($a; $b): ($a + $b) | unique | sort;
 
+        def pick_scalar(parent; child; key):
+          if (child // {}) | has(key) then child[key] else parent[key] end;
+
         def merge_one(parent; child):
           {
             auto_approve: {
-              read_only:     ((child.auto_approve.read_only)     // parent.auto_approve.read_only),
-              file_writes:   ((child.auto_approve.file_writes)   // parent.auto_approve.file_writes),
-              bash_commands: ((child.auto_approve.bash_commands) // parent.auto_approve.bash_commands)
+              read_only:     pick_scalar(parent.auto_approve // {}; child.auto_approve // {}; "read_only"),
+              file_writes:   pick_scalar(parent.auto_approve // {}; child.auto_approve // {}; "file_writes"),
+              bash_commands: pick_scalar(parent.auto_approve // {}; child.auto_approve // {}; "bash_commands")
             },
             deny: {
               bash:  union_uniq(parent.deny.bash  // []; child.deny.bash  // []),

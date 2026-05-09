@@ -137,6 +137,19 @@ breaking changes to non-stable surfaces as documented in
   (`.omao/project-memory.json`), ontology status block
   (`.omao/ontology/`), and the budget warning
   (`.omao/ontology/budgets/`).
+- `scripts/lib/permissions.sh` `merge_one`: child template's explicit
+  `auto_approve.{read_only,file_writes,bash_commands}: false` now
+  overrides a parent's `true`. The previous `(child.k // parent.k)`
+  collapsed `false` into the parent value because jq's `//` operator
+  treats `false` as a null alternative. New `pick_scalar` helper uses
+  `has(k)` so child intent is honored regardless of the literal value.
+  Regression caught by `tests/installer/test_permissions_lib.bats`.
+- `scripts/install/claude.sh` `detect_claude_version`: trailing
+  `| awk '{print $1}' || true` keeps the silent-fallback intent under
+  `set -euo pipefail`. Wrapper `claude` binaries (toolbox / asdf /
+  similar) that exit non-zero on stale state no longer abort the
+  installer. The bug pre-dates this change set but only surfaced
+  through the new `tests/installer/test_doctor_permissions.bats`.
 
 ## [0.4.0-preview.1] — 2026-05-02
 
