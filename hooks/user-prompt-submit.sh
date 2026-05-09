@@ -113,7 +113,12 @@ Description: $DESCRIPTION
 
 Invoke this command or proceed with the user's request using the relevant Tier-0 workflow."
 
-    jq -n --arg ctx "$ADDITIONAL_CONTEXT" '{"additionalContext": $ctx}'
+    jq -n --arg ctx "$ADDITIONAL_CONTEXT" '{
+      hookSpecificOutput: {
+        hookEventName: "UserPromptSubmit",
+        additionalContext: $ctx
+      }
+    }'
     exit 0
   fi
 done <<< "$TRIGGERS"
@@ -138,7 +143,12 @@ if [[ "${OMA_DISABLE_ONTOLOGY:-0}" != "1" ]] && [[ -d "$OMA_PROJ_DIR/.omao/ontol
 $warn_line
 
 Consider running /oma:agenticops or pausing high-cost operations."
-      jq -n --arg ctx "$ADDITIONAL_CONTEXT" '{"additionalContext": $ctx}'
+      jq -n --arg ctx "$ADDITIONAL_CONTEXT" '{
+        hookSpecificOutput: {
+          hookEventName: "UserPromptSubmit",
+          additionalContext: $ctx
+        }
+      }'
       exit 0
     fi
   done < <(find "$OMA_PROJ_DIR/.omao/ontology/budgets" -maxdepth 1 -type f -name '*.json' 2>/dev/null)

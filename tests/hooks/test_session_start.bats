@@ -44,29 +44,29 @@ teardown() {
     cd "$PROJECT"
     run bash "$HOOK"
     [ "$status" -eq 0 ]
-    echo "$output" | jq -e '.additionalContext | contains("[OMA Ontology]")' >/dev/null
-    echo "$output" | jq -e '.additionalContext | contains("Budget default-monthly")' >/dev/null
+    echo "$output" | jq -e '.hookSpecificOutput.additionalContext | contains("[OMA Ontology]")' >/dev/null
+    echo "$output" | jq -e '.hookSpecificOutput.additionalContext | contains("Budget default-monthly")' >/dev/null
 }
 
 @test "session-start includes open incident" {
     cd "$PROJECT"
     run bash "$HOOK"
     [ "$status" -eq 0 ]
-    echo "$output" | jq -e '.additionalContext | contains("Incident inc-test-001")' >/dev/null
+    echo "$output" | jq -e '.hookSpecificOutput.additionalContext | contains("Incident inc-test-001")' >/dev/null
 }
 
 @test "session-start includes proposed deployment" {
     cd "$PROJECT"
     run bash "$HOOK"
     [ "$status" -eq 0 ]
-    echo "$output" | jq -e '.additionalContext | contains("Deployment vllm-mini")' >/dev/null
+    echo "$output" | jq -e '.hookSpecificOutput.additionalContext | contains("Deployment vllm-mini")' >/dev/null
 }
 
 @test "OMA_DISABLE_ONTOLOGY skips ontology block" {
     cd "$PROJECT"
     OMA_DISABLE_ONTOLOGY=1 run bash "$HOOK"
     [ "$status" -eq 0 ]
-    run jq -e '.additionalContext | contains("[OMA Ontology]") | not' <<<"$output"
+    run jq -e '.hookSpecificOutput.additionalContext | contains("[OMA Ontology]") | not' <<<"$output"
     [ "$status" -eq 0 ]
 }
 
@@ -75,5 +75,5 @@ teardown() {
     cd "$PROJECT"
     run bash "$HOOK"
     [ "$status" -eq 0 ]
-    echo "$output" | jq -e '.additionalContext' >/dev/null
+    echo "$output" | jq -e '.hookSpecificOutput.additionalContext' >/dev/null
 }

@@ -104,25 +104,44 @@ Keyword triggers are active. Type keywords like 'autopilot', 'agenticops', 'ince
 
 # Emit JSON output.
 #
+# Claude Code 2.x expects:
+#   { "hookSpecificOutput": { "hookEventName": "SessionStart",
+#                              "additionalContext": "..." } }
+# A bare {additionalContext: "..."} is NOT honored by 2.x — the context
+# silently drops out, and the user sees no effect from the hook.
+#
 # CRITICAL: ADDITIONAL_CONTEXT is built from files on disk
 # (.omao/state/active-mode, .omao/project-memory.json) that may contain double
-# quotes, backslashes, newlines, or control characters. Naive
-# `echo "{\"additionalContext\": \"$VAR\"}"` would break the emitted JSON and,
-# worse, let a crafted state file inject arbitrary keys into the session
-# context. We REQUIRE a real JSON encoder: jq is preferred, Python 3 is an
-# acceptable fallback. We never fall back to shell-string interpolation.
+# quotes, backslashes, newlines, or control characters. Naive shell-string
+# interpolation would break the emitted JSON and let a crafted state file
+# inject arbitrary keys. We REQUIRE a real JSON encoder.
 if command -v jq >/dev/null 2>&1; then
-  jq -n --arg ctx "$ADDITIONAL_CONTEXT" '{"additionalContext": $ctx}'
+  jq -n --arg ctx "$ADDITIONAL_CONTEXT" '{
+    hookSpecificOutput: {
+      hookEventName: "SessionStart",
+      additionalContext: $ctx
+    }
+  }'
 elif command -v python3 >/dev/null 2>&1; then
   ADDITIONAL_CONTEXT="$ADDITIONAL_CONTEXT" python3 -c '
 import json, os, sys
-sys.stdout.write(json.dumps({"additionalContext": os.environ["ADDITIONAL_CONTEXT"]}))
+sys.stdout.write(json.dumps({
+    "hookSpecificOutput": {
+        "hookEventName": "SessionStart",
+        "additionalContext": os.environ["ADDITIONAL_CONTEXT"]
+    }
+}))
 sys.stdout.write("\n")
 '
 elif command -v python >/dev/null 2>&1; then
   ADDITIONAL_CONTEXT="$ADDITIONAL_CONTEXT" python -c '
 import json, os, sys
-sys.stdout.write(json.dumps({"additionalContext": os.environ["ADDITIONAL_CONTEXT"]}))
+sys.stdout.write(json.dumps({
+    "hookSpecificOutput": {
+        "hookEventName": "SessionStart",
+        "additionalContext": os.environ["ADDITIONAL_CONTEXT"]
+    }
+}))
 sys.stdout.write("\n")
 '
 else
