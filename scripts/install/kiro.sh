@@ -348,9 +348,11 @@ install_permissions() {
                 ' "$src_agent" > "$tmp"; then
                 # Replace whatever currently lives at $dst (symlink or
                 # OMA-meta-tagged file) with the freshly patched copy.
-                [ -e "$dst" ] || [ -L "$dst" ] && rm -f "$dst"
+                if [ -e "$dst" ] || [ -L "$dst" ]; then
+                    rm -f "$dst"
+                fi
                 mv "$tmp" "$dst"
-                log "permissions: wrote ${dst#$KIRO_HOME/}"
+                log "permissions: wrote ${dst#"$KIRO_HOME"/}"
                 PERMISSIONS_APPLIED=$((PERMISSIONS_APPLIED + 1))
             else
                 warn "permissions: failed to render $src_agent → $dst (left untouched)"
