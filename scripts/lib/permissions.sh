@@ -3,8 +3,18 @@
 # and Kiro install scripts.
 #
 # Reads templates/permissions/<env>.yaml, resolves `extends` against
-# common.yaml, and emits a single normalized JSON document on stdout that
-# both install scripts can ingest without re-parsing YAML.
+# common.yaml, optionally applies a project-level overlay
+# (`<project>/.omao/permissions.yaml`), and emits a single normalized JSON
+# document on stdout that both install scripts can ingest without re-parsing
+# YAML.
+#
+# Resolution chain (lowest → highest priority):
+#   1. templates/permissions/common.yaml      (OMA repo, baseline floor)
+#   2. templates/permissions/<env>.yaml       (OMA repo, environment defaults)
+#   3. <project>/.omao/permissions.yaml       (user overlay, optional)
+#
+# The overlay can both add and remove rules, and override auto_approve flags.
+# See perms_apply_overlay below for the schema.
 #
 # Output schema (always present, may be empty arrays):
 #
@@ -146,6 +156,89 @@ EOF
         --argjson exts "$extends_array_json" \
         --arg main_name "${env}.yaml" \
         '._meta.templates = ($exts + [$main_name])'
+}
+
+# perms_apply_overlay <resolved-json> <overlay-yaml>
+# Apply a project overlay (`<project>/.omao/permissions.yaml`) on top of an
+# already-resolved template chain. Returns the merged JSON on stdout.
+#
+# Overlay schema (every key optional):
+#
+#   version: 1
+#   deny:
+#     add:                          # extra deny patterns to layer in
+#       bash:  ["<pattern>", ...]
+#       edit:  ["<glob>", ...]
+#       write: ["<glob>", ...]
+#       mcp:   ["<pattern>", ...]
+#     remove:                       # patterns to subtract from the resolved set
+#       bash:  ["<pattern>", ...]
+#       edit:  ["<glob>", ...]
+#       write: ["<glob>", ...]
+#       mcp:   ["<pattern>", ...]
+#   auto_approve:                   # any/all flags optional; explicit value wins
+#     read_only:     <bool>
+#     file_writes:   <bool>
+#     bash_commands: <bool>
+#
+# Removals are exact-match against the post-merge deny array (after
+# common+env have unioned). To remove a pattern that was introduced in
+# common.yaml, copy the exact string into deny.remove.<bucket>.
+perms_apply_overlay() {
+    resolved="$1"
+    overlay_yaml="$2"
+    if [ ! -f "$overlay_yaml" ]; then
+        printf '%s' "$resolved"
+        return 0
+    fi
+    overlay_json="$(perms_yaml_to_json "$overlay_yaml")"
+
+    jq -n \
+        --argjson r "$resolved" \
+        --argjson o "$overlay_json" \
+        --arg     overlay_path "$overlay_yaml" \
+        '
+        def union_uniq($a; $b): ($a + $b) | unique | sort;
+        def subtract($a; $b): $a | map(select(. as $x | $b | index($x) | not));
+        def pick_scalar(parent; child; key):
+          if (child // {}) | has(key) then child[key] else parent[key] end;
+
+        ($o.deny.add    // {}) as $add
+        | ($o.deny.remove // {}) as $rm
+        | ($o.auto_approve // {}) as $aa
+        | $r
+        | .deny.bash  = subtract(union_uniq(.deny.bash  // []; $add.bash  // []); $rm.bash  // [])
+        | .deny.edit  = subtract(union_uniq(.deny.edit  // []; $add.edit  // []); $rm.edit  // [])
+        | .deny.write = subtract(union_uniq(.deny.write // []; $add.write // []); $rm.write // [])
+        | .deny.mcp   = subtract(union_uniq(.deny.mcp   // []; $add.mcp   // []); $rm.mcp   // [])
+        | .auto_approve.read_only     = pick_scalar(.auto_approve // {}; $aa; "read_only")
+        | .auto_approve.file_writes   = pick_scalar(.auto_approve // {}; $aa; "file_writes")
+        | .auto_approve.bash_commands = pick_scalar(.auto_approve // {}; $aa; "bash_commands")
+        | ._meta.overlay_path = $overlay_path
+        | ._meta.overlay_applied = (
+            ((($add.bash  // []) | length) > 0) or
+            ((($add.edit  // []) | length) > 0) or
+            ((($add.write // []) | length) > 0) or
+            ((($add.mcp   // []) | length) > 0) or
+            ((($rm.bash   // []) | length) > 0) or
+            ((($rm.edit   // []) | length) > 0) or
+            ((($rm.write  // []) | length) > 0) or
+            ((($rm.mcp    // []) | length) > 0) or
+            (($aa | keys | length) > 0)
+          )
+        '
+}
+
+# perms_resolve_with_overlays <env> [<project_dir>]
+# Resolve templates/<env>.yaml and (if present) layer the project overlay
+# from <project_dir>/.omao/permissions.yaml on top. <project_dir> defaults
+# to $PWD.
+perms_resolve_with_overlays() {
+    env="$1"
+    project_dir="${2:-$PWD}"
+    base_resolved="$(perms_resolve "$env")"
+    overlay="$project_dir/.omao/permissions.yaml"
+    perms_apply_overlay "$base_resolved" "$overlay"
 }
 
 # perms_resolve_for_profile <profile.yaml>

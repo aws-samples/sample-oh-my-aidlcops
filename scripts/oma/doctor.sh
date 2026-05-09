@@ -196,7 +196,7 @@ probe_permissions_applied() {
            return ;;
     esac
 
-    expected_deny="$(perms_resolve "$env" 2>/dev/null | perms_to_claude_deny 2>/dev/null || echo '[]')"
+    expected_deny="$(perms_resolve_with_overlays "$env" "$PROJECT_DIR" 2>/dev/null | perms_to_claude_deny 2>/dev/null || echo '[]')"
 
     claude_settings="$HOME/.claude/settings.json"
     kiro_dir="$HOME/.kiro"

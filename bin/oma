@@ -61,6 +61,9 @@ Subcommands:
     status      Read .omao/profile.yaml and summarize active mode, budgets, last doctor.
     enterprise-status
                 Summarize enterprise readiness: probe results + phased-adoption stage counters.
+    permissions Inspect the resolved permission chain (templates + overlay).
+                Use \`oma permissions show\` to see provenance,
+                \`oma permissions path\` to print the overlay file path.
     where       Print the OMA install root and key subdirectories.
     upgrade     git pull + re-run setup --migrate (clone installs only).
     uninstall   Reverse symlinks and surgically remove OMA entries from ~/.claude/settings.json.

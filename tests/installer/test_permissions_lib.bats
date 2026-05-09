@@ -149,6 +149,84 @@ EOF
     done <<< "$out"
 }
 
+@test "overlay deny.add appends to the resolved set" {
+    proj=$(mktemp -d)
+    mkdir -p "$proj/.omao"
+    cat > "$proj/.omao/permissions.yaml" <<'EOF'
+version: 1
+deny:
+  add:
+    edit: ["infra/secrets/**"]
+EOF
+    has=$(bash -c ". '$LIB' && perms_resolve_with_overlays prod '$proj' | jq '.deny.edit | any(test(\"infra/secrets\"))'")
+    rm -rf "$proj"
+    [ "$has" = "true" ]
+}
+
+@test "overlay deny.remove subtracts from the resolved set" {
+    proj=$(mktemp -d)
+    mkdir -p "$proj/.omao"
+    # Pick an entry that's actually in prod.
+    target="kubectl delete ns*"
+    cat > "$proj/.omao/permissions.yaml" <<EOF
+version: 1
+deny:
+  remove:
+    bash: ["$target"]
+EOF
+    base_count=$(bash -c ". '$LIB' && perms_resolve prod | jq '.deny.bash | length'")
+    overlay_count=$(bash -c ". '$LIB' && perms_resolve_with_overlays prod '$proj' | jq '.deny.bash | length'")
+    rm -rf "$proj"
+    [ "$overlay_count" -eq $((base_count - 1)) ]
+}
+
+@test "overlay auto_approve.bash_commands=true overrides prod default false" {
+    proj=$(mktemp -d)
+    mkdir -p "$proj/.omao"
+    cat > "$proj/.omao/permissions.yaml" <<'EOF'
+version: 1
+auto_approve:
+  bash_commands: true
+EOF
+    out=$(bash -c ". '$LIB' && perms_resolve_with_overlays prod '$proj' | jq -r '.auto_approve.bash_commands'")
+    rm -rf "$proj"
+    [ "$out" = "true" ]
+}
+
+@test "absent overlay leaves base resolution unchanged" {
+    proj=$(mktemp -d)
+    mkdir -p "$proj/.omao"
+    base=$(bash -c ". '$LIB' && perms_resolve prod | jq -c .")
+    overlay=$(bash -c ". '$LIB' && perms_resolve_with_overlays prod '$proj' | jq -c 'del(._meta.overlay_path, ._meta.overlay_applied)'")
+    rm -rf "$proj"
+    [ "$base" = "$overlay" ]
+}
+
+@test "overlay marks _meta.overlay_applied true when any rule fires" {
+    proj=$(mktemp -d)
+    mkdir -p "$proj/.omao"
+    cat > "$proj/.omao/permissions.yaml" <<'EOF'
+version: 1
+deny:
+  add:
+    bash: ["echo overlay-only"]
+EOF
+    flag=$(bash -c ". '$LIB' && perms_resolve_with_overlays prod '$proj' | jq -r '._meta.overlay_applied'")
+    rm -rf "$proj"
+    [ "$flag" = "true" ]
+}
+
+@test "overlay with empty schema does not set overlay_applied" {
+    proj=$(mktemp -d)
+    mkdir -p "$proj/.omao"
+    cat > "$proj/.omao/permissions.yaml" <<'EOF'
+version: 1
+EOF
+    flag=$(bash -c ". '$LIB' && perms_resolve_with_overlays prod '$proj' | jq -r '._meta.overlay_applied'")
+    rm -rf "$proj"
+    [ "$flag" = "false" ]
+}
+
 @test "perms_resolve_for_profile reads aws.environment from a profile file" {
     tmp_profile="$(mktemp)"
     cat > "$tmp_profile" <<'YAML'

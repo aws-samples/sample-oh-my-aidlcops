@@ -73,6 +73,27 @@ breaking changes to non-stable surfaces as documented in
   the probe through skip / pass / warn paths for both harnesses,
   including profile env-mismatch and missing/unsupported
   aws.environment.
+- **Project-level permission overlay**:
+  `<project>/.omao/permissions.yaml` is now read on top of the
+  `common + <env>.yaml` chain. Overlay supports
+  `deny.add.{bash,edit,write,mcp}`, `deny.remove.{...}`, and
+  `auto_approve.{...}` overrides. `scripts/lib/permissions.sh` gains
+  `perms_apply_overlay` and `perms_resolve_with_overlays`; both install
+  scripts and the doctor probe call the new resolver so the overlay is
+  reflected in `~/.claude/settings.json`, Kiro autoApprove, and the
+  doctor superset check.
+- `oma permissions [show|path]` subcommand
+  (`scripts/oma/permissions.sh`). `show` prints the resolved chain with
+  per-entry provenance (`common.yaml` / `<env>.yaml` / `overlay`) plus
+  overlay add/remove counts; `--json` emits machine-readable output.
+  `path` prints `<project>/.omao/permissions.yaml` and creates the
+  parent directory so `$EDITOR $(oma permissions path)` works
+  immediately. Registered in `bin/oma`.
+- `tests/installer/test_permissions_overlay.bats` — 9 cases covering
+  the overlay add/remove/auto_approve semantics, the
+  `oma permissions show|path|--json` interface, install reflection,
+  and the doctor warn-on-overlay-but-no-reinstall path. The lib suite
+  also gains 6 unit cases for `perms_resolve_with_overlays`.
 
 ### Changed
 - **Observability is opt-in (default `none`).** `oma setup` no longer

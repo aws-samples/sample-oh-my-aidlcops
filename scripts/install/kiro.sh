@@ -270,7 +270,7 @@ install_permissions() {
     esac
 
     PERMISSIONS_ENV="$env"
-    resolved="$(perms_resolve "$env")"
+    resolved="$(perms_resolve_with_overlays "$env" "${OMA_PROJECT_DIR:-$PWD}")"
     autoapprove="$(printf '%s' "$resolved" | perms_to_kiro_autoapprove)"
     deny_bash="$(printf  '%s' "$resolved" | jq '.deny.bash  // []')"
     deny_edit="$(printf  '%s' "$resolved" | jq '.deny.edit  // []')"
@@ -279,6 +279,9 @@ install_permissions() {
 
     log "permissions: applying template chain for env=$env"
     perms_print_summary "$resolved" >&2
+    if [ "$(printf '%s' "$resolved" | jq -r '._meta.overlay_applied // false')" = "true" ]; then
+        log "permissions: overlay $(printf '%s' "$resolved" | jq -r '._meta.overlay_path') applied"
+    fi
 
     # 1) cli.json — global autoApprove. Other keys (defaultModel, steering, …)
     #    preserved. Existing autoApprove keys win where the template did not

@@ -78,14 +78,57 @@ can copy a template into `.omao/permissions.yaml` and the install script
 will prefer the local copy. That override path lands with the install
 script commit.
 
+## Customizing without editing the OMA repo — overlay
+
+Don't fork or hand-edit the templates in this directory. Instead, drop a
+project overlay at **`<project>/.omao/permissions.yaml`** and the resolver
+will layer it on top of `common.yaml` + `<env>.yaml`. The overlay is the
+only file the user is expected to edit.
+
+```yaml
+# .omao/permissions.yaml — project-level customization
+version: 1
+deny:
+  remove:                                # subtract from the resolved set
+    bash:
+      - "kubectl delete ns*"             # our team uses this routinely
+  add:                                   # add project-specific extras
+    edit:
+      - "infra/secrets/**"
+auto_approve:
+  bash_commands: true                    # override the env default
+```
+
+Resolution chain (lowest → highest priority):
+
+1. `templates/permissions/common.yaml`     (OMA repo, baseline floor)
+2. `templates/permissions/<env>.yaml`      (OMA repo, environment defaults)
+3. `<project>/.omao/permissions.yaml`     (user overlay, optional)
+
+Removals are exact-match against the post-merge deny array. To remove a
+pattern that was introduced by `common.yaml` or `<env>.yaml`, copy the
+exact string into `deny.remove.<bucket>`.
+
+`oma permissions show [--json]` prints the resolved chain with provenance
+for each entry (which layer it came from, plus overlay add/remove counts).
+`oma permissions path` prints `<project>/.omao/permissions.yaml` so you
+can `$EDITOR $(oma permissions path)`.
+
+After editing the overlay, **re-run `oma setup`** (or
+`bash scripts/install/{claude,kiro}.sh`) to push the new resolved set
+into `~/.claude/settings.json` and `~/.kiro/`. The overlay file alone
+does not affect a running Claude/Kiro session — those harnesses only
+read their own home-dir config.
+
 ## How the templates are applied
 
 `scripts/lib/permissions.sh` is the shared resolver:
 
 ```bash
 . scripts/lib/permissions.sh
-perms_resolve prod | perms_to_claude_deny      # -> JSON array of "Bash(...)" lines
-perms_resolve prod | perms_to_kiro_autoapprove # -> {readOnly,fileWrites,bashCommands}
+perms_resolve prod | perms_to_claude_deny           # -> Bash/Edit/Write/MCP strings
+perms_resolve_with_overlays prod /path/to/proj      # -> chain incl. .omao overlay
+perms_to_kiro_autoapprove                            # -> {readOnly,fileWrites,…}
 ```
 
 `install_permissions()` in `scripts/install/{claude,kiro}.sh` invokes the
