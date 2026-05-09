@@ -94,8 +94,8 @@ YAML
     cd "$PROJECT"
     HOME="$fake_home" run bash "$HOOK"
     [ "$status" -eq 0 ]
-    echo "$output" | jq -e '.additionalContext | contains("OMA_PERMISSIONS_DRIFT")'
-    echo "$output" | jq -e '.additionalContext | contains("oma setup --skip-doctor")'
+    echo "$output" | jq -e '.hookSpecificOutput.additionalContext | contains("OMA_PERMISSIONS_DRIFT")'
+    echo "$output" | jq -e '.hookSpecificOutput.additionalContext | contains("oma setup --skip-doctor")'
     rm -rf "$fake_home"
 }
 
@@ -111,7 +111,7 @@ YAML
     cd "$PROJECT"
     HOME="$fake_home" run bash "$HOOK"
     [ "$status" -eq 0 ]
-    run jq -e '.additionalContext | contains("OMA_PERMISSIONS_DRIFT") | not' <<<"$output"
+    run jq -e '.hookSpecificOutput.additionalContext | contains("OMA_PERMISSIONS_DRIFT") | not' <<<"$output"
     [ "$status" -eq 0 ]
     rm -rf "$fake_home"
 }
@@ -128,7 +128,7 @@ YAML
     cd "$PROJECT"
     HOME="$fake_home" OMA_DISABLE_PERMISSIONS_DRIFT=1 run bash "$HOOK"
     [ "$status" -eq 0 ]
-    run jq -e '.additionalContext | contains("OMA_PERMISSIONS_DRIFT") | not' <<<"$output"
+    run jq -e '.hookSpecificOutput.additionalContext | contains("OMA_PERMISSIONS_DRIFT") | not' <<<"$output"
     [ "$status" -eq 0 ]
     rm -rf "$fake_home"
 }
@@ -141,7 +141,7 @@ YAML
     cd "$PROJECT"
     HOME="$fake_home" run bash "$HOOK"
     [ "$status" -eq 0 ]
-    run jq -e '.additionalContext | contains("OMA_PERMISSIONS_DRIFT") | not' <<<"$output"
+    run jq -e '.hookSpecificOutput.additionalContext | contains("OMA_PERMISSIONS_DRIFT") | not' <<<"$output"
     [ "$status" -eq 0 ]
     rm -rf "$fake_home"
 }
@@ -160,9 +160,9 @@ YAML
     cd "$PROJECT"
     HOME="$fake_home" run bash "$HOOK"
     [ "$status" -eq 0 ]
-    echo "$output" | jq -e '.additionalContext | contains("OMA_PERMISSIONS_DRIFT")'
+    echo "$output" | jq -e '.hookSpecificOutput.additionalContext | contains("OMA_PERMISSIONS_DRIFT")'
     # Drift body must NOT reference the kiro sentinel path.
-    run jq -e '.additionalContext | contains(".kiro/.oma-permissions-applied-at") | not' <<<"$output"
+    run jq -e '.hookSpecificOutput.additionalContext | contains(".kiro/.oma-permissions-applied-at") | not' <<<"$output"
     [ "$status" -eq 0 ]
     rm -rf "$fake_home"
 }

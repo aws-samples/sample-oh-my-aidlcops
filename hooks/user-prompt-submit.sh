@@ -182,7 +182,12 @@ The new overlay is NOT yet reflected in your harness config. Run one of:
   bash scripts/install/kiro.sh
 
 Use \`oma permissions show\` to preview the resolved chain before applying."
-      jq -n --arg ctx "$ADDITIONAL_CONTEXT" '{"additionalContext": $ctx}'
+      jq -n --arg ctx "$ADDITIONAL_CONTEXT" '{
+        hookSpecificOutput: {
+          hookEventName: "UserPromptSubmit",
+          additionalContext: $ctx
+        }
+      }'
       exit 0
     fi
   fi

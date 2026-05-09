@@ -42,7 +42,7 @@ deny:
 YAML
     run_hook 'just a normal question'
     [ "$status" -eq 0 ]
-    echo "$output" | jq -e '.additionalContext | contains("OMA_PERMISSIONS_DRIFT")'
+    echo "$output" | jq -e '.hookSpecificOutput.additionalContext | contains("OMA_PERMISSIONS_DRIFT")'
 }
 
 @test "no drift line when sentinel is newer than overlay" {
@@ -55,7 +55,7 @@ YAML
     run_hook 'just a normal question'
     [ "$status" -eq 0 ]
     if [ -n "$output" ]; then
-        run jq -e '.additionalContext | contains("OMA_PERMISSIONS_DRIFT") | not' <<<"$output"
+        run jq -e '.hookSpecificOutput.additionalContext | contains("OMA_PERMISSIONS_DRIFT") | not' <<<"$output"
         [ "$status" -eq 0 ]
     fi
 }
@@ -68,7 +68,7 @@ YAML
     HOME="$FAKE_HOME" OMA_DISABLE_PERMISSIONS_DRIFT=1 run bash -c "echo 'q' | bash '$HOOK'"
     [ "$status" -eq 0 ]
     if [ -n "$output" ]; then
-        run jq -e '.additionalContext | contains("OMA_PERMISSIONS_DRIFT") | not' <<<"$output"
+        run jq -e '.hookSpecificOutput.additionalContext | contains("OMA_PERMISSIONS_DRIFT") | not' <<<"$output"
         [ "$status" -eq 0 ]
     fi
 }
@@ -88,8 +88,8 @@ YAML
     run_hook 'launch agenticops now'
     [ "$status" -eq 0 ]
     # Trigger keyword wins: OMA_TRIGGER, not the drift keyword.
-    echo "$output" | jq -e '.additionalContext | contains("OMA_TRIGGER")'
-    run jq -e '.additionalContext | contains("OMA_PERMISSIONS_DRIFT") | not' <<<"$output"
+    echo "$output" | jq -e '.hookSpecificOutput.additionalContext | contains("OMA_TRIGGER")'
+    run jq -e '.hookSpecificOutput.additionalContext | contains("OMA_PERMISSIONS_DRIFT") | not' <<<"$output"
     [ "$status" -eq 0 ]
 }
 
@@ -99,7 +99,7 @@ YAML
     [ "$status" -eq 0 ]
     # Either empty output or no drift mention.
     if [ -n "$output" ]; then
-        run jq -e '.additionalContext | contains("OMA_PERMISSIONS_DRIFT") | not' <<<"$output"
+        run jq -e '.hookSpecificOutput.additionalContext | contains("OMA_PERMISSIONS_DRIFT") | not' <<<"$output"
         [ "$status" -eq 0 ]
     fi
 }
