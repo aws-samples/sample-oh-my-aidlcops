@@ -54,7 +54,7 @@ Usage: oma <subcommand> [options]
 Subcommands:
     setup       Interactive setup: profile wizard, install plugins, seed ontology, doctor.
     init        Scaffold .omao/ in the current project (subset of setup).
-    doctor      Run 12 environment probes; exit 0 all-pass / 1 warn / 2 fail.
+    doctor      Run 13 environment probes; exit 0 all-pass / 1 warn / 2 fail.
     compile     Compile every plugin's *.oma.yaml into native .mcp.json / agent.json files.
     validate    Validate a Deployment YAML against the ontology + active OPA policies.
     run-workflow Resolve and print workflow DAG execution plan (stub: no invocation yet).

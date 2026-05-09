@@ -62,6 +62,17 @@ breaking changes to non-stable surfaces as documented in
   (idempotency, user-entry preservation, `--skip-permissions`,
   `OMA_PERMISSIONS_ENV` override, hand-edited agent refusal, source
   repo cleanliness).
+- New `permissions-applied` probe in `scripts/oma/doctor.sh` (13th
+  probe). Reports pass when `~/.claude/settings.json` deny set is a
+  superset of the resolved env template AND every Kiro
+  `~/.kiro/agents/*.agent.json` carries a matching
+  `_meta.oma_permissions_env`. Skips cleanly when no profile or no
+  harness install is detected; warns and points at `oma setup` when
+  drift is detected. `bin/oma` help reflects the new count.
+- `tests/installer/test_doctor_permissions.bats` — 9 cases pinning
+  the probe through skip / pass / warn paths for both harnesses,
+  including profile env-mismatch and missing/unsupported
+  aws.environment.
 
 ### Changed
 - **Observability is opt-in (default `none`).** `oma setup` no longer
