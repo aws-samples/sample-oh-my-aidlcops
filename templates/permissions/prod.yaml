@@ -1,15 +1,9 @@
 # OMA Permission Template — prod
 #
-# Tightest profile. Intended for production AWS accounts that hold real
-# customer data, run user-facing inference traffic, or are gated by
-# compliance regimes (SOC 2, ISMS-P, NIST AI RMF). Inherits common.yaml
-# audit/ontology guards and adds infrastructure mutation guards on top.
-#
-# Prod should never accept agent-driven destructive changes. The pattern is
-# always: agent prepares a Spec/ADR/Deployment, a human approves out-of-band,
-# `oma promote` materializes the change. Direct kubectl/aws/helm calls that
-# mutate infra are blocked at the harness layer so a slip in agent reasoning
-# cannot cascade into a production outage.
+# Production AWS accounts. Inherits common.yaml audit guard. The deny set
+# is intentionally narrow — only operations that are almost never the right
+# choice from an agent context. The user can still run them directly; the
+# deny just forces them out of any auto-approve flow.
 
 version: 1
 extends: ["common.yaml"]
@@ -17,88 +11,57 @@ applies_when:
   aws.environment: prod
 
 description: |
-  Production profile — agents may read freely but must not mutate infra,
-  IAM, or secret stores directly. Manifests are read-only at the harness
-  layer; changes flow through GitOps PRs. Cross-region inference profiles
-  are blocked (cost & data-residency concerns).
+  Production profile — confirmation gate on the handful of operations
+  that have caused real outages when run reflexively (cluster delete,
+  IAM detach, secret deletion, force-pushing manifests). Routine reads
+  and edits remain auto-approved; the agent stays useful in prod, just
+  not autonomous on destructive paths.
 
 deny:
   bash:
-    # Cross-region Bedrock inference profiles — prod must pin region.
+    # Cross-region Bedrock — same reason as staging, but enforced.
     - "aws bedrock-runtime invoke-model*global.anthropic*"
     - "aws bedrock-runtime invoke-model*global.amazon*"
-    # All destructive kubectl. Reads (get/describe/logs) remain allowed.
-    - "kubectl delete*"
-    - "kubectl apply*"        # apply only via GitOps controller
-    - "kubectl patch*"
-    - "kubectl rollout undo*" # rollback through `oma promote --to rolled_back`
-    - "kubectl scale*"
-    - "kubectl exec*"         # exec into prod pods bypasses audit
-    - "kubectl edit*"
-    - "kubectl cp*"
-    # Helm — prod uses ArgoCD/Flux only.
-    - "helm install*"
-    - "helm upgrade*"
+    # Cluster-wide kubectl deletes. Namespaced delete remains allowed so
+    # the agent can clean up its own resources.
+    - "kubectl delete ns*"
+    - "kubectl delete clusterrole*"
+    - "kubectl delete clusterrolebinding*"
+    - "kubectl delete crd*"
+    # Helm uninstall. Reinstalls/upgrades remain available.
     - "helm uninstall*"
-    - "helm rollback*"
-    # IAM mutation — humans only.
-    - "aws iam create-*"
+    # IAM destructive ops. Create/update remain available because they're
+    # the common path for adding least-privilege bindings.
     - "aws iam delete-*"
-    - "aws iam attach-*"
     - "aws iam detach-*"
-    - "aws iam put-*"
-    - "aws iam update-*"
-    # Secrets / KMS / parameter store — read in narrow paths only,
-    # never mutate from agent context.
-    - "aws secretsmanager put-secret-value*"
+    # Secret destruction.
     - "aws secretsmanager delete-secret*"
-    - "aws ssm put-parameter*"
-    - "aws ssm delete-parameter*"
     - "aws kms schedule-key-deletion*"
-    - "aws kms disable-key*"
-    # S3 bucket-level destructive ops.
+    # ECR repository delete. Single-image delete remains.
+    - "aws ecr delete-repository*"
+    # S3 bucket-level delete.
     - "aws s3 rb*"
     - "aws s3api delete-bucket*"
-    - "aws s3api put-bucket-policy*"
-    # ECR delete — prod images are immutable.
-    - "aws ecr batch-delete-image*"
-    - "aws ecr delete-repository*"
   edit:
-    # Manifests are GitOps-owned. PR flow only.
-    - "manifests/**"
-    - "charts/**"
-    - "kustomize/**"
-    # AWS / SSH / kube credentials.
+    # Local credentials and SSH/kube config — never edit from agent context.
     - "/Users/**/.aws/credentials"
-    - "/Users/**/.aws/config"
     - "/Users/**/.ssh/**"
     - "/Users/**/.kube/**"
     # System paths.
     - "/etc/**"
-    - "/usr/local/**"
   write:
-    - "manifests/**"
-    - "charts/**"
-    - "kustomize/**"
     - "/Users/**/.aws/credentials"
-    - "/Users/**/.aws/config"
     - "/Users/**/.ssh/**"
     - "/Users/**/.kube/**"
     - "/etc/**"
   mcp:
-    # EKS write ops disabled — prod EKS goes through CodePipeline, not agents.
-    - "mcp__eks__*create*"
-    - "mcp__eks__*update*"
+    # The single MCP class that historically caused prod outages: cluster
+    # deletion via the EKS MCP server. Other EKS write ops (update node
+    # group, scale, etc.) remain available so the agent can still help
+    # with operations work.
     - "mcp__eks__*delete*"
-    - "mcp__eks__*put*"
-    # Bedrock KB mutations.
-    - "mcp__bedrock-kb-retrieval__*ingest*"
-    - "mcp__bedrock-kb-retrieval__*delete*"
-    # CloudWatch alarm mutation — alarms govern paging, change via Terraform.
-    - "mcp__cloudwatch__*put*"
-    - "mcp__cloudwatch__*delete*"
 
 auto_approve:
   read_only: true
-  file_writes: false
+  file_writes: true
   bash_commands: false

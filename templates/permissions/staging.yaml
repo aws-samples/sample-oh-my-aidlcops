@@ -1,9 +1,13 @@
 # OMA Permission Template — staging
 #
-# Mid-strength profile. Intended for shared dev clusters, pre-prod accounts,
-# and any environment that holds non-production but real data (synthetic
-# customer records, integration test fixtures, real Bedrock spend). Inherits
-# common.yaml audit/ontology guards.
+# Mid-strength profile. Shared dev clusters, pre-prod accounts, environments
+# that hold non-production but real data. Inherits common.yaml audit guard.
+#
+# Staging blocks only the operations whose accidental execution would either
+# (a) cost the team noticeable money on a wrong region, or (b) overwrite the
+# user's local credentials. Everything else (kubectl, helm, IAM read/write
+# inside the user's own role) stays available — staging is where the team
+# rehearses the prod path.
 
 version: 1
 extends: ["common.yaml"]
@@ -11,43 +15,28 @@ applies_when:
   aws.environment: staging
 
 description: |
-  Staging profile — assumes shared resources and real spend. Cross-region
-  Bedrock inference profiles and destructive kubectl/aws calls are blocked
-  to prevent accidental fan-out. Manifests stay editable (staging is where
-  GitOps PRs are dry-run before prod promotion).
+  Staging profile — guards cross-region Bedrock inference profiles
+  (cost surprise risk) and the user's local AWS/SSH credentials.
+  Bash auto-approve disabled so destructive ad-hoc commands at least
+  surface a confirmation. File writes auto-approve to keep manifest
+  iteration smooth.
 
 deny:
   bash:
-    # Cross-region Bedrock inference profiles — staging should pin a region
-    # explicitly via `aws bedrock-runtime invoke-model --region` rather than
-    # relying on `global.*` profiles that span regions silently.
+    # `global.*` Bedrock inference profiles span regions. Staging should pin
+    # the region explicitly so spend stays in the expected billing bucket.
     - "aws bedrock-runtime invoke-model*global.anthropic*"
     - "aws bedrock-runtime invoke-model*global.amazon*"
-    # Cluster-wide destructive kubectl. Namespaced delete remains allowed.
-    - "kubectl delete ns*"
-    - "kubectl delete clusterrole*"
-    - "kubectl delete clusterrolebinding*"
-    - "kubectl delete crd*"
-    # Helm uninstall — explicit `oma promote --to rolled_back` is the path.
-    - "helm uninstall*"
-    # IAM destructive actions — staging IAM is shared, treat as prod-adjacent.
-    - "aws iam delete-*"
-    - "aws iam detach-*"
   edit:
-    # AWS credentials & SSH keys — never edit from agent context.
+    # Local credential and key material — never edit from agent context.
     - "/Users/**/.aws/credentials"
-    - "/Users/**/.aws/config"
     - "/Users/**/.ssh/**"
   write:
     - "/Users/**/.aws/credentials"
-    - "/Users/**/.aws/config"
     - "/Users/**/.ssh/**"
-  mcp:
-    # KB writes are deferred until prod hardening. Read-only KB queries OK.
-    - "mcp__bedrock-kb-retrieval__*ingest*"
-    - "mcp__bedrock-kb-retrieval__*delete*"
+  mcp: []
 
 auto_approve:
   read_only: true
-  file_writes: false       # require explicit user click on every write
+  file_writes: true
   bash_commands: false

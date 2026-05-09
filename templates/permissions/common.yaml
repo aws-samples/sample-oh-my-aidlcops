@@ -4,59 +4,65 @@
 # of `aws.environment`. Environment-specific overlays (sandbox/staging/prod.yaml)
 # extend this file via `extends: ["common.yaml"]`.
 #
-# Why "abstract": the same rule must be emitted into two harness-specific
-# config formats. install scripts translate these keys as follows.
+# Philosophy
+# ----------
+# These templates are about preventing *accidents*, not about sandboxing the
+# agent. The user can always remove a rule from ~/.claude/settings.json or
+# ~/.kiro/agents/<name>.agent.json if it gets in the way. A deny entry should
+# only exist when the failure mode it prevents is destructive enough that the
+# extra confirmation step is worth the friction.
 #
+# What `common.yaml` protects
+# ---------------------------
+# Just one thing: `.omao/audit.jsonl`. The audit ledger is the only OMA-owned
+# file whose corruption is silent and forensically expensive — once timestamps
+# are lost or lines are removed, downstream tooling (`oma doctor`, future hash
+# chain) can no longer prove what happened. We block the *destructive* shell
+# patterns (in-place rewrite, redirect, rm) but leave Edit/Write alone so the
+# user can still inspect or hand-fix the file when they explicitly want to.
+#
+# Format reference
+# ----------------
 # | abstract key      | Claude (.claude/settings.json)              | Kiro (~/.kiro/settings/cli.json + agents/*.agent.json) |
 # | ----------------- | ------------------------------------------- | ------------------------------------------------------ |
-# | deny.bash         | permissions.deny += "Bash(<pattern>)"       | autoApprove.bashCommands=false + agents.tools strip   |
-# | deny.edit         | permissions.deny += "Edit(<glob>)"          | autoApprove.fileWrites=false + agents.tools filter    |
-# | deny.write        | permissions.deny += "Write(<glob>)"         | (same as edit — Kiro merges Edit/Write)               |
-# | deny.mcp          | permissions.deny += "<mcp_tool_pattern>"    | agents.mcpServers entry disabled or tool removed      |
-# | auto_approve.*    | permissions.defaultMode hint                | settings.cli.json autoApprove.{readOnly,fileWrites,…} |
+# | deny.bash         | permissions.deny += "Bash(<pattern>)"       | autoApprove.bashCommands floor                         |
+# | deny.edit         | permissions.deny += "Edit(<glob>)"          | autoApprove.fileWrites floor + _meta.oma_permissions   |
+# | deny.write        | permissions.deny += "Write(<glob>)"         | (same as edit — Kiro merges Edit/Write)                |
+# | deny.mcp          | permissions.deny += "<mcp_tool_pattern>"    | _meta.oma_permissions                                  |
+# | auto_approve.*    | informational hint                          | settings.cli.json autoApprove.{readOnly,fileWrites,…}  |
 #
 # Patterns:
 # - `deny.bash` / `deny.mcp` — fnmatch globs against the full command line or
 #   tool name (case-sensitive). `*` does NOT cross spaces in bash patterns.
 # - `deny.edit` / `deny.write` — POSIX globs against the file path argument.
 #   Use `**` for recursive match.
-#
-# Backward compatibility: this file is reference data only. It is consumed by
-# `oma setup` / `oma compile` once the install script's `install_permissions()`
-# function lands (separate commit). Until then, dropping/editing this file has
-# no runtime effect.
 
 version: 1
 description: |
-  Baseline deny rules every OMA project inherits. Protects the audit ledger
-  and ontology entry points so they can only be mutated through OMA tools
-  (oma_audit.append, oma promote, oma backup), never by free-form Edit/Bash.
+  Audit-ledger guard. Blocks shell patterns that would corrupt
+  .omao/audit.jsonl in place. Everything else is left to environment
+  overlays. Edit/Write to the ledger are NOT blocked here — `oma doctor`
+  will detect tampering after the fact, and a user inspecting the file
+  with their editor is a normal workflow.
 
-# Sentinel paths that OMA owns. Direct edits would silently break the audit
-# chain or the ontology contract. The corresponding write helpers
-# (tools/oma_audit/append.py, scripts/oma/*.sh) remain the only legal entry.
 deny:
-  edit:
-    - ".omao/audit.jsonl"
-    - ".omao/ontology/**/*.json"
-    - ".omao/state/active-mode"
-  write:
-    - ".omao/audit.jsonl"
-    - ".omao/ontology/**/*.json"
   bash:
-    # In-place audit log mutation — sed/awk -i, truncate, redirect.
+    # In-place rewrite, truncate, redirect, or delete of the audit ledger.
+    # All of these would silently break the chain in ways the user cannot
+    # easily reverse, so we force the slow path (Edit it, or use the
+    # tools/oma_audit/append.py CLI).
     - "sed -i*.omao/audit*"
     - "awk -i*.omao/audit*"
     - ":>*.omao/audit*"
     - "*>*.omao/audit.jsonl*"      # any redirect into audit.jsonl
     - "rm*.omao/audit.jsonl*"
-    # Ontology JSON tampering bypassing oma promote / oma_audit.append.
-    - "jq*-i*.omao/ontology/*"
-    - "rm*.omao/ontology/*.json*"
-  mcp: []   # no MCP-level deny in the common baseline
+  edit: []
+  write: []
+  mcp:  []
 
-# Auto-approval defaults. Environment overlays may relax (sandbox) or tighten
-# (prod), but read_only=true is a floor — we never auto-approve unread tools.
+# Auto-approval defaults. Environment overlays adjust these.
+# read_only stays true everywhere — we never need user clicks for `cat`,
+# `ls`, or pure-read MCP queries.
 auto_approve:
   read_only: true
   file_writes: false
