@@ -37,11 +37,24 @@ breaking changes to non-stable surfaces as documented in
 - `templates/permissions/{common,sandbox,staging,prod}.yaml` — abstract
   deny-rule templates scoped by `profile.yaml` `aws.environment`. Each
   template declares `deny.{bash,edit,write,mcp}` patterns plus
-  `auto_approve` defaults. Reference data only — no runtime effect until
-  the follow-up `install_permissions()` commit wires `oma setup` to
-  emit the rules into `.claude/settings.json` and Kiro `cli.json` /
-  `agents/*.agent.json`. See `templates/permissions/README.md` for the
+  `auto_approve` defaults. See `templates/permissions/README.md` for the
   schema and the abstract → harness mapping table.
+- `scripts/lib/permissions.sh` — shared resolver. Reads
+  `templates/permissions/<env>.yaml`, follows `extends` against
+  `common.yaml`, and emits a normalized JSON document plus Claude /
+  Kiro emitters (`perms_to_claude_deny`, `perms_to_kiro_autoapprove`).
+- `install_permissions()` in `scripts/install/{claude,kiro}.sh`:
+  Claude — append-uniq merge of `permissions.deny` into
+  `~/.claude/settings.json`; existing user-authored entries preserved.
+  Kiro — patch `~/.kiro/settings/cli.json` autoApprove and rewrite each
+  OMA-owned `~/.kiro/agents/*.agent.json` from the source repo (never
+  mutates the tracked repo files), tagging the result with
+  `_meta.oma_permissions_env` so the deny set is auditable from Kiro.
+  Hand-edited agent.json copies are detected and refused.
+- New install flags `--skip-permissions` / `OMA_SKIP_PERMISSIONS=1` and
+  override `OMA_PERMISSIONS_ENV=<env>` for CI smoke runs.
+- `scripts/oma/setup.sh` exports `OMA_PROJECT_DIR` so the install
+  scripts read the project's `.omao/profile.yaml`, not their own cwd.
 
 ### Changed
 - **Observability is opt-in (default `none`).** `oma setup` no longer

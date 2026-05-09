@@ -23,8 +23,11 @@ STEERING_CMDS_DIR="$OMA_REPO_DIR/steering/commands/oma"
 PLUGINS_INSTALLED=0
 MCP_SERVERS_MERGED=0
 HOOKS_REGISTERED=0
+PERMISSIONS_ADDED=0
+PERMISSIONS_ENV=""
 CLAUDE_MAJOR_VERSION=""
 CLAUDE_SUPPORTS_NATIVE=0
+SKIP_PERMISSIONS="${OMA_SKIP_PERMISSIONS:-0}"
 
 # ---------------------------------------------------------------------------
 # Usage
@@ -34,11 +37,16 @@ usage() {
 install-claude.sh — Install oh-my-aidlcops (OMA) into ~/.claude/
 
 Usage:
-    bash scripts/install-claude.sh [--help] [--dry-run]
+    bash scripts/install-claude.sh [--help] [--dry-run] [--skip-permissions]
 
 Environment:
-    OMA_OWNER      GitHub owner for the marketplace (default: aws-samples).
-    CLAUDE_HOME    Target Claude directory (default: $HOME/.claude).
+    OMA_OWNER             GitHub owner for the marketplace (default: aws-samples).
+    CLAUDE_HOME           Target Claude directory (default: $HOME/.claude).
+    OMA_PROJECT_DIR       Project that holds .omao/profile.yaml. Used to pick
+                          the permission template (default: $PWD).
+    OMA_SKIP_PERMISSIONS  Set to 1 to skip the install_permissions step.
+    OMA_PERMISSIONS_ENV   Override the env (sandbox/staging/prod) regardless
+                          of profile.yaml. Useful for CI smoke tests.
 
 What it does:
     1. Create ~/.claude/plugins/<plugin>/ symlinks for every plugin listed in
@@ -48,6 +56,8 @@ What it does:
     3. Merge each plugin's .mcp.json mcpServers map into ~/.claude/settings.json
        non-destructively via jq.
     4. Register the OMA UserPromptSubmit and SessionStart hook scripts.
+    5. Merge env-scoped deny patterns from templates/permissions/ into
+       ~/.claude/settings.json `permissions.deny` (append-uniq).
 
 Dependencies: jq, bash 4+.
 The script is idempotent — re-running will refresh symlinks and re-merge only
@@ -197,6 +207,73 @@ install_hooks() {
     done
 }
 
+# Merge env-scoped deny patterns into ~/.claude/settings.json. Reads the
+# active environment from .omao/profile.yaml (or OMA_PERMISSIONS_ENV override),
+# resolves templates/permissions/<env>.yaml against common.yaml, and appends
+# unique entries to permissions.deny. Existing user-authored entries are
+# preserved verbatim — this function never deletes.
+install_permissions() {
+    if [ "$SKIP_PERMISSIONS" = 1 ]; then
+        log "permissions: skipped (OMA_SKIP_PERMISSIONS=1)"
+        return 0
+    fi
+
+    # shellcheck disable=SC1091
+    . "$OMA_REPO_DIR/scripts/lib/permissions.sh"
+
+    env="${OMA_PERMISSIONS_ENV:-}"
+    if [ -z "$env" ]; then
+        project_dir="${OMA_PROJECT_DIR:-$PWD}"
+        profile="$project_dir/.omao/profile.yaml"
+        if [ -f "$profile" ]; then
+            if command -v yq >/dev/null 2>&1; then
+                env="$(yq -r '.aws.environment // ""' "$profile")"
+            elif command -v python3 >/dev/null 2>&1; then
+                env="$(python3 -c "import sys, yaml; d=yaml.safe_load(open(sys.argv[1])); print(d.get('aws',{}).get('environment',''))" "$profile")"
+            fi
+        fi
+    fi
+
+    if [ -z "$env" ]; then
+        log "permissions: no .omao/profile.yaml aws.environment found; skipping (run 'oma setup' first)"
+        return 0
+    fi
+
+    case "$env" in
+        sandbox|staging|prod) ;;
+        *) warn "permissions: unsupported env '$env'; skipping"; return 0 ;;
+    esac
+
+    PERMISSIONS_ENV="$env"
+    resolved="$(perms_resolve "$env")"
+
+    log "permissions: applying template chain for env=$env"
+    perms_print_summary "$resolved" >&2
+
+    settings="$CLAUDE_HOME/settings.json"
+    [ -f "$settings" ] || printf '{}\n' > "$settings"
+
+    new_deny="$(printf '%s' "$resolved" | perms_to_claude_deny)"
+
+    # Count entries that aren't already present so the summary line is accurate.
+    added_count="$(jq --argjson new "$new_deny" '
+        ((.permissions.deny // []) | unique) as $cur
+        | [ $new[] | select(. as $x | $cur | index($x) | not) ]
+        | length
+    ' "$settings")"
+
+    tmp="$(mktemp)"
+    jq --argjson new "$new_deny" '
+        .permissions //= {}
+        | .permissions.deny //= []
+        | .permissions.deny = ((.permissions.deny + $new) | unique)
+    ' "$settings" > "$tmp"
+    mv "$tmp" "$settings"
+
+    PERMISSIONS_ADDED="$added_count"
+    log "permissions: $added_count new deny entries appended (total $(jq '.permissions.deny | length' "$settings"))"
+}
+
 detect_claude_version() {
     if ! command -v claude >/dev/null 2>&1; then
         CLAUDE_MAJOR_VERSION=""
@@ -217,6 +294,7 @@ Installation complete.
     plugins installed : $PLUGINS_INSTALLED
     MCP servers added : $MCP_SERVERS_MERGED
     hooks registered  : $HOOKS_REGISTERED
+    permission deny   : $PERMISSIONS_ADDED new entries${PERMISSIONS_ENV:+ (env=$PERMISSIONS_ENV)}
 EOF
 
     if [ "$CLAUDE_SUPPORTS_NATIVE" = 1 ]; then
@@ -260,13 +338,20 @@ EOF
 # Main
 # ---------------------------------------------------------------------------
 main() {
-    case "${1:-}" in
-        -h|--help) usage; exit 0 ;;
-        --dry-run)
-            log "dry-run mode not implemented; exiting without side effects"
-            exit 0
-            ;;
-    esac
+    while [ $# -gt 0 ]; do
+        case "$1" in
+            -h|--help) usage; exit 0 ;;
+            --dry-run)
+                log "dry-run mode not implemented; exiting without side effects"
+                exit 0
+                ;;
+            --skip-permissions)
+                SKIP_PERMISSIONS=1
+                shift
+                ;;
+            *) die "unknown argument: $1 (try --help)" ;;
+        esac
+    done
     require jq
     detect_claude_version
     log "OMA repo  : $OMA_REPO_DIR"
@@ -281,6 +366,7 @@ main() {
     install_commands
     install_mcp_servers
     install_hooks
+    install_permissions
     summary
 }
 

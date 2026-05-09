@@ -78,14 +78,30 @@ can copy a template into `.omao/permissions.yaml` and the install script
 will prefer the local copy. That override path lands with the install
 script commit.
 
-## What this commit does NOT do
+## How the templates are applied
 
-- Does not modify `scripts/install/claude.sh` or `scripts/install/kiro.sh`.
-- Does not modify any plugin's `*.oma.yaml`.
-- Does not modify `bin/oma` or any subcommand.
-- Does not write to `~/.claude/settings.json` or `~/.kiro/`.
+`scripts/lib/permissions.sh` is the shared resolver:
 
-A separate follow-up commit adds `install_permissions()` to both install
-scripts and wires it into `oma setup`. Splitting the work this way lets
-reviewers see and edit the abstract templates before any harness-specific
-emit logic is committed.
+```bash
+. scripts/lib/permissions.sh
+perms_resolve prod | perms_to_claude_deny      # -> JSON array of "Bash(...)" lines
+perms_resolve prod | perms_to_kiro_autoapprove # -> {readOnly,fileWrites,bashCommands}
+```
+
+`install_permissions()` in `scripts/install/{claude,kiro}.sh` invokes the
+resolver based on `.omao/profile.yaml` `aws.environment` (or the
+`OMA_PERMISSIONS_ENV` override) and merges the result into:
+
+- **Claude** — `~/.claude/settings.json` `permissions.deny[]` via
+  append-uniq. Existing user-authored entries are preserved verbatim.
+- **Kiro** — `~/.kiro/settings/cli.json` `autoApprove` and each
+  OMA-installed `~/.kiro/agents/*.agent.json`. The agent files are
+  rewritten from the source repo on every run (so upstream agent
+  updates flow through), but never mutated in the tracked repo. Each
+  patched copy carries `_meta.oma_permissions_env` and
+  `_meta.oma_permissions_deny` so the deny set is auditable from Kiro
+  even though Kiro itself does not enforce a permissions list.
+
+Skip the step entirely with `--skip-permissions` or
+`OMA_SKIP_PERMISSIONS=1`. Hand-edited agent.json copies (no
+`_meta.oma_permissions_env`) are refused — delete the file to re-apply.
