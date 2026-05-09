@@ -55,6 +55,13 @@ breaking changes to non-stable surfaces as documented in
   override `OMA_PERMISSIONS_ENV=<env>` for CI smoke runs.
 - `scripts/oma/setup.sh` exports `OMA_PROJECT_DIR` so the install
   scripts read the project's `.omao/profile.yaml`, not their own cwd.
+- `tests/installer/test_permissions_lib.bats` and
+  `tests/installer/test_install_permissions.bats` — 26 bats cases
+  covering the resolver (extends-merge, env validation, sandbox/staging/
+  prod superset, emitter shape) and the end-to-end install path
+  (idempotency, user-entry preservation, `--skip-permissions`,
+  `OMA_PERMISSIONS_ENV` override, hand-edited agent refusal, source
+  repo cleanliness).
 
 ### Changed
 - **Observability is opt-in (default `none`).** `oma setup` no longer
