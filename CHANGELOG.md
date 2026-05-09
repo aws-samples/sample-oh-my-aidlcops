@@ -17,7 +17,17 @@ breaking changes to non-stable surfaces as documented in
 - (next release entries go here)
 
 ### Fixed
-- (next release entries go here)
+- `hooks/{session-start,user-prompt-submit}.sh` now resolve every
+  `.omao/...` path against `$CLAUDE_PROJECT_DIR` (with `OMA_PROJECT_DIR`
+  and `$PWD` as fallbacks) instead of the bare cwd. Claude Code spawns
+  hooks from whichever directory `claude` was invoked in, so the
+  previous relative-path lookups silently skipped when the cwd
+  diverged from the project root. Affected paths: trigger detection
+  (`.omao/triggers.json`), active-mode reminder
+  (`.omao/state/active-mode`), project-memory loading
+  (`.omao/project-memory.json`), ontology status block
+  (`.omao/ontology/`), and the budget warning
+  (`.omao/ontology/budgets/`).
 
 ## [0.4.0-preview.1] — 2026-05-02
 

@@ -12,12 +12,16 @@ if [[ "${OMA_DISABLE_TRIGGERS:-0}" == "1" ]]; then
   exit 0
 fi
 
-# Locate triggers.json (repo-relative or user project)
+# Resolve the project directory. Claude Code passes CLAUDE_PROJECT_DIR
+# to hooks (the cwd at `claude` startup). For other harnesses or local
+# invocations, fall back to $PWD. Every .omao/ path below MUST go through
+# this so the hook works no matter what cwd Claude spawns it with.
+OMA_PROJ_DIR="${CLAUDE_PROJECT_DIR:-${OMA_PROJECT_DIR:-$PWD}}"
+
+# Locate triggers.json
 TRIGGERS_JSON=""
-if [[ -f ".omao/triggers.json" ]]; then
-  TRIGGERS_JSON=".omao/triggers.json"
-elif [[ -f "./.omao/triggers.json" ]]; then
-  TRIGGERS_JSON="./.omao/triggers.json"
+if [[ -f "$OMA_PROJ_DIR/.omao/triggers.json" ]]; then
+  TRIGGERS_JSON="$OMA_PROJ_DIR/.omao/triggers.json"
 fi
 
 # Graceful exit if triggers.json missing
@@ -118,7 +122,7 @@ done <<< "$TRIGGERS"
 # If any .omao/ontology/budgets/*.json has `spend_ratio > warn_at_pct/100`
 # we prepend a warning. This requires the user or agenticops to have written
 # a `spend_usd` value into the instance; otherwise we silently skip.
-if [[ "${OMA_DISABLE_ONTOLOGY:-0}" != "1" ]] && [[ -d ".omao/ontology/budgets" ]]; then
+if [[ "${OMA_DISABLE_ONTOLOGY:-0}" != "1" ]] && [[ -d "$OMA_PROJ_DIR/.omao/ontology/budgets" ]]; then
   while IFS= read -r f; do
     [[ -z "$f" ]] && continue
     warn_line=$(jq -r '
@@ -137,7 +141,7 @@ Consider running /oma:agenticops or pausing high-cost operations."
       jq -n --arg ctx "$ADDITIONAL_CONTEXT" '{"additionalContext": $ctx}'
       exit 0
     fi
-  done < <(find .omao/ontology/budgets -maxdepth 1 -type f -name '*.json' 2>/dev/null)
+  done < <(find "$OMA_PROJ_DIR/.omao/ontology/budgets" -maxdepth 1 -type f -name '*.json' 2>/dev/null)
 fi
 
 # No match found
