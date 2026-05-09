@@ -94,6 +94,14 @@ breaking changes to non-stable surfaces as documented in
   `oma permissions show|path|--json` interface, install reflection,
   and the doctor warn-on-overlay-but-no-reinstall path. The lib suite
   also gains 6 unit cases for `perms_resolve_with_overlays`.
+- `hooks/session-start.sh` emits a new
+  `[MAGIC KEYWORD: OMA_PERMISSIONS_DRIFT]` line when
+  `.omao/permissions.yaml` has been edited more recently than
+  `~/.claude/settings.json` or `~/.kiro/settings/cli.json`. The model
+  surfaces a reminder to re-run `oma setup`. Kill switch:
+  `OMA_DISABLE_PERMISSIONS_DRIFT=1`. 4 new bats cases in
+  `tests/hooks/test_session_start.bats` cover newer-overlay,
+  newer-settings, kill switch, and missing-harness-config paths.
 - `oma setup` now seeds `<project>/.omao/permissions.yaml` from
   `templates/permissions/overlay.yaml.tmpl` on first run. The seed is
   fully commented out so it's a no-op overlay; users uncomment the

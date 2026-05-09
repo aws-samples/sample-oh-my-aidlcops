@@ -77,3 +77,71 @@ teardown() {
     [ "$status" -eq 0 ]
     echo "$output" | jq -e '.hookSpecificOutput.additionalContext' >/dev/null
 }
+
+@test "session-start emits OMA_PERMISSIONS_DRIFT when overlay newer than settings.json" {
+    cat > "$PROJECT/.omao/permissions.yaml" <<'YAML'
+version: 1
+deny:
+  add:
+    bash: ["test-pattern"]
+YAML
+    fake_home=$(mktemp -d)
+    mkdir -p "$fake_home/.claude"
+    : > "$fake_home/.claude/settings.json"
+    # Backdate the harness config so the overlay is "newer".
+    touch -t 202401010000 "$fake_home/.claude/settings.json"
+
+    cd "$PROJECT"
+    HOME="$fake_home" run bash "$HOOK"
+    [ "$status" -eq 0 ]
+    echo "$output" | jq -e '.additionalContext | contains("OMA_PERMISSIONS_DRIFT")'
+    echo "$output" | jq -e '.additionalContext | contains("oma setup --skip-doctor")'
+    rm -rf "$fake_home"
+}
+
+@test "no drift line when settings.json is newer than overlay" {
+    cat > "$PROJECT/.omao/permissions.yaml" <<'YAML'
+version: 1
+YAML
+    touch -t 202401010000 "$PROJECT/.omao/permissions.yaml"
+    fake_home=$(mktemp -d)
+    mkdir -p "$fake_home/.claude"
+    : > "$fake_home/.claude/settings.json"   # current mtime, newer
+
+    cd "$PROJECT"
+    HOME="$fake_home" run bash "$HOOK"
+    [ "$status" -eq 0 ]
+    run jq -e '.additionalContext | contains("OMA_PERMISSIONS_DRIFT") | not' <<<"$output"
+    [ "$status" -eq 0 ]
+    rm -rf "$fake_home"
+}
+
+@test "OMA_DISABLE_PERMISSIONS_DRIFT suppresses the drift line" {
+    cat > "$PROJECT/.omao/permissions.yaml" <<'YAML'
+version: 1
+YAML
+    fake_home=$(mktemp -d)
+    mkdir -p "$fake_home/.claude"
+    : > "$fake_home/.claude/settings.json"
+    touch -t 202401010000 "$fake_home/.claude/settings.json"
+
+    cd "$PROJECT"
+    HOME="$fake_home" OMA_DISABLE_PERMISSIONS_DRIFT=1 run bash "$HOOK"
+    [ "$status" -eq 0 ]
+    run jq -e '.additionalContext | contains("OMA_PERMISSIONS_DRIFT") | not' <<<"$output"
+    [ "$status" -eq 0 ]
+    rm -rf "$fake_home"
+}
+
+@test "no harness config: drift detection silently skips" {
+    cat > "$PROJECT/.omao/permissions.yaml" <<'YAML'
+version: 1
+YAML
+    fake_home=$(mktemp -d)   # no .claude or .kiro
+    cd "$PROJECT"
+    HOME="$fake_home" run bash "$HOOK"
+    [ "$status" -eq 0 ]
+    run jq -e '.additionalContext | contains("OMA_PERMISSIONS_DRIFT") | not' <<<"$output"
+    [ "$status" -eq 0 ]
+    rm -rf "$fake_home"
+}

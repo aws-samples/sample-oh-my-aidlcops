@@ -88,6 +88,40 @@ $ONTOLOGY_BLOCK
   fi
 fi
 
+# ----- Permission overlay drift detection ----------------------------------
+# If .omao/permissions.yaml has been edited more recently than the harness
+# config it lands in, surface a one-line reminder so the user knows to
+# re-run `oma setup` (or scripts/install/{claude,kiro}.sh) before the next
+# session relies on stale deny rules.
+#
+# Heuristic: mtime comparison only. We don't open the YAML — same kill
+# switch family as the other ontology probes (OMA_DISABLE_PERMISSIONS_DRIFT=1).
+if [[ "${OMA_DISABLE_PERMISSIONS_DRIFT:-0}" != "1" ]] && [[ -f ".omao/permissions.yaml" ]]; then
+  overlay_mtime=$(stat -f %m ".omao/permissions.yaml" 2>/dev/null || stat -c %Y ".omao/permissions.yaml" 2>/dev/null || echo 0)
+  drifted=""
+  for cfg in "$HOME/.claude/settings.json" "$HOME/.kiro/settings/cli.json"; do
+    [[ -f "$cfg" ]] || continue
+    cfg_mtime=$(stat -f %m "$cfg" 2>/dev/null || stat -c %Y "$cfg" 2>/dev/null || echo 0)
+    if [[ "$overlay_mtime" -gt "$cfg_mtime" ]]; then
+      drifted+="${drifted:+, }${cfg/#$HOME/~}"
+    fi
+  done
+  if [[ -n "$drifted" ]]; then
+    ADDITIONAL_CONTEXT+="[MAGIC KEYWORD: OMA_PERMISSIONS_DRIFT]
+
+.omao/permissions.yaml has been edited more recently than: $drifted
+
+The new overlay is NOT yet reflected in your harness config. Run one of:
+  oma setup --skip-doctor
+  bash scripts/install/claude.sh
+  bash scripts/install/kiro.sh
+
+Use \`oma permissions show\` to preview the resolved chain before applying.
+
+"
+  fi
+fi
+
 # Add OMA command reference
 ADDITIONAL_CONTEXT+="Available OMA Tier-0 Commands:
 - /oma:autopilot           — AIDLC full-loop autopilot (Inception→Construction→Operations)

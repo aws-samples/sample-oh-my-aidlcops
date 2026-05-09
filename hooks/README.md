@@ -66,8 +66,9 @@ Triggered at session start. Injects project context:
 
 - **Active mode reminder**: Reads `.omao/state/active-mode` and warns if a Tier-0 workflow is running
 - **Project memory**: Loads `.omao/project-memory.json` content
+- **Permissions drift**: Compares `.omao/permissions.yaml` mtime against `~/.claude/settings.json` and `~/.kiro/settings/cli.json`. If the overlay is newer, emits `[MAGIC KEYWORD: OMA_PERMISSIONS_DRIFT]` so the model reminds the user to re-run `oma setup`. Kill switch: `OMA_DISABLE_PERMISSIONS_DRIFT=1`.
 - **Command reference**: Lists all available OMA Tier-0 commands
-- **Kill switch**: Set `OMA_DISABLE_TRIGGERS=1` to disable
+- **Kill switch**: Set `OMA_DISABLE_TRIGGERS=1` to disable the entire hook
 
 ## Triggers Catalog
 
