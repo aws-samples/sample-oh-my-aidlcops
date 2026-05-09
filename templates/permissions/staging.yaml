@@ -1,0 +1,53 @@
+# OMA Permission Template — staging
+#
+# Mid-strength profile. Intended for shared dev clusters, pre-prod accounts,
+# and any environment that holds non-production but real data (synthetic
+# customer records, integration test fixtures, real Bedrock spend). Inherits
+# common.yaml audit/ontology guards.
+
+version: 1
+extends: ["common.yaml"]
+applies_when:
+  aws.environment: staging
+
+description: |
+  Staging profile — assumes shared resources and real spend. Cross-region
+  Bedrock inference profiles and destructive kubectl/aws calls are blocked
+  to prevent accidental fan-out. Manifests stay editable (staging is where
+  GitOps PRs are dry-run before prod promotion).
+
+deny:
+  bash:
+    # Cross-region Bedrock inference profiles — staging should pin a region
+    # explicitly via `aws bedrock-runtime invoke-model --region` rather than
+    # relying on `global.*` profiles that span regions silently.
+    - "aws bedrock-runtime invoke-model*global.anthropic*"
+    - "aws bedrock-runtime invoke-model*global.amazon*"
+    # Cluster-wide destructive kubectl. Namespaced delete remains allowed.
+    - "kubectl delete ns*"
+    - "kubectl delete clusterrole*"
+    - "kubectl delete clusterrolebinding*"
+    - "kubectl delete crd*"
+    # Helm uninstall — explicit `oma promote --to rolled_back` is the path.
+    - "helm uninstall*"
+    # IAM destructive actions — staging IAM is shared, treat as prod-adjacent.
+    - "aws iam delete-*"
+    - "aws iam detach-*"
+  edit:
+    # AWS credentials & SSH keys — never edit from agent context.
+    - "/Users/**/.aws/credentials"
+    - "/Users/**/.aws/config"
+    - "/Users/**/.ssh/**"
+  write:
+    - "/Users/**/.aws/credentials"
+    - "/Users/**/.aws/config"
+    - "/Users/**/.ssh/**"
+  mcp:
+    # KB writes are deferred until prod hardening. Read-only KB queries OK.
+    - "mcp__bedrock-kb-retrieval__*ingest*"
+    - "mcp__bedrock-kb-retrieval__*delete*"
+
+auto_approve:
+  read_only: true
+  file_writes: false       # require explicit user click on every write
+  bash_commands: false

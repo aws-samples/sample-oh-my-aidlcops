@@ -34,6 +34,14 @@ breaking changes to non-stable surfaces as documented in
   agenticops feedback-loop skills. OMA ships no trace MCP and runs no
   Langfuse — it defines the `mcp__<server_name>__*` socket; the user
   supplies the server. Registered the Langfuse Public API in REFERENCES.
+- `templates/permissions/{common,sandbox,staging,prod}.yaml` — abstract
+  deny-rule templates scoped by `profile.yaml` `aws.environment`. Each
+  template declares `deny.{bash,edit,write,mcp}` patterns plus
+  `auto_approve` defaults. Reference data only — no runtime effect until
+  the follow-up `install_permissions()` commit wires `oma setup` to
+  emit the rules into `.claude/settings.json` and Kiro `cli.json` /
+  `agents/*.agent.json`. See `templates/permissions/README.md` for the
+  schema and the abstract → harness mapping table.
 
 ### Changed
 - **Observability is opt-in (default `none`).** `oma setup` no longer

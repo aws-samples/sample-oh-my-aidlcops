@@ -1,0 +1,63 @@
+# OMA Permission Template — common (shared by every environment)
+#
+# This file declares the abstract deny set every OMA install applies regardless
+# of `aws.environment`. Environment-specific overlays (sandbox/staging/prod.yaml)
+# extend this file via `extends: ["common.yaml"]`.
+#
+# Why "abstract": the same rule must be emitted into two harness-specific
+# config formats. install scripts translate these keys as follows.
+#
+# | abstract key      | Claude (.claude/settings.json)              | Kiro (~/.kiro/settings/cli.json + agents/*.agent.json) |
+# | ----------------- | ------------------------------------------- | ------------------------------------------------------ |
+# | deny.bash         | permissions.deny += "Bash(<pattern>)"       | autoApprove.bashCommands=false + agents.tools strip   |
+# | deny.edit         | permissions.deny += "Edit(<glob>)"          | autoApprove.fileWrites=false + agents.tools filter    |
+# | deny.write        | permissions.deny += "Write(<glob>)"         | (same as edit — Kiro merges Edit/Write)               |
+# | deny.mcp          | permissions.deny += "<mcp_tool_pattern>"    | agents.mcpServers entry disabled or tool removed      |
+# | auto_approve.*    | permissions.defaultMode hint                | settings.cli.json autoApprove.{readOnly,fileWrites,…} |
+#
+# Patterns:
+# - `deny.bash` / `deny.mcp` — fnmatch globs against the full command line or
+#   tool name (case-sensitive). `*` does NOT cross spaces in bash patterns.
+# - `deny.edit` / `deny.write` — POSIX globs against the file path argument.
+#   Use `**` for recursive match.
+#
+# Backward compatibility: this file is reference data only. It is consumed by
+# `oma setup` / `oma compile` once the install script's `install_permissions()`
+# function lands (separate commit). Until then, dropping/editing this file has
+# no runtime effect.
+
+version: 1
+description: |
+  Baseline deny rules every OMA project inherits. Protects the audit ledger
+  and ontology entry points so they can only be mutated through OMA tools
+  (oma_audit.append, oma promote, oma backup), never by free-form Edit/Bash.
+
+# Sentinel paths that OMA owns. Direct edits would silently break the audit
+# chain or the ontology contract. The corresponding write helpers
+# (tools/oma_audit/append.py, scripts/oma/*.sh) remain the only legal entry.
+deny:
+  edit:
+    - ".omao/audit.jsonl"
+    - ".omao/ontology/**/*.json"
+    - ".omao/state/active-mode"
+  write:
+    - ".omao/audit.jsonl"
+    - ".omao/ontology/**/*.json"
+  bash:
+    # In-place audit log mutation — sed/awk -i, truncate, redirect.
+    - "sed -i*.omao/audit*"
+    - "awk -i*.omao/audit*"
+    - ":>*.omao/audit*"
+    - "*>*.omao/audit.jsonl*"      # any redirect into audit.jsonl
+    - "rm*.omao/audit.jsonl*"
+    # Ontology JSON tampering bypassing oma promote / oma_audit.append.
+    - "jq*-i*.omao/ontology/*"
+    - "rm*.omao/ontology/*.json*"
+  mcp: []   # no MCP-level deny in the common baseline
+
+# Auto-approval defaults. Environment overlays may relax (sandbox) or tighten
+# (prod), but read_only=true is a floor — we never auto-approve unread tools.
+auto_approve:
+  read_only: true
+  file_writes: false
+  bash_commands: false

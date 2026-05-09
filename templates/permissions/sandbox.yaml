@@ -1,0 +1,31 @@
+# OMA Permission Template — sandbox
+#
+# Loosest profile. Intended for personal AWS accounts, dev clusters, and the
+# sandbox environment used by `harness-proposal-2026-05-08` / ai-on-eks demo
+# stacks. The common.yaml baseline still applies — sandbox only relaxes the
+# auto_approve defaults; it does NOT remove any common deny rule.
+
+version: 1
+extends: ["common.yaml"]
+applies_when:
+  aws.environment: sandbox
+
+description: |
+  Sandbox profile — assumes the AWS account is isolated, has no production
+  data, and that the user wants minimal friction. Common.yaml audit/ontology
+  guards are inherited unchanged so even sandbox runs cannot tamper with the
+  OMA ledger.
+
+deny:
+  bash: []
+  edit: []
+  write: []
+  mcp: []
+
+# Sandbox: convenience wins over rigour.
+auto_approve:
+  read_only: true
+  file_writes: true       # Edit/Write auto-approved; common.yaml still blocks
+                          # the audit ledger and ontology paths.
+  bash_commands: false    # bash stays gated — sandbox accidents on the host
+                          # FS (rm, kubectl) are still costly.
