@@ -101,7 +101,7 @@ if [[ "${OMA_DISABLE_PERMISSIONS_DRIFT:-0}" != "1" ]]; then
   if [[ -f "$__oma_repo_root/scripts/lib/permissions.sh" ]]; then
     # shellcheck disable=SC1091
     . "$__oma_repo_root/scripts/lib/permissions.sh"
-    drifted=$(perms_overlay_drift "$PWD" "$HOME" 2>/dev/null || true)
+    drifted=$(perms_overlay_drift "$OMA_PROJ_DIR" "$HOME" 2>/dev/null || true)
     if [[ -n "$drifted" ]]; then
       ADDITIONAL_CONTEXT+="[MAGIC KEYWORD: OMA_PERMISSIONS_DRIFT]
 

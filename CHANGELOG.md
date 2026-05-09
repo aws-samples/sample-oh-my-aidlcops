@@ -192,6 +192,14 @@ breaking changes to non-stable surfaces as documented in
   with no sentinel is treated as "never installed" — no false-positive
   alerts on Kiro-less workstations either. Bats coverage updated to
   exercise the sentinel mtime semantics.
+- `hooks/{session-start,user-prompt-submit}.sh` now resolve every
+  `.omao/...` path against `$CLAUDE_PROJECT_DIR` (with `OMA_PROJECT_DIR`
+  and `$PWD` as fallbacks) instead of the bare cwd. Claude Code spawns
+  hooks from whichever directory `claude` was invoked in, so the
+  previous relative-path lookups silently skipped when the cwd
+  diverged from the project root. Drift detection, trigger matching,
+  active-mode reminder, project-memory loading, ontology status block,
+  and the budget warning are all on the new resolution.
 - `scripts/lib/permissions.sh` `merge_one`: child template's explicit
   `auto_approve.{read_only,file_writes,bash_commands}: false` now
   overrides a parent's `true`. The previous `(child.k // parent.k)`
