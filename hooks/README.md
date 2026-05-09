@@ -51,7 +51,9 @@ Triggered on every user prompt. Reads `.omao/triggers.json` and checks for keywo
 - **Keyword detection**: Case-insensitive matching against trigger keywords
 - **Context validation**: Ensures required context tokens are present (e.g., "autopilot" requires "aidlc")
 - **Output**: Emits `additionalContext` JSON with suggested command if a match is found
-- **Kill switch**: Set `OMA_DISABLE_TRIGGERS=1` to disable
+- **Budget warning**: Same `OMA_BUDGET_WARN` block as session-start (overflow path).
+- **Permissions drift**: When no trigger and no budget warning fire, compares `.omao/permissions.yaml` mtime against `~/.claude/settings.json` and `~/.kiro/settings/cli.json`. Emits `[MAGIC KEYWORD: OMA_PERMISSIONS_DRIFT]` so the model nudges the user to re-run install on the **next prompt**, not just the next session. Kill switch: `OMA_DISABLE_PERMISSIONS_DRIFT=1`.
+- **Kill switch**: Set `OMA_DISABLE_TRIGGERS=1` to disable trigger detection
 
 Example trigger detection:
 ```

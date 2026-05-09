@@ -94,14 +94,23 @@ breaking changes to non-stable surfaces as documented in
   `oma permissions show|path|--json` interface, install reflection,
   and the doctor warn-on-overlay-but-no-reinstall path. The lib suite
   also gains 6 unit cases for `perms_resolve_with_overlays`.
-- `hooks/session-start.sh` emits a new
+- `hooks/{session-start,user-prompt-submit}.sh` emit a new
   `[MAGIC KEYWORD: OMA_PERMISSIONS_DRIFT]` line when
   `.omao/permissions.yaml` has been edited more recently than
-  `~/.claude/settings.json` or `~/.kiro/settings/cli.json`. The model
-  surfaces a reminder to re-run `oma setup`. Kill switch:
-  `OMA_DISABLE_PERMISSIONS_DRIFT=1`. 4 new bats cases in
-  `tests/hooks/test_session_start.bats` cover newer-overlay,
-  newer-settings, kill switch, and missing-harness-config paths.
+  `~/.claude/settings.json` or `~/.kiro/settings/cli.json`. The
+  per-prompt hook is the load-bearing one: a yaml edit is reflected
+  on the very next prompt, not just the next session. Detection is a
+  pure mtime check shared via `perms_overlay_drift` in
+  `scripts/lib/permissions.sh`. Kill switch:
+  `OMA_DISABLE_PERMISSIONS_DRIFT=1`. 9 new bats cases across
+  `tests/hooks/test_session_start.bats` and
+  `tests/hooks/test_user_prompt_submit_drift.bats` cover newer-overlay,
+  newer-settings, kill switch, missing-harness-config, and "trigger
+  keyword still wins" paths.
+- `hooks/user-prompt-submit.sh` no longer exits early on an empty
+  triggers list — the budget warning and the new drift block need
+  to run regardless. Triggers loop is now properly conditional on
+  non-empty `TRIGGERS`.
 - `oma setup` now seeds `<project>/.omao/permissions.yaml` from
   `templates/permissions/overlay.yaml.tmpl` on first run. The seed is
   fully commented out so it's a no-op overlay; users uncomment the

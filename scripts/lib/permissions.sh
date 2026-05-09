@@ -288,6 +288,34 @@ perms_to_kiro_autoapprove() {
     '
 }
 
+# perms_overlay_drift <project_dir> [<harness_home_dir>]
+# Compare .omao/permissions.yaml mtime against ~/.claude/settings.json and
+# ~/.kiro/settings/cli.json. Print a comma-separated list of harness configs
+# that pre-date the overlay (newer overlay → drift) on stdout. Empty stdout
+# means "no drift".
+#
+# Pure mtime check — no YAML parsing, no install side effects. Safe to call
+# from any hook on every keystroke.
+#
+# <harness_home_dir> defaults to $HOME so callers can stub it for tests.
+perms_overlay_drift() {
+    project_dir="${1:-$PWD}"
+    harness_home="${2:-$HOME}"
+    overlay="$project_dir/.omao/permissions.yaml"
+    [ -f "$overlay" ] || return 0
+    overlay_mtime=$(stat -f %m "$overlay" 2>/dev/null || stat -c %Y "$overlay" 2>/dev/null || echo 0)
+    drifted=""
+    for cfg in "$harness_home/.claude/settings.json" "$harness_home/.kiro/settings/cli.json"; do
+        [ -f "$cfg" ] || continue
+        cfg_mtime=$(stat -f %m "$cfg" 2>/dev/null || stat -c %Y "$cfg" 2>/dev/null || echo 0)
+        if [ "$overlay_mtime" -gt "$cfg_mtime" ]; then
+            label="${cfg/#$harness_home/~}"
+            drifted+="${drifted:+, }$label"
+        fi
+    done
+    printf '%s' "$drifted"
+}
+
 # perms_print_summary <resolved-json>
 # Human-readable one-screen summary, stderr-friendly. Used by install scripts.
 perms_print_summary() {

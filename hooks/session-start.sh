@@ -89,25 +89,21 @@ $ONTOLOGY_BLOCK
 fi
 
 # ----- Permission overlay drift detection ----------------------------------
-# If .omao/permissions.yaml has been edited more recently than the harness
-# config it lands in, surface a one-line reminder so the user knows to
-# re-run `oma setup` (or scripts/install/{claude,kiro}.sh) before the next
-# session relies on stale deny rules.
-#
-# Heuristic: mtime comparison only. We don't open the YAML — same kill
-# switch family as the other ontology probes (OMA_DISABLE_PERMISSIONS_DRIFT=1).
-if [[ "${OMA_DISABLE_PERMISSIONS_DRIFT:-0}" != "1" ]] && [[ -f ".omao/permissions.yaml" ]]; then
-  overlay_mtime=$(stat -f %m ".omao/permissions.yaml" 2>/dev/null || stat -c %Y ".omao/permissions.yaml" 2>/dev/null || echo 0)
-  drifted=""
-  for cfg in "$HOME/.claude/settings.json" "$HOME/.kiro/settings/cli.json"; do
-    [[ -f "$cfg" ]] || continue
-    cfg_mtime=$(stat -f %m "$cfg" 2>/dev/null || stat -c %Y "$cfg" 2>/dev/null || echo 0)
-    if [[ "$overlay_mtime" -gt "$cfg_mtime" ]]; then
-      drifted+="${drifted:+, }${cfg/#$HOME/~}"
-    fi
-  done
-  if [[ -n "$drifted" ]]; then
-    ADDITIONAL_CONTEXT+="[MAGIC KEYWORD: OMA_PERMISSIONS_DRIFT]
+# Surface a one-liner when .omao/permissions.yaml has been edited more
+# recently than the harness config the install scripts wrote to. The actual
+# detection lives in scripts/lib/permissions.sh so user-prompt-submit.sh
+# can reuse it on every keystroke.
+if [[ "${OMA_DISABLE_PERMISSIONS_DRIFT:-0}" != "1" ]]; then
+  __oma_repo_root="${OMA_REPO_ROOT:-}"
+  if [[ -z "$__oma_repo_root" ]]; then
+    __oma_repo_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." 2>/dev/null && pwd)" || __oma_repo_root=""
+  fi
+  if [[ -f "$__oma_repo_root/scripts/lib/permissions.sh" ]]; then
+    # shellcheck disable=SC1091
+    . "$__oma_repo_root/scripts/lib/permissions.sh"
+    drifted=$(perms_overlay_drift "$PWD" "$HOME" 2>/dev/null || true)
+    if [[ -n "$drifted" ]]; then
+      ADDITIONAL_CONTEXT+="[MAGIC KEYWORD: OMA_PERMISSIONS_DRIFT]
 
 .omao/permissions.yaml has been edited more recently than: $drifted
 
@@ -119,6 +115,7 @@ The new overlay is NOT yet reflected in your harness config. Run one of:
 Use \`oma permissions show\` to preview the resolved chain before applying.
 
 "
+    fi
   fi
 fi
 
