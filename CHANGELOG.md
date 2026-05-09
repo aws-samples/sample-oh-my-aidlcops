@@ -94,6 +94,12 @@ breaking changes to non-stable surfaces as documented in
   `oma permissions show|path|--json` interface, install reflection,
   and the doctor warn-on-overlay-but-no-reinstall path. The lib suite
   also gains 6 unit cases for `perms_resolve_with_overlays`.
+- `oma setup` now seeds `<project>/.omao/permissions.yaml` from
+  `templates/permissions/overlay.yaml.tmpl` on first run. The seed is
+  fully commented out so it's a no-op overlay; users uncomment the
+  rules they need. Existing overlay files are preserved verbatim on
+  re-run. Two new bats cases in `tests/profile/test_setup_non_interactive.bats`
+  pin the no-op equivalence and the preservation behaviour.
 
 ### Changed
 - **Observability is opt-in (default `none`).** `oma setup` no longer

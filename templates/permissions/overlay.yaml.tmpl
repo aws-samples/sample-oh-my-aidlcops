@@ -1,0 +1,49 @@
+# .omao/permissions.yaml — project-level permission overlay
+#
+# This file lets you customize the OMA permission set without editing the
+# OMA repo. Drop rules below, then re-run `oma setup` (or
+# `bash scripts/install/{claude,kiro}.sh`) to push the change into
+# ~/.claude/settings.json and ~/.kiro/.
+#
+# Resolution chain (lowest → highest priority):
+#   1. templates/permissions/common.yaml   (OMA baseline floor)
+#   2. templates/permissions/<env>.yaml    (env defaults from profile.yaml)
+#   3. THIS FILE                           (your project-specific overrides)
+#
+# Inspect: `oma permissions show` (annotated) or
+#          `oma permissions show --json` (machine-readable).
+#
+# Edit:    `$EDITOR $(oma permissions path)`
+#
+# Apply:   `oma setup --skip-doctor` or `bash scripts/install/claude.sh`
+#
+# Every key below is OPTIONAL. The default of "no overlay" leaves the
+# template chain untouched — start by uncommenting only what your team
+# actually needs.
+
+version: 1
+
+# deny:
+#   # remove — subtract patterns from the resolved set (exact-match).
+#   # Useful when a template-level deny gets in the way of your team's flow.
+#   remove:
+#     bash:
+#       - "kubectl delete ns*"          # we use this routinely on staging
+#     edit: []
+#     write: []
+#     mcp: []
+#
+#   # add — extra patterns this project needs blocked on top of the templates.
+#   add:
+#     bash: []
+#     edit:
+#       - "infra/secrets/**"            # prevent accidental secret edits
+#     write: []
+#     mcp: []
+#
+# # auto_approve — override the env defaults. Each key is optional; an
+# # explicit value (including `false`) wins over the resolved chain.
+# auto_approve:
+#   read_only:     true
+#   file_writes:   true
+#   bash_commands: false
