@@ -51,6 +51,6 @@ rm ~/.local/bin/oma
 GA (`v1.0.0`) enters when all four items below are met:
 
 1. E2E scenarios on both harnesses (Claude Code, Kiro) reproducible: 3 or more.
-2. All 5 plugins complete DSL migration.
+2. All 4 plugins complete DSL migration.
 3. Zero critical bug reports from downstream users / 90 days.
 4. Release artifact supply-chain validation (sha256 + SBOM + signed commit) automated.

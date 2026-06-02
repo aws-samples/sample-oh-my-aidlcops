@@ -18,6 +18,13 @@ breaking changes to non-stable surfaces as documented in
   (safety axis: seven harness patterns mapped to OMA surfaces with
   honest partial/roadmap status, independent verification) — plus a
   "Reliability dual-axis" sidebar category.
+- **Diagram authoring standard.**
+  `steering/workflows/diagram-authoring-standard.md` mandates the diagram
+  tool by intent — D2 (flow/sequence/state), mingrammer Diagrams
+  (infrastructure/cloud), Excalidraw (concept sketches) — retires Mermaid
+  for new diagrams, and requires quoted labels on any grandfathered
+  Mermaid. Surfaced as a top-level rule in `steering/oma-hub.md`; D2,
+  Diagrams, and Excalidraw registered in REFERENCES.
 - **REFERENCES.** Registered the engineering-playbook AIDLC methodology
   landing page and the Ontology/Harness Engineering sub-pages as the
   canonical conceptual sources.
@@ -31,8 +38,23 @@ breaking changes to non-stable surfaces as documented in
   living-ontology Outer Loop, rather than the prior
   "Operations-automation marketplace" framing. No code or schema
   changes.
+- **Easy-button + enterprise-ops-toolset framing.** READMEs, intro, and
+  philosophy now present OMA as a one-install easy button for the two
+  reliability axes, with a stated roadmap toward AWS Hosted MCP + DevOps
+  agent + Security agent integrations forming an open toolset for
+  enterprise operations automation.
 
 ### Fixed
+- **Broken philosophy/ontology Mermaid diagrams.** Unquoted labels (the
+  `(6R)` edge label aborted the entire flowchart parse) now quoted per the
+  diagram-authoring standard; the English philosophy diagram, which had
+  drifted from the Korean source, is re-synced.
+- **Doc consistency.** `ontology.md` (en/ko) now documents all 8 entities
+  (adds Spec/ADR); stale `v0.2.0-preview.1` strings in easy-button,
+  getting-started, and support-policy refreshed to `v0.4.0-preview.1`;
+  the "5 plugins" GA criterion corrected to 4; duplicate aidlc Phase 1 /
+  Phase 2 plugin rows merged. Missing en i18n pages added so the
+  Docusaurus build resolves with 0 link warnings.
 - `hooks/{session-start,user-prompt-submit}.sh` now emit
   `{hookSpecificOutput: {hookEventName, additionalContext}}` instead
   of the bare `{additionalContext}` form. Claude Code 2.x ignores
