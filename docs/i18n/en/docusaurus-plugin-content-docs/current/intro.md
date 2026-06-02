@@ -5,20 +5,28 @@ sidebar_position: 1
 slug: /intro
 ---
 
-`oh-my-aidlcops` (OMA) is a **plugin marketplace** that connects all phases of the AIDLC (AI-Driven Development Lifecycle) — Inception → Construction → Operations — through agent-driven operations automation. OMA is a sister project of [oh-my-claudecode](https://github.com/Yeachan-Heo/oh-my-claudecode) (OMC), extending the general-purpose Claude Code orchestration philosophy to the AIDLC domain. The core premise is simple — **AIDLC becomes complete only when its operations phase is automated by agents.**
+`oh-my-aidlcops` (OMA) is a **Claude Code · Kiro plugin marketplace** that turns the two reliability axes of the [AIDLC methodology](https://devfloor9.github.io/engineering-playbook/docs/aidlc/methodology) — **Ontology Engineering** (correctness) and **Harness Engineering** (safety) — into installable plugins on AWS. AWS's official AIDLC Workflows serve as the process spine, and AgenticOps closes the feedback loop back into the ontology. OMA is a sister project of [oh-my-claudecode](https://github.com/Yeachan-Heo/oh-my-claudecode) (OMC), specializing its orchestration philosophy in making the AIDLC loop reliable enough to run with agents.
 
 ## One-Paragraph Summary
 
-AWS's official [awslabs/aidlc-workflows](https://github.com/awslabs/aidlc-workflows) systematizes the planning, design, and implementation phases. OMA combines this with an **AgenticOps** layer (self-improving feedback loop, autonomous deployment, continuous evaluation, incident response, and cost governance), enabling the lifecycle to close without manual phase-by-phase execution. Users approve only at checkpoints; agents handle diagnosis, proposal, and execution.
+Agentic AIDLC fails on reliability, not capability — hallucination/drift, runaway execution, and self-grading. The methodology answers with a **reliability dual-axis**: Ontology Engineering guarantees the correctness of what agents produce (WHAT/WHEN), and Harness Engineering enforces the safety of how they execute (HOW). OMA is the installable implementation of that dual-axis: a one-install **easy button** that activates a typed ontology, a harness DSL, and AWS Hosted MCP wiring without hand-rolling schemas, policies, or hooks. Users approve at checkpoints; agents handle diagnosis, proposal, and execution.
+
+## Where this is going — an enterprise operations open toolset
+
+OMA is being built into an **open toolset for enterprise operations automation**:
+
+1. **Today** — Ontology + Harness Engineering as installable plugins, AWS Hosted MCP (awslabs/mcp) as the default runtime data layer, AgenticOps closing the Outer Loop.
+2. **Next** — deeper AWS Hosted MCP coverage plus first-class **DevOps agent** and **Security agent** integrations, so deploy, observability, and security review run as governed agents inside the same Tier-0 approval model.
+3. **The promise** — install a few plugins and get enterprise-grade operations automation that is auditable, policy-gated, and harness-constrained by default — a drop-in open toolset, not a bespoke platform you assemble yourself.
 
 ## Plugin Catalog
 
 | Plugin | Role | Example Skills |
 |---|---|---|
 | `ai-infra` | Build and operate Agentic AI Platform on EKS | `agentic-eks-bootstrap`, `vllm-serving-setup`, `inference-gateway-routing`, `langfuse-observability`, `gpu-resource-management`, `ai-gateway-guardrails` |
-| `agenticops` | Agent-driven operations automation | `self-improving-loop`, `autopilot-deploy`, `incident-response`, `continuous-eval`, `cost-governance` |
-| `aidlc` | AIDLC Phase 1 extensions (opt-in) | `workspace-detection`, `requirements-analysis`, `user-stories`, `workflow-planning` |
-| `aidlc` | AIDLC Phase 2 extensions (opt-in) | `component-design`, `code-generation`, `test-strategy` |
+| `agenticops` | Agent-driven operations automation | `self-improving-loop`, `autopilot-deploy`, `incident-response`, `continuous-eval`, `cost-governance`, `audit-trail` |
+| `aidlc` | AIDLC Phase 1 (Inception) + Phase 2 (Construction) extensions (opt-in) | `requirements-analysis`, `user-stories`, `workflow-planning`, `component-design`, `code-generation`, `test-strategy`, `risk-discovery`, `quality-gates` |
+| `modernization` | Legacy workload modernization to AWS (6R strategy) | `workload-assessment`, `modernization-strategy`, `to-be-architecture`, `containerization`, `cutover-planning` |
 
 Detailed plugin definitions are in the repository root at [`.claude-plugin/marketplace.json`](https://github.com/aws-samples/sample-oh-my-aidlcops/blob/main/.claude-plugin/marketplace.json).
 
@@ -44,27 +52,27 @@ See [Tier-0 Workflows](./tier-0-workflows.md) for detailed invocation of each co
 
 ```mermaid
 flowchart LR
-    U[User Request] --> T[Tier-0 Trigger]
-    T -->|keyword matching| C["/oma:&lt;workflow&gt;"]
-    C --> D[Plugin Dispatch]
-    D --> P1[ai-infra]
-    D --> P2[agenticops]
-    D --> P3[aidlc]
-    D --> P4[aidlc]
-    P1 --> S[Skill Execution]
+    U["User Request"] --> T["Tier-0 Trigger"]
+    T -- "keyword matching" --> C["/oma workflow"]
+    C --> D["Plugin Dispatch"]
+    D --> P1["ai-infra"]
+    D --> P2["agenticops"]
+    D --> P3["aidlc"]
+    D --> P4["modernization"]
+    P1 --> S["Skill Execution"]
     P2 --> S
     P3 --> S
     P4 --> S
-    S --> M[AWS Hosted MCP]
-    M --> EKS[eks-mcp-server]
-    M --> CW[cloudwatch-mcp-server]
-    M --> PR[prometheus-mcp-server]
-    M --> IAC[aws-iac-mcp-server]
-    S --> CK{Checkpoint<br/>User Approval}
-    CK -->|approve| OP[Operations Autonomous Execution]
-    OP -->|trace feedback| SI[self-improving-loop]
-    SI -.improvement PR.-> P4
-    SI -.skill tuning.-> P2
+    S --> M["AWS Hosted MCP"]
+    M --> EKS["eks-mcp-server"]
+    M --> CW["cloudwatch-mcp-server"]
+    M --> PR["prometheus-mcp-server"]
+    M --> IAC["aws-iac-mcp-server"]
+    S --> CK{"Checkpoint · User Approval"}
+    CK -- "approve" --> OP["Operations Autonomous Execution"]
+    OP -- "trace feedback" --> SI["self-improving-loop"]
+    SI -. "improvement PR" .-> P3
+    SI -. "skill tuning" .-> P2
 ```
 
 The diagram above shows how the AIDLC 3-phase structure closes via an agent-driven feedback loop. Observability data from the Operations phase (Langfuse traces, Prometheus metrics, CloudWatch logs) flows back through `self-improving-loop` to automatically improve Construction-phase skills and prompts.

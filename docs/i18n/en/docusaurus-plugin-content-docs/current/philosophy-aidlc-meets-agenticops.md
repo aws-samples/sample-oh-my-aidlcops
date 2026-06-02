@@ -6,6 +6,19 @@ sidebar_position: 3
 
 This document synthesizes the design premise of `oh-my-aidlcops` (OMA). It explains why OMA combines an **AgenticOps** layer with the existing AIDLC framework, why this combination is inevitable, and what this integration actually automates.
 
+## OMA = the methodology's execution layer (reliability dual-axis)
+
+OMA's starting point is the **reliability dual-axis** defined by the [AIDLC methodology](https://devfloor9.github.io/engineering-playbook/docs/aidlc/methodology). Agentic AIDLC fails on reliability, not model capability, and the methodology splits that reliability into two axes — OMA implements each as an installable surface.
+
+| Axis | Question | Guarantee | OMA implementation | Detail |
+|---|---|---|---|---|
+| **Ontology Engineering** | WHAT · WHEN | Correctness (prevents hallucination/drift) | `schemas/ontology/` 8 entities, `oma validate` | [Ontology Engineering](./ontology-engineering.md) |
+| **Harness Engineering** | HOW | Safety (blocks runaway/self-grading) | Harness DSL v2, `oma compile --strict-enterprise` | [Harness Engineering](./harness-engineering.md) |
+
+The "incomplete Operations" narrative below and the AgenticOps layer automate the **Outer Loop** (operational signal → ontology feedback, the methodology's "living ontology") on top of these two axes. AgenticOps is not a separate feature; it is the outermost feedback loop of the ontology axis.
+
+Both axes ship as an **easy button** — instead of hand-rolling schemas, policies, and hooks, installing the plugins activates a typed ontology and the harness DSL. On top of that easy button, OMA uses AWS Hosted MCP as the default data plane and extends — with first-class **DevOps agent** and **Security agent** integrations under the same Tier-0 approval model — into an **open toolset for enterprise operations automation**.
+
 ## Problem Statement — The Incomplete AIDLC Interval
 
 AWS's official [awslabs/aidlc-workflows](https://github.com/awslabs/aidlc-workflows) structures the AI-driven development lifecycle into three phases:
