@@ -108,6 +108,25 @@
         "endpoint": {
           "description": "Ingest endpoint URL for the chosen observability backend. Null when mode=none.",
           "type": ["string", "null"]
+        },
+        "trace_mcp": {
+          "description": "Optional user-supplied MCP server that exposes Langfuse (or compatible) trace reads to the agenticops feedback-loop skills (self-improving-loop, continuous-eval, cost-governance). OMA ships no trace MCP of its own — point this at your own pinned server, or leave null to disable trace-fed features. When null, those skills fall back to golden datasets / CloudWatch / Cost Explorer only.",
+          "type": ["object", "null"],
+          "additionalProperties": false,
+          "required": ["server_name"],
+          "properties": {
+            "server_name": {
+              "description": "MCP server id the skills call as mcp__<server_name>__* (e.g. \"langfuse\" -> mcp__langfuse__query_traces).",
+              "type": "string",
+              "minLength": 1
+            },
+            "tools": {
+              "description": "Tool names the server is expected to expose. Defaults to the contract set when omitted.",
+              "type": "array",
+              "items": { "type": "string" },
+              "default": ["query_traces", "get_observations", "list_scores"]
+            }
+          }
         }
       }
     },
