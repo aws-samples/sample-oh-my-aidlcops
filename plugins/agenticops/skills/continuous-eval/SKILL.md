@@ -68,14 +68,17 @@ def load_dataset(target: str, mode: str) -> Dataset:
         with open(f".omao/plans/eval/golden/{target}.jsonl") as f:
             samples += [json.loads(line) for line in f]
     if mode in {"canary", "hourly", "full"}:
-        samples += fetch_langfuse_traces(
+        # Call MCP tool mcp__langfuse__query_traces via configured observability.trace_mcp
+        # If trace_mcp is null, skip and use golden datasets only
+        traces = query_traces_via_mcp(
             target=target,
             hours=1 if mode == "hourly" else 24,
         )
+        samples += traces
     return Dataset.from_list(samples)
 ```
 
-`fetch_langfuse_traces`는 Langfuse REST API로 trace를 조회하여 `{question, answer, contexts, ground_truth}` 스키마로 변환합니다.
+`query_traces_via_mcp`는 설정된 trace MCP (`observability.trace_mcp`의 `mcp__langfuse__query_traces` 등)를 통해 trace를 조회하여 `{question, answer, contexts, ground_truth}` 스키마로 변환합니다. `observability.trace_mcp`가 null이면 golden dataset만 사용합니다.
 
 ### 3. Ragas 평가 실행
 

@@ -4,7 +4,7 @@ description: Langfuse production trace를 관찰하고 품질 regression·비용
 argument-hint: "[which agent/skill to analyze?]"
 user-invocable: true
 model: claude-opus-4-7
-allowed-tools: "Read,Grep,Bash,mcp__cloudwatch,mcp__prometheus"
+allowed-tools: "Read,Grep,Bash,mcp__cloudwatch,mcp__prometheus,mcp__langfuse__query_traces,mcp__langfuse__get_observations,mcp__langfuse__list_scores"
 ontology:
   consumes: [Skill, Agent]
   references: [Deployment]
@@ -26,7 +26,7 @@ ontology:
 
 ## Prerequisites
 
-- **Langfuse v3.x** self-hosted 또는 cloud 인스턴스. 최소 30일 trace retention.
+- **Langfuse v3.x** self-hosted 또는 cloud 인스턴스 (OMA가 제공하지 않음 — 외부 prerequisite) **AND** trace 조회 MCP 서버가 `profile.yaml`의 `observability.trace_mcp`에 등록되어 있어야 합니다. Skill은 `mcp__<server_name>__*` (기본 `mcp__langfuse__*`) 도구로 호출합니다. 미설정 시 skill은 "trace MCP not configured" 안내와 함께 종료합니다.
 - **Prometheus** (AMP 또는 self-hosted) — latency, error_rate, token_usage 메트릭 수집.
 - **CloudWatch Logs** — Agent 실행 로그, tool invocation 로그.
 - **awslabs.cloudwatch-mcp-server==0.0.25**, **awslabs.prometheus-mcp-server==0.2.15** MCP 서버가 설정된 상태 (공급망 보안을 위해 `@latest` 대신 PyPI 버전 pin 필수).
@@ -41,16 +41,17 @@ ontology:
 
 개선 대상 agent/skill의 최근 trace를 시간·품질·비용 차원으로 그룹화합니다.
 
-```bash
-LANGFUSE_HOST="${LANGFUSE_HOST:-http://langfuse.svc.cluster.local}"
-TARGET_AGENT="$1"   # 예: rag-qa-agent, code-reviewer-skill
-WINDOW_HOURS="${WINDOW_HOURS:-168}"  # 기본 7일
+MCP 도구 `mcp__langfuse__query_traces`를 호출하여 trace를 조회합니다 (설정된 `observability.trace_mcp` 서버를 통해):
 
-curl -s -u "$LANGFUSE_PUBLIC_KEY:$LANGFUSE_SECRET_KEY" \
-  "$LANGFUSE_HOST/api/public/traces?name=$TARGET_AGENT&from=$(date -u -d "-${WINDOW_HOURS} hours" +%Y-%m-%dT%H:%M:%SZ)&limit=500" \
-  | jq -c '.data[]' \
-  > .omao/plans/self-improving/traces-raw.jsonl
+```json
+{
+  "name": "$TARGET_AGENT",
+  "from": "2026-05-27T00:00:00Z",
+  "limit": 500
+}
 ```
+
+출력은 `.omao/plans/self-improving/traces-raw.jsonl`로 저장합니다.
 
 수집 항목은 trace ID, 프롬프트, 응답, reward_score, user_feedback, latency, tool_invocations, token_count입니다. Reward가 낮은 trace(< 0.5)와 user_feedback이 부정인 trace를 우선 분석 대상으로 flag합니다.
 
@@ -164,7 +165,7 @@ EOF
 
 **실패 케이스**:
 
-- Langfuse 접근 불가 → `.omao/state/self-improving/error-langfuse.log`에 원인 기록, skill 종료.
+- trace MCP (`observability.trace_mcp`) 미설정 또는 접근 불가 → `.omao/state/self-improving/error-langfuse.log`에 원인 기록, skill 종료.
 - Regression 미검출 → "no regression detected" 리포트만 생성하고 PR 미생성.
 - Target agent가 self-hosted가 아닌 관리형 모델(Claude/Nova 등) → ADR §1 위반으로 즉시 중단하고 "managed model — prompt-only improvement required" 안내.
 

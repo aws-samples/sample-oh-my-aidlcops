@@ -135,7 +135,12 @@ def eval_condition(expression: str, **context) -> bool:
 
 
 def evaluate_downgrade(agent: str) -> list[dict]:
-    traces = fetch_langfuse_traces(agent=agent, days=7)
+    # Query traces via MCP tool mcp__langfuse__query_traces (configured in observability.trace_mcp)
+    # Cost data itself comes from mcp__cost-explorer; trace-derived metrics are optional
+    # If observability.trace_mcp is null, skip trace-derived analysis
+    traces = query_traces_via_mcp(agent=agent, days=7)
+    if not traces:
+        return []  # No trace MCP configured, skip downgrade recommendations
     complexity = mean([t["complexity_score"] for t in traces])
     output_tokens = mean([t["output_tokens"] for t in traces])
 
