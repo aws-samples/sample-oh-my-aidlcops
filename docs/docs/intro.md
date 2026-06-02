@@ -1,46 +1,47 @@
 ---
 title: Introduction — oh-my-aidlcops
-description: AIDLC × AgenticOps 를 닫아주는 플러그인 마켓플레이스. 프로젝트 목적, 컨셉, 접근 방식, 플러그인 카탈로그, Tier-0 워크플로우를 한 페이지에서 파악합니다.
+description: AIDLC 방법론의 신뢰성 2축(온톨로지=정확성, 하네스=안전성)을 설치 가능한 플러그인으로 구현한 마켓플레이스. 프로젝트 목적, 신뢰성 2축, 플러그인 카탈로그, Tier-0 워크플로우를 한 페이지에서 파악합니다.
 sidebar_position: 1
 slug: /intro
 ---
 
 # oh-my-aidlcops (OMA)
 
-> **"AIDLC 는 운영이 에이전트로 자동화되었을 때 비로소 완성된다. 사람은 승인하고, 에이전트는 실행한다."**
+> **"AIDLC 는 신뢰할 수 있을 때 비로소 에이전트에게 맡길 수 있다. 온톨로지가 정확성을, 하네스가 안전성을 보장한다."**
 
-`oh-my-aidlcops`(OMA)는 AWS 의 AI-Driven Development Lifecycle(AIDLC) 를 Inception → Construction → Operations 전 구간에서 닫아주는 **Claude Code · Kiro 플러그인 마켓플레이스** 입니다. 리포지토리 — [aws-samples/sample-oh-my-aidlcops](https://github.com/aws-samples/sample-oh-my-aidlcops).
+`oh-my-aidlcops`(OMA)는 [AIDLC 방법론](https://devfloor9.github.io/engineering-playbook/docs/aidlc/methodology)의 두 신뢰성 축 — **온톨로지 엔지니어링**(정확성)과 **하네스 엔지니어링**(안전성) — 을 AWS 위에서 설치 가능한 플러그인으로 구현한 **Claude Code · Kiro 플러그인 마켓플레이스** 입니다. AWS 공식 AIDLC Workflows 가 프로세스 척추 역할을 하고, AgenticOps 가 운영 신호를 온톨로지로 되돌려 루프를 닫습니다. 리포지토리 — [aws-samples/sample-oh-my-aidlcops](https://github.com/aws-samples/sample-oh-my-aidlcops).
 
 ---
 
 ## 1. 왜 OMA 인가 — 문제 정의
 
-AWS 공식 [awslabs/aidlc-workflows](https://github.com/awslabs/aidlc-workflows) 는 AI 주도 개발 수명주기를 세 단계로 구조화합니다.
+AWS 공식 [awslabs/aidlc-workflows](https://github.com/awslabs/aidlc-workflows) 는 AI 주도 개발 수명주기를 세 단계(Inception → Construction → Operations)로 구조화합니다. 그러나 [AIDLC 방법론](https://devfloor9.github.io/engineering-playbook/docs/aidlc/methodology)이 지적하듯, 에이전틱 AIDLC 의 실패는 **모델 역량이 아니라 신뢰성**에서 발생합니다.
 
-1. **Inception** — 요구사항 분석, 유저 스토리, 워크플로우 계획
-2. **Construction** — 컴포넌트 설계, 코드 생성, 테스트 전략
-3. **Operations** — 배포·모니터링·인시던트 대응·비용 관리
+- **할루시네이션·드리프트** — 개념이 프롬프트·세션마다 다른 의미를 가져, 핸드오프가 사람의 재해석에 의존합니다. (`autopilot-deploy` 와 `construction-loop` 이 "deployment target" 을 서로 다르게 쓰던 실제 사례 → [Ontology](./ontology.md) 참조)
+- **런어웨이 실행** — 아키텍처적 제약이 없으면 에이전트 루프가 수백 회 재시도를 발사합니다(방법론의 핀테크 사례: 847회 재시도, 약 $2,200, 3시간 장애).
+- **셀프 채점** — 코드를 작성한 에이전트가 테스트도 작성하면 자신의 사각지대가 검증을 통과합니다.
 
-Inception 과 Construction 은 에이전트의 자연스러운 작업 영역이라 자동화가 비교적 직관적이지만, **Operations 는 대부분의 AIDLC 구현에서 여전히 사람의 실행 구간으로 남아 있습니다.** 결과적으로 라이프사이클은 구조적으로 미완결입니다. 트레이스는 Langfuse 에 쌓이지만 PR 로 돌아오지 않고, 인시던트 런북은 새벽 2시에 아무도 열지 않는 위키에 있고, 비용 이상은 다음 달 청구서에서 발견됩니다.
+이 세 가지는 단계 스킵·미완결 운영 구간과 결합해 라이프사이클을 구조적으로 취약하게 만듭니다.
 
 ---
 
-## 2. OMA 의 접근 방식 — 컨셉
+## 2. OMA 의 접근 방식 — 신뢰성 2축 + 프로세스 척추
 
-OMA 는 이 미완결을 **AgenticOps 레이어**로 닫습니다. 두 문장으로 요약합니다.
+OMA 는 방법론의 **신뢰성 2축**을 설치 가능한 형태로 구현하고, 그 위에 AIDLC Workflows(프로세스)와 AgenticOps(피드백)를 곁들입니다.
 
-1. **Operations 는 자동화 가능하다** — Langfuse/Prometheus/CloudWatch 와 AWS Hosted MCP 의 조합이 에이전트에게 운영 판단을 위임할 데이터 평면을 제공합니다.
-2. **승인 ≠ 실행** — 사람은 Tier-0 체크포인트에서 **승인 권한**을 유지하되, 진단·제안·배포·롤백·튜닝의 **실행**은 에이전트가 담당합니다.
+### ① 온톨로지 엔지니어링 — 정확성 (WHAT · WHEN)
 
-이 둘이 성립하면 라이프사이클은 **체크포인트로 연결된 에이전트 자율 실행 구간**이 됩니다. 사람이 관여하는 지점은 "누가 무엇을 실행했는가" 가 아니라 "어떤 정책 하에 승인되었는가" 로 이동합니다.
+"프롬프트 엔지니어링은 온톨로지 엔지니어링이다." OMA 는 모든 플러그인·스킬이 합의하는 **8 개 JSON-Schema 엔티티**(`schemas/ontology/`)로 도메인을 typed world model 로 고정합니다. 핸드오프는 산문이 아니라 검증된 온톨로지 문서(`Deployment`, `Spec`, `ADR` …)로 전달되고, `oma validate` 가 스키마·정책 위반을 기계적으로 잡습니다. 상세: [Ontology Engineering](./ontology-engineering.md).
 
-### 핵심 메커니즘 세 가지
+### ② 하네스 엔지니어링 — 안전성 (HOW)
 
-**① 한 커맨드, 전체 라이프사이클** — `/oma:autopilot` 한 번으로 Inception → Construction → Operations 가 순차 실행되며 명시적 승인 게이트에서만 멈춥니다.
+"에이전트가 어려운 게 아니라 하네스가 어렵다." OMA 는 에이전트 실행을 아키텍처적으로 제약합니다 — **하네스 DSL v2**(`policies`/OPA, `telemetry`), `oma compile --strict-enterprise` 게이트, MCP 버전 pin, 샌드박싱된 budget 평가. 런어웨이·셀프채점을 retry budget·cost limit·독립 검증으로 차단합니다. 상세: [Harness Engineering](./harness-engineering.md).
 
-**② 트레이스 기반 자가 개선** — Langfuse 트레이스를 `/oma:self-improving` 이 분석해 실패 패턴을 구체적인 스킬·프롬프트 수정 PR 로 제안합니다. 회귀 테스트가 통과해야 PR 이 열립니다.
+### ③ AIDLC Workflows + AgenticOps Outer Loop
 
-**③ 사람은 승인만, 에이전트가 실행** — 모든 Tier-0 워크플로우가 에이전트 주도의 진단·제안·실행을 **명시적 사람 승인** 사이에 끼워넣습니다. 에이전트가 조용히 프로덕션을 바꾸는 일은 없습니다.
+**AIDLC Workflows** 가 Inception → Construction → Operations 프로세스 척추를 제공하고, **AgenticOps** 가 운영 신호(트레이스·메트릭·인시던트)를 온톨로지로 되돌리는 **Outer Loop**(살아있는 온톨로지)를 닫습니다. 사람은 Tier-0 체크포인트에서 **승인**하고, 진단·제안·실행은 에이전트가 담당합니다 — "누가 실행했는가" 가 아니라 "어떤 정책 하에 승인되었는가" 로 거버넌스 단위가 이동합니다.
+
+> **한 커맨드, 전체 라이프사이클** — `/oma:autopilot` 한 번으로 세 단계가 순차 실행되며 명시적 승인 게이트에서만 멈춥니다. 트레이스 기반 자가 개선(`/oma:self-improving`)은 회귀 테스트가 통과해야 PR 을 엽니다.
 
 ---
 
@@ -171,7 +172,8 @@ OMA 는 재발명 대신 재사용을 원칙으로 합니다. 전체 attribution
 ## 9. 다음 단계
 
 1. [Getting Started](./getting-started.md) — 5분 Quickstart 로 첫 Tier-0 실행 경험
-2. [Philosophy](./philosophy-aidlc-meets-agenticops.md) — AIDLC × AgenticOps 의 설계 명제와 거버넌스 프레이밍
+2. [Ontology Engineering](./ontology-engineering.md) · [Harness Engineering](./harness-engineering.md) — 신뢰성 2축의 방법론 매핑
+3. [Philosophy](./philosophy-aidlc-meets-agenticops.md) — AIDLC × AgenticOps 의 설계 명제와 거버넌스 프레이밍
 3. [Claude Code Setup](./claude-code-setup.md) 또는 [Kiro Setup](./kiro-setup.md) — 실제 설치 진행
 4. [Tier-0 Workflows](./tier-0-workflows.md) — 9 개 커맨드의 상세 레퍼런스
 5. [Enterprise Readiness](./enterprise-readiness.md) — `--strict-enterprise` 게이트와 8-probe 검증
