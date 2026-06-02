@@ -325,7 +325,7 @@ export default function HomeLanding(): React.ReactElement {
             <div className={styles.previewBadge} role="note">
               <span className={styles.previewBadgeLabel}>Tech Preview</span>
               <span className={styles.previewBadgeText}>
-                v0.3.0-preview.1 — API may change before GA. See the{' '}
+                v0.4.0-preview.1 — schemas &amp; DSL may change before GA. See the{' '}
                 <Link to={useBaseUrl('/docs/support-policy')}>support policy</Link>.
               </span>
             </div>
