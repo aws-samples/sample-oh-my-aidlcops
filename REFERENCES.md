@@ -124,7 +124,10 @@ quick-access list for humans.
 | <a id="docusaurus"></a>Docusaurus | https://docusaurus.io/ | `docs/` site generator |
 | <a id="lychee"></a>lycheeverse/lychee-action | https://github.com/lycheeverse/lychee-action | Link-check CI (see `.github/workflows/link-check.yml` and `.lycheeignore`) |
 | <a id="opa-tool"></a>OPA binary | https://www.openpolicyagent.org/docs/latest/#running-opa | `scripts/oma/validate.sh` policy evaluation shell-out |
-| <a id="mermaid"></a>Mermaid | https://mermaid.js.org/ | Flow diagrams in docs (`theme-mermaid` plugin) |
+| <a id="mermaid"></a>Mermaid | https://mermaid.js.org/ | Legacy flow diagrams in docs (`theme-mermaid` plugin); retired for new diagrams per the diagram-authoring standard |
+| <a id="d2"></a>D2 | https://d2lang.com/ | REQUIRED tool for flow / sequence / state diagrams (`steering/workflows/diagram-authoring-standard.md`) |
+| <a id="diagrams"></a>mingrammer Diagrams | https://diagrams.mingrammer.com/ | REQUIRED tool for infrastructure / cloud architecture diagrams; renders AWS/K8s icon nodes from Python source |
+| <a id="excalidraw"></a>Excalidraw | https://excalidraw.com/ | REQUIRED tool for concept / explanatory sketches (mental models, 2-axis framings) |
 | <a id="hypothesis"></a>Hypothesis (property-based testing) | https://hypothesis.readthedocs.io/ | Referenced by `plugins/aidlc` agentic TDD rules; property-based invariant generator |
 | <a id="kiro"></a>Kiro | https://kiro.dev/ | Secondary agent harness alongside Claude Code; `scripts/install/kiro.sh` target |
 | <a id="gh-cli"></a>GitHub CLI (`gh`) | https://cli.github.com/ | Release create, PR open, workflow dispatch across release pipeline |

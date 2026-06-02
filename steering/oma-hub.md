@@ -35,6 +35,22 @@ inclusion: manual
 - `oma doctor` → 프로파일/온톨로지/하네스 drift 검사
 - CI `oma-foundation.yml` → `oma compile --check` 로 DSL↔네이티브 drift 차단
 
+## ABSOLUTE RULE — Diagram Authoring Standard
+
+모든 OMA 산출물의 다이어그램은 **의도별 도구**를 강제합니다. 상세 규칙은
+[`workflows/diagram-authoring-standard.md`](./workflows/diagram-authoring-standard.md)
+를 참조합니다.
+
+- **플로우 · 시퀀스 · 상태** (제어 흐름, 피드백 루프, 시퀀스) → **D2** (`*.d2`)
+- **인프라 · 클라우드 아키텍처** (AWS 토폴로지, EKS/VPC, 런타임 배선) → **mingrammer Diagrams** (`*.diagram.py`)
+- **개념 · 설명 스케치** (멘탈 모델, 2축 프레이밍, 교육용) → **Excalidraw** (`*.excalidraw` + export SVG)
+
+소스(`.d2`/`.diagram.py`/`.excalidraw`)와 렌더 이미지(`.svg`/`.png`)를 함께 커밋하고,
+문서에는 렌더 이미지를 임베드합니다. 신규 다이어그램에 Mermaid 사용 금지 —
+인라인 파서가 라벨의 괄호·특수문자에서 조용히 실패해 전체 렌더가 깨지기 때문입니다
+(philosophy 다이어그램이 `(6R)` 때문에 깨진 사례). 아직 남아 있는 Mermaid 블록은
+모든 노드·엣지 라벨을 큰따옴표로 감싸야 합니다.
+
 ---
 
 OMA는 AIDLC(AI-Driven Development Lifecycle)와 AgenticOps를 결합한 플러그인 마켓플레이스입니다.
