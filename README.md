@@ -1,7 +1,10 @@
 # sample-oh-my-aidlcops
 
-**AIDLC × AgenticOps** — a plugin marketplace that automates the full AI-Driven
-Development Lifecycle with agent-based operations on AWS.
+**Make AIDLC reliable.** OMA is a Claude Code · Kiro plugin marketplace that turns
+the [AIDLC methodology](https://devfloor9.github.io/engineering-playbook/docs/aidlc/methodology)'s
+two reliability axes — **Ontology Engineering** (correctness) and **Harness
+Engineering** (safety) — into installable plugins, with **AIDLC Workflows** as the
+process spine and **AgenticOps** closing the feedback loop back into the ontology.
 
 [한국어 README](./README.ko.md) · [Documentation](./docs/) · [Plugins](./plugins/) · [Steering](./steering/) · [Releases](https://aws-samples.github.io/sample-oh-my-aidlcops/releases) · [References](./REFERENCES.md)
 
@@ -43,14 +46,43 @@ Full details in [CHANGELOG.md](./CHANGELOG.md) and on the
 
 `oh-my-aidlcops` (OMA) is the sibling project of
 [oh-my-claudecode](https://github.com/Yeachan-Heo/oh-my-claudecode) (OMC).
-Where OMC orchestrates generic Claude Code workflows, OMA specializes in the
-**AIDLC loop**: Inception → Construction → Operations.
+Where OMC orchestrates generic Claude Code workflows, OMA specializes in making
+the **AIDLC loop** — Inception → Construction → Operations — *reliable enough to
+run with agents*.
 
-The thesis: AIDLC is complete only when operations are agent-automated. OMA
-fuses the AWS-official [AIDLC workflows](https://github.com/awslabs/aidlc-workflows)
-with an **AgenticOps** layer (self-improving feedback loops, autonomous deploys,
-continuous evaluation, incident response, cost governance) so the lifecycle
-closes itself without human execution at every step.
+### The problem: agentic AIDLC fails on reliability, not capability
+
+The [AIDLC methodology](https://devfloor9.github.io/engineering-playbook/docs/aidlc/methodology)
+identifies that AI-driven development breaks down in three recurring ways, and
+none of them are about model quality:
+
+- **Hallucination & drift** — concepts mean different things across prompts and
+  sessions, so handoffs only work because a human re-interprets them.
+- **Runaway execution** — without architectural limits an agent loop can fire
+  hundreds of retries (the methodology's fintech case: 847 retries, ~$2,200, a
+  3-hour outage) before anyone notices.
+- **Self-grading** — the agent that wrote the code also writes the tests, so its
+  own blind spots survive verification.
+
+The methodology answers these with a **reliability dual-axis**: *Ontology
+Engineering* guarantees the **correctness** of what agents produce (the WHAT/WHEN),
+and *Harness Engineering* enforces the **safety** of how they execute (the HOW).
+OMA is the installable implementation of that dual-axis on AWS.
+
+### The three pillars OMA installs
+
+| Methodology axis | Guarantees | OMA implementation | Entry point |
+|---|---|---|---|
+| **Ontology Engineering** | Correctness (WHAT · WHEN) | 8 JSON-Schema entities in `schemas/ontology/`, `oma validate`, schema-evolution rules | `/oma:inception`, `oma validate` |
+| **Harness Engineering** | Safety (HOW) | Harness DSL v2 (`policies`/OPA, `telemetry`), `oma compile --strict-enterprise`, pinned MCP, sandboxed budget eval | `oma doctor --enterprise`, `oma compile` |
+| **AgenticOps (Outer Loop)** | Living ontology | `self-improving-loop`, `continuous-eval`, `incident-response` feeding operational signal back into the ontology | `/oma:agenticops`, `/oma:self-improving` |
+
+**AIDLC Workflows** — the AWS-official
+[awslabs/aidlc-workflows](https://github.com/awslabs/aidlc-workflows) 3-phase loop —
+is the *process spine* these pillars hang on. OMA contributes only `*.opt-in.md`
+extensions to it and never forks the core. The result: AIDLC stops being "design
+and build, then hope," and becomes a lifecycle where every artifact is a validated
+ontology document and every agent action runs inside a harness.
 
 ## Who is this for?
 
