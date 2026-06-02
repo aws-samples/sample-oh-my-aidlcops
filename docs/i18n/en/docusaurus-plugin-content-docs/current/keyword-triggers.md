@@ -12,7 +12,7 @@ Keyword Trigger works as follows: the `UserPromptSubmit` hook intercepts user in
 
 ## Default Mapping Table
 
-Immediately after OMA installation, default triggers are (source: [CLAUDE.md](https://github.com/aws-samples/sample-oh-my-aidlcops/blob/main/CLAUDE.md) `<keyword_triggers>`):
+Immediately after OMA installation, default triggers are (source: each plugin's [`<plugin>.oma.yaml`](https://github.com/aws-samples/sample-oh-my-aidlcops/tree/main/plugins) DSL `triggers` block, merged into `.omao/triggers.json` by `oma compile`):
 
 | Keyword | Maps to Command | Example Input |
 |---|---|---|

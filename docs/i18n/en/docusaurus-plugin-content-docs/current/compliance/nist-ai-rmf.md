@@ -7,7 +7,7 @@ title: NIST AI RMF mapping
 
 :::tip External references
 Every upstream spec and framework OMA cites — including NIST AI RMF
-itself — is catalogued on the [References](/docs/references) page.
+itself — is catalogued on the [References](../references.md) page.
 :::
 
 OMA uses the NIST AI RMF as its primary AI-specific governance taxonomy.

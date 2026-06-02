@@ -7,7 +7,7 @@ title: SLSA provenance
 
 :::tip External references
 Every upstream spec and framework OMA cites — including SLSA v1.1
-itself — is catalogued on the [References](/docs/references) page.
+itself — is catalogued on the [References](../references.md) page.
 :::
 
 `Deployment.artifact` accepts two shapes in v0.4+:

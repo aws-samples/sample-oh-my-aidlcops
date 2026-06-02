@@ -16,7 +16,7 @@ probe chain.
 :::tip External references
 For the authoritative sources behind every probe (NIST AI RMF, OWASP
 LLM Top 10, SLSA v1.1, JSON Schema 2020-12, ADR template, etc.) see
-the [References](/docs/references) page.
+the [References](./references.md) page.
 :::
 
 Enterprise readiness in OMA is defined by an **opt-in gate**, not a

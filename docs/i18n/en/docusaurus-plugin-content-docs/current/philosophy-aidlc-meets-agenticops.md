@@ -99,7 +99,7 @@ AgenticOps does not replace DevOps, SRE, or MLOps. It shares the same observabil
 
 ## Design Principles
 
-OMA adheres to these principles in implementation choices (source: [CLAUDE.md](https://github.com/aws-samples/sample-oh-my-aidlcops/blob/main/CLAUDE.md) `<operating_principles>`):
+OMA adheres to these principles in implementation choices (source: the absolute rules in [steering/oma-hub.md](https://github.com/aws-samples/sample-oh-my-aidlcops/blob/main/steering/oma-hub.md)):
 
 1. **AIDLC 3-phase is the basic unit of work** — Institutional prevention of phase skipping (Phase gate).
 2. **Operations default to automation** — Manual intervention is not the default.

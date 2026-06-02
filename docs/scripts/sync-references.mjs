@@ -17,7 +17,22 @@ const __dirname = dirname(__filename);
 
 const repoRoot = resolve(__dirname, '..', '..');
 const sourcePath = resolve(repoRoot, 'REFERENCES.md');
-const targetPath = resolve(__dirname, '..', 'docs', 'references.md');
+// Default-locale page plus the en i18n override. Both must exist so that
+// relative `./references.md` / `../references.md` links resolve in every
+// locale (otherwise the en build reports broken links and the lychee
+// check fails on root-relative `/docs/references` workarounds).
+const targetPaths = [
+  resolve(__dirname, '..', 'docs', 'references.md'),
+  resolve(
+    __dirname,
+    '..',
+    'i18n',
+    'en',
+    'docusaurus-plugin-content-docs',
+    'current',
+    'references.md',
+  ),
+];
 
 const FRONTMATTER = `---
 sidebar_position: 57
@@ -52,14 +67,16 @@ try {
   for (const { pattern, replacement } of LINK_REWRITES) {
     rewritten = rewritten.replace(pattern, replacement);
   }
-  await mkdir(dirname(targetPath), { recursive: true });
-  await writeFile(targetPath, FRONTMATTER + rewritten, 'utf8');
-  // Echo a short line so the build log shows the sync happened.
   const lineCount = rewritten.split('\n').length;
-  console.log(
-    `[sync-references] copied ${sourcePath.replace(repoRoot + '/', '')} ` +
-      `-> ${targetPath.replace(repoRoot + '/', '')} (${lineCount} lines)`,
-  );
+  for (const targetPath of targetPaths) {
+    await mkdir(dirname(targetPath), { recursive: true });
+    await writeFile(targetPath, FRONTMATTER + rewritten, 'utf8');
+    // Echo a short line so the build log shows the sync happened.
+    console.log(
+      `[sync-references] copied ${sourcePath.replace(repoRoot + '/', '')} ` +
+        `-> ${targetPath.replace(repoRoot + '/', '')} (${lineCount} lines)`,
+    );
+  }
 } catch (err) {
   console.error(`[sync-references] failed: ${err.message}`);
   process.exit(1);

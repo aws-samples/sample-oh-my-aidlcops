@@ -102,7 +102,7 @@ AgenticOps는 DevOps·SRE·MLOps를 대체하지 않습니다. 동일한 관측 
 
 ## 설계 원칙
 
-OMA는 구현 선택에서 다음 원칙을 준수합니다(출처 [CLAUDE.md](https://github.com/aws-samples/sample-oh-my-aidlcops/blob/main/CLAUDE.md) `<operating_principles>`).
+OMA는 구현 선택에서 다음 원칙을 준수합니다(출처 [steering/oma-hub.md](https://github.com/aws-samples/sample-oh-my-aidlcops/blob/main/steering/oma-hub.md) 의 absolute rules).
 
 1. **AIDLC 3-phase는 작업의 기본 단위** — 단계 스킵을 제도적으로 방지합니다(Phase gate).
 2. **운영은 자동화 기본값** — 수동 개입이 기본이 아닙니다.

@@ -106,7 +106,7 @@ allowed-tools: "Read,Write,Edit,Grep,Glob"
 
 ### 공식 문서
 - [awslabs/aidlc-workflows — requirements-analysis](https://github.com/awslabs/aidlc-workflows/blob/main/aidlc-rules/aws-aidlc-rule-details/inception/requirements-analysis.md) — 원본 요구사항 분석 규칙
-- [AWS Prescriptive Guidance — Functional Requirements](https://docs.aws.amazon.com/prescriptive-guidance/latest/software-requirements-specification/) — 요구사항 명세 가이드
+- [Software Requirements Specification (SRS) 개요](https://en.wikipedia.org/wiki/Software_requirements_specification) — 요구사항 명세 일반 개념 (IEEE 830 / ISO·IEC·IEEE 29148 계보)
 
 ### 관련 문서 (내부)
 - `../workspace-detection/SKILL.md` — 선행 스킬

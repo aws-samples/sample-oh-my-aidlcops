@@ -39,3 +39,13 @@ aws\.amazon\.com/modernization/?
 # against the Pages deploy. Skip so the first post-release run stays
 # green; subsequent runs pick up the URL once GitHub resolves it.
 github\.com/aws-samples/sample-oh-my-aidlcops/releases/tag/v.*
+
+# www.sigstore.dev — the marketing host resets the connection from
+# GitHub Actions egress ("Connection reset by peer"). Alive from
+# browsers and reachable via docs.sigstore.dev. Skip the apex host.
+www\.sigstore\.dev/?
+
+# isms.kisa.or.kr — Korean ISMS-P authority site. Geofenced / blocks
+# GitHub Actions' US egress, so the runner cannot connect even though
+# the page is alive from KR browsers. Informational compliance link.
+isms\.kisa\.or\.kr/.*

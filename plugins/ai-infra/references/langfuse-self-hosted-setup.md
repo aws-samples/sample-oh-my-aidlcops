@@ -301,7 +301,7 @@ helm upgrade --install otel-collector open-telemetry/opentelemetry-collector \
 
 ### 기술 블로그
 - [Langfuse v3 Release Notes](https://langfuse.com/changelog) — ClickHouse 도입 배경
-- [OTel GenAI 도구 현황](https://opentelemetry.io/blog/2024/genai/)
+- [OTel GenAI 도구 현황](https://opentelemetry.io/blog/2024/otel-generative-ai/)
 
 ### 관련 문서 (내부)
 - [langfuse-observability Skill](../skills/langfuse-observability/SKILL.md)

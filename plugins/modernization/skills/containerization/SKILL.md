@@ -246,7 +246,7 @@ spec:
 
 ### 공식 문서
 - [Docker multi-stage builds](https://docs.docker.com/build/building/multi-stage/) — 공식 가이드
-- [Docker buildx](https://docs.docker.com/build/buildx/) — multi-arch 빌드
+- [Docker buildx](https://docs.docker.com/reference/cli/docker/buildx/) — multi-arch 빌드
 - [Amazon ECR User Guide](https://docs.aws.amazon.com/AmazonECR/latest/userguide/what-is-ecr.html) — ECR 공식 문서
 - [Trivy Documentation](https://aquasecurity.github.io/trivy/) — 컨테이너 취약점 스캔
 - [Distroless images](https://github.com/GoogleContainerTools/distroless) — 최소 베이스 이미지

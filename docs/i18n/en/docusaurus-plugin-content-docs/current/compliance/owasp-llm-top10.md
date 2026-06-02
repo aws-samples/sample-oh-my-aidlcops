@@ -7,7 +7,7 @@ title: OWASP LLM Top 10 mapping
 
 :::tip External references
 Every upstream spec and framework OMA cites — including OWASP LLM
-Top 10 itself — is catalogued on the [References](/docs/references)
+Top 10 itself — is catalogued on the [References](../references.md)
 page.
 :::
 
