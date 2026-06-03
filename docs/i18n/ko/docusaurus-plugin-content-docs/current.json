@@ -1,0 +1,50 @@
+{
+  "version.label": {
+    "message": "Next",
+    "description": "The label for version current"
+  },
+  "sidebar.docs.category.Reliability dual-axis": {
+    "message": "Reliability dual-axis",
+    "description": "The label for category 'Reliability dual-axis' in sidebar 'docs'"
+  },
+  "sidebar.docs.category.Installation": {
+    "message": "Installation",
+    "description": "The label for category 'Installation' in sidebar 'docs'"
+  },
+  "sidebar.docs.category.Foundation": {
+    "message": "Foundation",
+    "description": "The label for category 'Foundation' in sidebar 'docs'"
+  },
+  "sidebar.docs.category.Governance": {
+    "message": "Governance",
+    "description": "The label for category 'Governance' in sidebar 'docs'"
+  },
+  "sidebar.docs.link.Releases": {
+    "message": "Releases",
+    "description": "The label for link 'Releases' in sidebar 'docs', linking to '/releases'"
+  },
+  "sidebar.docs.doc.Introduction": {
+    "message": "Introduction",
+    "description": "The label for the doc item 'Introduction' in sidebar 'docs', linking to the doc intro"
+  },
+  "sidebar.docs.doc.Getting Started": {
+    "message": "Getting Started",
+    "description": "The label for the doc item 'Getting Started' in sidebar 'docs', linking to the doc getting-started"
+  },
+  "sidebar.docs.doc.Philosophy": {
+    "message": "Philosophy",
+    "description": "The label for the doc item 'Philosophy' in sidebar 'docs', linking to the doc philosophy-aidlc-meets-agenticops"
+  },
+  "sidebar.docs.doc.Tier-0 Workflows": {
+    "message": "Tier-0 Workflows",
+    "description": "The label for the doc item 'Tier-0 Workflows' in sidebar 'docs', linking to the doc tier-0-workflows"
+  },
+  "sidebar.docs.doc.Keyword Triggers": {
+    "message": "Keyword Triggers",
+    "description": "The label for the doc item 'Keyword Triggers' in sidebar 'docs', linking to the doc keyword-triggers"
+  },
+  "sidebar.docs.doc.Easy Button": {
+    "message": "Easy Button",
+    "description": "The label for the doc item 'Easy Button' in sidebar 'docs', linking to the doc easy-button"
+  }
+}

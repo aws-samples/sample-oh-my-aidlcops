@@ -1,0 +1,861 @@
+{
+  "page.home.title": {
+    "message": "AIDLC × AgenticOps 마켓플레이스",
+    "description": "Home page title"
+  },
+  "page.home.description": {
+    "message": "Claude Code와 Kiro를 AgenticOps 플러그인과 스킬로 확장하여 AWS AI 주도 개발 수명주기(Inception, Construction, Operations)를 자동화합니다.",
+    "description": "Home page description"
+  },
+  "landing.plugin.ai_infra.tagline": {
+    "message": "런타임을 구축합니다.",
+    "description": "Tagline for ai-infra plugin"
+  },
+  "landing.plugin.ai_infra.scope": {
+    "message": "AWS 위 AI 런타임 인프라. EKS + vLLM + Inference Gateway + Langfuse + GPU + guardrails를 제공하며, Bedrock / SageMaker 런타임 스킬은 계획 중입니다. MCP 서버는 정확한 PyPI 버전으로 pin — @latest 사용 안 함.",
+    "description": "Description of ai-infra plugin scope"
+  },
+  "landing.plugin.aidlc.tagline": {
+    "message": "스펙을 기반으로 설계하고 구축합니다.",
+    "description": "Tagline for aidlc plugin"
+  },
+  "landing.plugin.aidlc.scope": {
+    "message": "awslabs/aidlc-workflows를 위한 AIDLC Phase 1 (Inception) + Phase 2 (Construction) opt-in 확장. Inception은 워크스페이스, 요구사항, 스토리, 워크플로우 계획을 포착합니다. Construction은 그 계획을 컴포넌트, 코드, 테스트, 리스크가 발견된 품질 게이트로 전환합니다.",
+    "description": "Description of aidlc plugin scope"
+  },
+  "landing.plugin.agenticops.tagline": {
+    "message": "에이전트로 운영합니다.",
+    "description": "Tagline for agenticops plugin"
+  },
+  "landing.plugin.agenticops.scope": {
+    "message": "프로덕션 에이전틱 워크로드를 위한 자율 운영. 인시던트 대응, 자가 개선 피드백 루프, SLO 서킷 브레이커가 있는 점진적 롤아웃, simpleeval 샌드박스 기반 비용 거버넌스, 그리고 verbatim 감사 추적.",
+    "description": "Description of agenticops plugin scope"
+  },
+  "landing.plugin.modernization.tagline": {
+    "message": "레거시를 AWS로 이전합니다.",
+    "description": "Tagline for modernization plugin"
+  },
+  "landing.plugin.modernization.scope": {
+    "message": "AWS 6R 전략을 사용한 브라운필드 레거시 워크로드 모더나이제이션. Five Lenses를 통한 워크로드 평가, 6R 의사결정 매트릭스, to-be 아키텍처, 컨테이너화 강화, 롤백 트리거가 있는 프로덕션 cutover 계획.",
+    "description": "Description of modernization plugin scope"
+  },
+  "landing.workflow.autopilot.scope": {
+    "message": "전체 AIDLC 루프 (Inception → Construction → Operations).",
+    "description": "Description of autopilot workflow"
+  },
+  "landing.workflow.aidlc_loop.scope": {
+    "message": "단일 기능 Inception → Construction 1회전.",
+    "description": "Description of aidlc-loop workflow"
+  },
+  "landing.workflow.inception.scope": {
+    "message": "AIDLC Phase 1 단독 — 스펙, 스토리, 워크플로우 계획.",
+    "description": "Description of inception workflow"
+  },
+  "landing.workflow.construction.scope": {
+    "message": "AIDLC Phase 2 단독 — 설계, 코드 생성, 에이전틱 TDD.",
+    "description": "Description of construction workflow"
+  },
+  "landing.workflow.agenticops.scope": {
+    "message": "운영 모드: continuous-eval + incident-response + cost-governance.",
+    "description": "Description of agenticops workflow"
+  },
+  "landing.workflow.self_improving.scope": {
+    "message": "Langfuse 트레이스 (구성된 trace MCP 사용) → 프롬프트 / 스킬 개선 PR.",
+    "description": "Description of self-improving workflow"
+  },
+  "landing.workflow.platform_bootstrap.scope": {
+    "message": "EKS 위 5-체크포인트 Agentic AI Platform 부트스트랩.",
+    "description": "Description of platform-bootstrap workflow"
+  },
+  "landing.workflow.modernize.scope": {
+    "message": "6단계 브라운필드 모더나이제이션 (평가 → cutover).",
+    "description": "Description of modernize workflow"
+  },
+  "landing.workflow.cancel.scope": {
+    "message": "활성 Tier-0 모드 종료.",
+    "description": "Description of cancel workflow"
+  },
+  "landing.superpower.1.title": {
+    "message": "한 커맨드, 전체 라이프사이클.",
+    "description": "Title for superpower 1"
+  },
+  "landing.superpower.1.body": {
+    "message": "스펙 → 설계 → 코드 → 카나리 배포 → 자가 치유 → 비용 귀속. /oma:autopilot이 전체 루프를 주도하며 명시적 승인 체크포인트에서만 멈춥니다.",
+    "description": "Body text for superpower 1"
+  },
+  "landing.superpower.2.title": {
+    "message": "프로덕션 트레이스에서 자가 개선.",
+    "description": "Title for superpower 2"
+  },
+  "landing.superpower.2.body": {
+    "message": "자체 Langfuse + trace 읽기 MCP를 구성하면 (프로파일 observability.trace_mcp를 통해), 트레이스가 /oma:self-improving에 공급됩니다. 실패 패턴은 이를 생성한 스킬과 프롬프트에 대한 초안 PR이 되며 — 회귀 테스트는 PR이 열리기 전에 실행됩니다.",
+    "description": "Body text for superpower 2"
+  },
+  "landing.superpower.3.title": {
+    "message": "사람은 승인하고, 에이전트가 실행합니다.",
+    "description": "Title for superpower 3"
+  },
+  "landing.superpower.3.body": {
+    "message": "모든 Tier-0 워크플로우는 에이전트 기반 진단, 제안, 실행을 명시적 인간 게이트 사이에 배치합니다. 에이전트는 절대 조용히 프로덕션을 변경하지 않습니다.",
+    "description": "Body text for superpower 3"
+  },
+  "landing.capability.autopilot.title": {
+    "message": "Autopilot 배포",
+    "description": "Title for autopilot deploys capability"
+  },
+  "landing.capability.autopilot.body": {
+    "message": "autopilot-deploy는 SLO 게이트 서킷 브레이커와 함께 카나리 1% → 10% → 50% → 100%를 실행합니다. 각 단계는 승격 전에 continuous-eval을 대기하며, 회귀가 발생하면 자동 롤백됩니다.",
+    "description": "Body text for autopilot deploys capability"
+  },
+  "landing.capability.autopilot.bullet1": {
+    "message": "Argo Rollouts / Flagger",
+    "description": "First bullet for autopilot deploys"
+  },
+  "landing.capability.autopilot.bullet2": {
+    "message": "Prometheus SLO 게이트",
+    "description": "Second bullet for autopilot deploys"
+  },
+  "landing.capability.autopilot.bullet3": {
+    "message": "100%에서 인간 승인",
+    "description": "Third bullet for autopilot deploys"
+  },
+  "landing.capability.self_healing.title": {
+    "message": "자가 치유",
+    "description": "Title for self-healing capability"
+  },
+  "landing.capability.self_healing.body": {
+    "message": "incident-response는 SEV1–4를 분류하고, 매칭되는 runbook을 가져와, 진단 MCP 쿼리를 발행하며, 승인을 위한 복구 스크립트를 작성합니다. SEV1은 on-call을 호출하며, 절대 자동 실행하지 않습니다.",
+    "description": "Body text for self-healing capability"
+  },
+  "landing.capability.cost_governance.title": {
+    "message": "비용 거버넌스",
+    "description": "Title for cost governance capability"
+  },
+  "landing.capability.cost_governance.body": {
+    "message": "cost-governance는 에이전트별로 지출을 귀속시키고, 월간 한도를 위반할 배포를 거부하며, Opus → Sonnet → Haiku 다운그레이드 PR을 작성합니다. budget.yaml은 simpleeval 샌드박스에서 실행 — Python eval 없음, RCE 벡터 없음.",
+    "description": "Body text for cost governance capability"
+  },
+  "landing.capability.cli_first.title": {
+    "message": "CLI 우선. 항상.",
+    "description": "Title for CLI first capability"
+  },
+  "landing.capability.cli_first.body": {
+    "message": "모든 스킬은 Claude Code에서 슬래시 커맨드로, Kiro에서 직접 스킬 호출로 접근 가능합니다. 전체 상태는 .omao/ 아래에 있으며 하네스 간 이식 가능합니다.",
+    "description": "Body text for CLI first capability"
+  },
+  "landing.integration.claude_code.title": {
+    "message": "Claude Code 플러그인",
+    "description": "Title for Claude Code integration"
+  },
+  "landing.integration.claude_code.body": {
+    "message": "네이티브 Claude Code 마켓플레이스 항목으로 제공됩니다. 슬래시 커맨드, 키워드 트리거, AWS hosted MCP 레이어가 즉시 작동합니다.",
+    "description": "Body text for Claude Code integration"
+  },
+  "landing.integration.kiro.title": {
+    "message": "Kiro 스킬",
+    "description": "Title for Kiro integration"
+  },
+  "landing.integration.kiro.body": {
+    "message": "install/kiro.sh가 모든 스킬을 ~/.kiro/skills/에 심링크하고 pin된 MCP 서버 버전으로 kiro-agents 프로파일을 연결합니다.",
+    "description": "Body text for Kiro integration"
+  },
+  "landing.integration.shared_state.title": {
+    "message": "공유 .omao 상태",
+    "description": "Title for shared state integration"
+  },
+  "landing.integration.shared_state.body": {
+    "message": "Tier-0 모드, 프로젝트 메모리, 감사 로그는 .omao/에 저장됩니다. 두 하네스 모두 동일한 디렉터리를 읽고 쓰므로 — 컨텍스트 손실 없이 전환 가능합니다.",
+    "description": "Body text for shared state integration"
+  },
+  "landing.faq.q1.q": {
+    "message": "이 리포지토리의 \"Tech Preview\"는 무엇을 의미하나요?",
+    "description": "FAQ question 1"
+  },
+  "landing.faq.q1.a": {
+    "message": "profile.yaml v1과 8개 온톨로지 스키마는 안정적입니다. CLI 표면과 doctor 리포트 형식은 GA 이전에 변경될 수 있습니다. Breaking 변경 사항은 CHANGELOG의 명시적 \"Breaking\" 제목 아래에 기록됩니다. 전체 안정성 계약은 지원 정책을 참조하세요.",
+    "description": "FAQ answer 1"
+  },
+  "landing.faq.q2.q": {
+    "message": "Claude Code와 Kiro를 둘 다 사용해야 하나요?",
+    "description": "FAQ question 2"
+  },
+  "landing.faq.q2.a": {
+    "message": "아니요. 하나를 선택하세요. 플러그인 디렉터리, 스킬, MCP 서버 pin은 하네스 간 동일하며 설치 스크립트만 다릅니다. .omao/ 상태 디렉터리는 하네스 독립적이므로 작업 손실 없이 나중에 전환할 수 있습니다.",
+    "description": "FAQ answer 2"
+  },
+  "landing.faq.q3.q": {
+    "message": "기본 워크플로우를 실행하는 데 필요한 AWS 권한은 무엇인가요?",
+    "description": "FAQ question 3"
+  },
+  "landing.faq.q3.a": {
+    "message": "EKS MCP 서버는 기본적으로 읽기 전용으로 실행됩니다 (--allow-write 없음). /oma:platform-bootstrap는 클러스터 계정에 대해 eks:*, ec2:*, iam:CreateRole이 필요합니다. /oma:agenticops는 CloudWatch, Prometheus, Cost Explorer를 읽습니다. 자격 증명은 셸 밖으로 수집되거나 전송되지 않습니다.",
+    "description": "FAQ answer 3"
+  },
+  "landing.faq.q4.q": {
+    "message": "OMA는 awslabs/aidlc-workflows와 어떤 관계인가요?",
+    "description": "FAQ question 4"
+  },
+  "landing.faq.q4.a": {
+    "message": "OMA는 aidlc-workflows를 핵심 AIDLC 스펙으로 사용하고 *.opt-in.md 확장 파일만 기여합니다. 핵심 워크플로우는 fork하지 않습니다. scripts/install/aidlc-extensions.sh가 런타임에 clone하고 opt-in 오버레이를 심링크합니다.",
+    "description": "FAQ answer 4"
+  },
+  "landing.faq.q5.q": {
+    "message": "/oma:agenticops를 켜면 비용은 어떻게 되나요?",
+    "description": "FAQ question 5"
+  },
+  "landing.faq.q5.a": {
+    "message": "cost-governance는 에이전트별 지출을 귀속시키고 Budget.action_on_breach를 통해 월간 한도를 강제합니다. 한도에 도달하면 모델 다운그레이드 PR (Opus → Sonnet → Haiku)을 작성하고 승인될 때까지 배포를 거부합니다. 명시적 승인 체인 없이는 자율 스케일링이 발생하지 않습니다.",
+    "description": "FAQ answer 5"
+  },
+  "landing.hero.eyebrow": {
+    "message": "aws-samples · AIDLC × AgenticOps",
+    "description": "Hero eyebrow text"
+  },
+  "landing.hero.preview_badge": {
+    "message": "Tech Preview",
+    "description": "Tech preview badge label"
+  },
+  "landing.hero.preview_text": {
+    "message": "v0.4.0-preview.1 — 스키마 및 DSL은 GA 이전에 변경될 수 있습니다.",
+    "description": "Tech preview description text"
+  },
+  "landing.hero.support_policy_link": {
+    "message": "지원 정책",
+    "description": "Support policy link text"
+  },
+  "landing.hero.title_line1": {
+    "message": "AIDLC 운영 공백은",
+    "description": "Hero main title line 1"
+  },
+  "landing.hero.title_line2_before": {
+    "message": "여전히",
+    "description": "Hero title line 2 before accent"
+  },
+  "landing.hero.title_line2_accent": {
+    "message": "사람의 손입니다.",
+    "description": "Hero title line 2 accent text"
+  },
+  "landing.hero.lede": {
+    "message": "AIDLC는 설계와 구축을 자동화합니다. 운영 — 배포, 인시던트, 비용 편차, 회귀 — 은 여전히 팀의 몫입니다. OMA는 AgenticOps로 루프를 닫는 플러그인 마켓플레이스입니다: 사람은 승인하고, 에이전트가 체크포인트 사이의 모든 것을 실행합니다.",
+    "description": "Hero lead paragraph"
+  },
+  "landing.hero.cta_primary": {
+    "message": "30초 안에 설치",
+    "description": "Primary CTA button text"
+  },
+  "landing.hero.cta_secondary": {
+    "message": "GitHub에서 Star",
+    "description": "Secondary CTA button text"
+  },
+  "landing.hero.stat1_label": {
+    "message": "플러그인",
+    "description": "Stat 1 label"
+  },
+  "landing.hero.stat2_label": {
+    "message": "Tier-0 워크플로우",
+    "description": "Stat 2 label"
+  },
+  "landing.hero.stat3_label": {
+    "message": "AWS MCP 서버",
+    "description": "Stat 3 label"
+  },
+  "landing.hero.stat3_value": {
+    "message": "11개 pin",
+    "description": "Stat 3 value"
+  },
+  "landing.hero.stat4_label": {
+    "message": "온톨로지 엔티티",
+    "description": "Stat 4 label"
+  },
+  "landing.hero.stat4_value": {
+    "message": "8개 스키마",
+    "description": "Stat 4 value"
+  },
+  "landing.hero.mock_callout": {
+    "message": "OMA · Inception → Construction → Operations. 승인 게이트: 4. 사이의 에이전트 단계: ~40.",
+    "description": "Hero mock terminal callout text"
+  },
+  "landing.contrast.kicker": {
+    "message": "공백",
+    "description": "Contrast section kicker"
+  },
+  "landing.contrast.title": {
+    "message": "대부분의 AIDLC 구현은 머지 시점에서 멈춥니다.",
+    "description": "Contrast section title"
+  },
+  "landing.contrast.without_title": {
+    "message": "OMA 없이",
+    "description": "Without OMA heading"
+  },
+  "landing.contrast.without_bullet1": {
+    "message": "트레이스는 Langfuse에 쌓이지만 PR이 되지 않습니다.",
+    "description": "Without OMA bullet 1"
+  },
+  "landing.contrast.without_bullet2": {
+    "message": "인시던트 플레이북은 새벽 2시에 on-call이 읽지 않는 위키에 있습니다.",
+    "description": "Without OMA bullet 2"
+  },
+  "landing.contrast.without_bullet3": {
+    "message": "비용 이상치는 다음 달 청구서에서 드러납니다.",
+    "description": "Without OMA bullet 3"
+  },
+  "landing.contrast.without_bullet4": {
+    "message": "모든 운영 결정은 사람의 판단입니다.",
+    "description": "Without OMA bullet 4"
+  },
+  "landing.contrast.with_title": {
+    "message": "OMA와 함께",
+    "description": "With OMA heading"
+  },
+  "landing.contrast.with_bullet1": {
+    "message": "트레이스 패턴은 이를 야기한 스킬에 대한 초안 PR을 엽니다 (Langfuse trace MCP를 구성하면).",
+    "description": "With OMA bullet 1"
+  },
+  "landing.contrast.with_bullet2": {
+    "message": "SEV1 알람은 인간 승인 게이트와 함께 진단 + 완화됩니다.",
+    "description": "With OMA bullet 2"
+  },
+  "landing.contrast.with_bullet3": {
+    "message": "예산 위반은 한도에 도달하기 전에 조절하거나 다운그레이드합니다.",
+    "description": "With OMA bullet 3"
+  },
+  "landing.contrast.with_bullet4": {
+    "message": "사람은 체크포인트에서 승인합니다. 에이전트가 나머지를 처리합니다.",
+    "description": "With OMA bullet 4"
+  },
+  "landing.superpowers.kicker": {
+    "message": "무엇이 바뀌는가",
+    "description": "Superpowers section kicker"
+  },
+  "landing.superpowers.title": {
+    "message": "AIDLC가 스스로 닫히게 만드는 세 가지 메커니즘.",
+    "description": "Superpowers section title"
+  },
+  "landing.integration.kicker": {
+    "message": "드롭인",
+    "description": "Integration section kicker"
+  },
+  "landing.integration.title": {
+    "message": "이미 사용 중인 도구 안에서 플러그인으로 제공됩니다.",
+    "description": "Integration section title"
+  },
+  "landing.loop.title": {
+    "message": "닫힌 AIDLC 루프.",
+    "description": "AIDLC loop section title"
+  },
+  "landing.loop.lede_before_em": {
+    "message": "Inception과 Construction은",
+    "description": "AIDLC loop lead paragraph before emphasis"
+  },
+  "landing.loop.lede_em": {
+    "message": "무엇을",
+    "description": "AIDLC loop lead paragraph emphasis"
+  },
+  "landing.loop.lede_after_em": {
+    "message": "출시할지 정의합니다. Operations는 출시 후 살아 있게 유지하며 — 일상적 수정을 위해 사람 없이 학습을 Construction으로 피드백합니다.",
+    "description": "AIDLC loop lead paragraph after emphasis"
+  },
+  "landing.loop.step1_title": {
+    "message": "Inception",
+    "description": "Loop step 1 title"
+  },
+  "landing.loop.step1_body": {
+    "message": "워크스페이스 탐지, 적응형 요구사항, 사용자 스토리, 워크플로우 계획. 출력 산출물은 Construction이 준수해야 할 계약이 됩니다.",
+    "description": "Loop step 1 body"
+  },
+  "landing.loop.step2_title": {
+    "message": "Construction",
+    "description": "Loop step 2 title"
+  },
+  "landing.loop.step2_body": {
+    "message": "컴포넌트 설계, 인간 승인 게이트가 있는 코드 생성, 12개 범주 리스크 발견, 에이전틱 시스템을 위한 TDD, 단계 품질 게이트.",
+    "description": "Loop step 2 body"
+  },
+  "landing.loop.step3_title": {
+    "message": "Operations",
+    "description": "Loop step 3 title"
+  },
+  "landing.loop.step3_body": {
+    "message": "Autopilot 배포, 지속적 평가, 인시던트 대응, 비용 거버넌스, 그리고 학습을 Construction으로 피드백하는 자가 개선 루프.",
+    "description": "Loop step 3 body"
+  },
+  "landing.loop.footer_before_ai_infra": {
+    "message": "런타임 (",
+    "description": "AIDLC loop footer before ai-infra"
+  },
+  "landing.loop.footer_between": {
+    "message": ")과 브라운필드 진입 (",
+    "description": "AIDLC loop footer between code blocks"
+  },
+  "landing.loop.footer_after_modernization": {
+    "message": ")은 루프 내부가 아닌 옆에 위치합니다.",
+    "description": "AIDLC loop footer after modernization"
+  },
+  "landing.capabilities.kicker": {
+    "message": "AgenticOps 역량",
+    "description": "Capabilities section kicker"
+  },
+  "landing.capabilities.title": {
+    "message": "자율 시대를 위해 설계되었습니다.",
+    "description": "Capabilities section title"
+  },
+  "landing.workflows.kicker": {
+    "message": "9개 Tier-0 워크플로우",
+    "description": "Workflows section kicker"
+  },
+  "landing.workflows.title": {
+    "message": "슬래시 커맨드 하나를 호출하면 체크포인트가 있는 계획을 얻습니다.",
+    "description": "Workflows section title"
+  },
+  "landing.workflows.footer": {
+    "message": "키워드 트리거는 프롬프트에 매치가 포함되면 적절한 커맨드를 자동 제안합니다.",
+    "description": "Workflows footer text"
+  },
+  "landing.workflows.trigger_catalog_link": {
+    "message": "트리거 카탈로그",
+    "description": "Trigger catalog link text"
+  },
+  "landing.plugins.kicker": {
+    "message": "4개 플러그인",
+    "description": "Plugins section kicker"
+  },
+  "landing.plugins.title": {
+    "message": "필요한 것만 설치 — 또는 하나의 마켓플레이스 커맨드로 전체 4개.",
+    "description": "Plugins section title"
+  },
+  "landing.install.kicker": {
+    "message": "30초 설치",
+    "description": "Install section kicker"
+  },
+  "landing.install.title": {
+    "message": "터미널 세 줄로 작동하는 루프.",
+    "description": "Install section title"
+  },
+  "landing.install.step1_title": {
+    "message": "마켓플레이스 등록",
+    "description": "Install step 1 title"
+  },
+  "landing.install.step2_title": {
+    "message": "4개 플러그인 설치",
+    "description": "Install step 2 title"
+  },
+  "landing.install.step3_title": {
+    "message": "Tier-0 워크플로우 실행",
+    "description": "Install step 3 title"
+  },
+  "landing.install.hint": {
+    "message": "또는 더 안전한 진입로로 시작:",
+    "description": "Install hint text"
+  },
+  "landing.install.guide_link": {
+    "message": "getting-started 가이드",
+    "description": "Getting started guide link text"
+  },
+  "landing.security.kicker": {
+    "message": "기본 보안",
+    "description": "Security section kicker"
+  },
+  "landing.security.title": {
+    "message": "데모가 아닌 출시 준비.",
+    "description": "Security section title"
+  },
+  "landing.security.item1_title": {
+    "message": "MCP 버전 pin",
+    "description": "Security item 1 title"
+  },
+  "landing.security.item1_body": {
+    "message": "모든 .mcp.json과 에이전트 프로파일은 정확한 PyPI 버전으로 awslabs MCP 서버를 참조합니다. @latest 공급망 서프라이즈 없음.",
+    "description": "Security item 1 body"
+  },
+  "landing.security.item2_title": {
+    "message": "읽기 전용 EKS MCP",
+    "description": "Security item 2 title"
+  },
+  "landing.security.item2_body": {
+    "message": "Kiro 에이전트 프로파일은 기본적으로 --allow-write나 --allow-sensitive-data-access를 활성화하지 않습니다. 명시적으로 opt-in 하세요.",
+    "description": "Security item 2 body"
+  },
+  "landing.security.item3_title": {
+    "message": "최소 권한 IAM",
+    "description": "Security item 3 title"
+  },
+  "landing.security.item3_body": {
+    "message": "langfuse-observability는 버킷 범위 customer-managed 정책을 사용합니다. AmazonS3FullAccess는 Bad Example로 명시됩니다.",
+    "description": "Security item 3 body"
+  },
+  "landing.security.item4_title": {
+    "message": "샌드박싱된 표현식",
+    "description": "Security item 4 title"
+  },
+  "landing.security.item4_body": {
+    "message": "cost-governance는 simpleeval로 budget.yaml 규칙을 평가합니다. 사용자 편집 가능 설정에 Python eval()은 문서화된 RCE 벡터입니다.",
+    "description": "Security item 4 body"
+  },
+  "landing.security.item5_title": {
+    "message": "세션 상태는 로컬 유지",
+    "description": "Security item 5 title"
+  },
+  "landing.security.item5_body": {
+    "message": ".omao/state, .omao/plans, .omao/logs, audit-trail 출력, 프로젝트 메모리는 gitignore됩니다. Verbatim 프롬프트는 절대 머신을 떠나지 않습니다.",
+    "description": "Security item 5 body"
+  },
+  "landing.security.item6_title": {
+    "message": "안전한 JSON hook",
+    "description": "Security item 6 title"
+  },
+  "landing.security.item6_body": {
+    "message": "session-start.sh는 jq 또는 python3를 요구하며 셸 보간 JSON 출력을 거부해, 컨텍스트로의 state-file 인젝션을 방지합니다.",
+    "description": "Security item 6 body"
+  },
+  "landing.faq.kicker": {
+    "message": "FAQ",
+    "description": "FAQ section kicker"
+  },
+  "landing.faq.title": {
+    "message": "설치 전 자주 묻는 질문.",
+    "description": "FAQ section title"
+  },
+  "landing.cta.title": {
+    "message": "운영 루프를 손으로 돌리는 것을 멈추세요.",
+    "description": "Final CTA title"
+  },
+  "landing.cta.lede": {
+    "message": "한 번 설치하고, 체크포인트에서 승인하고, 에이전트가 AIDLC 루프의 나머지를 처리하게 하세요.",
+    "description": "Final CTA lead text"
+  },
+  "landing.cta.primary": {
+    "message": "getting-started 가이드 읽기",
+    "description": "Final CTA primary button"
+  },
+  "landing.cta.secondary": {
+    "message": "GitHub에서 Star",
+    "description": "Final CTA secondary button"
+  },
+  "theme.ErrorPageContent.title": {
+    "message": "페이지에 오류가 발생하였습니다.",
+    "description": "The title of the fallback page when the page crashed"
+  },
+  "theme.BackToTopButton.buttonAriaLabel": {
+    "message": "맨 위로 스크롤하기",
+    "description": "The ARIA label for the back to top button"
+  },
+  "theme.blog.archive.title": {
+    "message": "게시물 목록",
+    "description": "The page & hero title of the blog archive page"
+  },
+  "theme.blog.archive.description": {
+    "message": "게시물 목록",
+    "description": "The page & hero description of the blog archive page"
+  },
+  "theme.blog.paginator.navAriaLabel": {
+    "message": "블로그 게시물 목록 탐색",
+    "description": "The ARIA label for the blog pagination"
+  },
+  "theme.blog.paginator.newerEntries": {
+    "message": "이전 페이지",
+    "description": "The label used to navigate to the newer blog posts page (previous page)"
+  },
+  "theme.blog.paginator.olderEntries": {
+    "message": "다음 페이지",
+    "description": "The label used to navigate to the older blog posts page (next page)"
+  },
+  "theme.blog.post.paginator.navAriaLabel": {
+    "message": "블로그 게시물 탐색",
+    "description": "The ARIA label for the blog posts pagination"
+  },
+  "theme.blog.post.paginator.newerPost": {
+    "message": "이전 게시물",
+    "description": "The blog post button label to navigate to the newer/previous post"
+  },
+  "theme.blog.post.paginator.olderPost": {
+    "message": "다음 게시물",
+    "description": "The blog post button label to navigate to the older/next post"
+  },
+  "theme.tags.tagsPageLink": {
+    "message": "모든 태그 보기",
+    "description": "The label of the link targeting the tag list page"
+  },
+  "theme.colorToggle.ariaLabel.mode.system": {
+    "message": "system mode",
+    "description": "The name for the system color mode"
+  },
+  "theme.colorToggle.ariaLabel.mode.light": {
+    "message": "밝은 모드",
+    "description": "The name for the light color mode"
+  },
+  "theme.colorToggle.ariaLabel.mode.dark": {
+    "message": "어두운 모드",
+    "description": "The name for the dark color mode"
+  },
+  "theme.colorToggle.ariaLabel": {
+    "message": "어두운 모드와 밝은 모드 전환하기 (현재 {mode})",
+    "description": "The ARIA label for the color mode toggle"
+  },
+  "theme.docs.breadcrumbs.navAriaLabel": {
+    "message": "탐색 경로",
+    "description": "The ARIA label for the breadcrumbs"
+  },
+  "theme.docs.DocCard.categoryDescription.plurals": {
+    "message": "{count} 항목",
+    "description": "The default description for a category card in the generated index about how many items this category includes"
+  },
+  "theme.docs.paginator.navAriaLabel": {
+    "message": "문서 페이지",
+    "description": "The ARIA label for the docs pagination"
+  },
+  "theme.docs.paginator.previous": {
+    "message": "이전",
+    "description": "The label used to navigate to the previous doc"
+  },
+  "theme.docs.paginator.next": {
+    "message": "다음",
+    "description": "The label used to navigate to the next doc"
+  },
+  "theme.docs.versionBadge.label": {
+    "message": "버전: {versionLabel}"
+  },
+  "theme.docs.tagDocListPageTitle.nDocsTagged": {
+    "message": "{count}개 문서가",
+    "description": "Pluralized label for \"{count} docs tagged\". Use as much plural forms (separated by \"|\") as your language support (see https://www.unicode.org/cldr/cldr-aux/charts/34/supplemental/language_plural_rules.html)"
+  },
+  "theme.docs.tagDocListPageTitle": {
+    "message": "{nDocsTagged} \"{tagName}\" 태그에 분류되었습니다",
+    "description": "The title of the page for a docs tag"
+  },
+  "theme.docs.versions.unreleasedVersionLabel": {
+    "message": "{siteTitle} {versionLabel} 문서는 아직 정식 공개되지 않았습니다.",
+    "description": "The label used to tell the user that he's browsing an unreleased doc version"
+  },
+  "theme.docs.versions.unmaintainedVersionLabel": {
+    "message": "{siteTitle} {versionLabel} 문서는 더 이상 업데이트되지 않습니다.",
+    "description": "The label used to tell the user that he's browsing an unmaintained doc version"
+  },
+  "theme.docs.versions.latestVersionSuggestionLabel": {
+    "message": "최신 문서는 {latestVersionLink} ({versionLabel})을 확인하세요.",
+    "description": "The label used to tell the user to check the latest version"
+  },
+  "theme.docs.versions.latestVersionLinkLabel": {
+    "message": "최신 버전",
+    "description": "The label used for the latest version suggestion link label"
+  },
+  "theme.common.editThisPage": {
+    "message": "페이지 편집",
+    "description": "The link label to edit the current page"
+  },
+  "theme.common.headingLinkTitle": {
+    "message": "{heading}에 대한 직접 링크",
+    "description": "Title for link to heading"
+  },
+  "theme.lastUpdated.atDate": {
+    "message": " {date}에",
+    "description": "The words used to describe on which date a page has been last updated"
+  },
+  "theme.lastUpdated.byUser": {
+    "message": " {user}가",
+    "description": "The words used to describe by who the page has been last updated"
+  },
+  "theme.lastUpdated.lastUpdatedAtBy": {
+    "message": "최종 수정: {atDate}{byUser}",
+    "description": "The sentence used to display when a page has been last updated, and by who"
+  },
+  "theme.NotFound.title": {
+    "message": "페이지를 찾을 수 없습니다.",
+    "description": "The title of the 404 page"
+  },
+  "theme.navbar.mobileVersionsDropdown.label": {
+    "message": "버전",
+    "description": "The label for the navbar versions dropdown on mobile view"
+  },
+  "theme.tags.tagsListLabel": {
+    "message": "태그:",
+    "description": "The label alongside a tag list"
+  },
+  "theme.admonition.caution": {
+    "message": "주의",
+    "description": "The default label used for the Caution admonition (:::caution)"
+  },
+  "theme.admonition.danger": {
+    "message": "위험",
+    "description": "The default label used for the Danger admonition (:::danger)"
+  },
+  "theme.admonition.info": {
+    "message": "정보",
+    "description": "The default label used for the Info admonition (:::info)"
+  },
+  "theme.admonition.note": {
+    "message": "노트",
+    "description": "The default label used for the Note admonition (:::note)"
+  },
+  "theme.admonition.tip": {
+    "message": "팁",
+    "description": "The default label used for the Tip admonition (:::tip)"
+  },
+  "theme.admonition.warning": {
+    "message": "경고",
+    "description": "The default label used for the Warning admonition (:::warning)"
+  },
+  "theme.AnnouncementBar.closeButtonAriaLabel": {
+    "message": "닫기",
+    "description": "The ARIA label for close button of announcement bar"
+  },
+  "theme.blog.sidebar.navAriaLabel": {
+    "message": "최근 블로그 문서 둘러보기",
+    "description": "The ARIA label for recent posts in the blog sidebar"
+  },
+  "theme.DocSidebarItem.expandCategoryAriaLabel": {
+    "message": "사이드바 분류 '{label}' 펼치기",
+    "description": "The ARIA label to expand the sidebar category"
+  },
+  "theme.DocSidebarItem.collapseCategoryAriaLabel": {
+    "message": "사이드바 분류 '{label}' 접기",
+    "description": "The ARIA label to collapse the sidebar category"
+  },
+  "theme.IconExternalLink.ariaLabel": {
+    "message": "(opens in new tab)",
+    "description": "The ARIA label for the external link icon"
+  },
+  "theme.NotFound.p1": {
+    "message": "원하는 페이지를 찾을 수 없습니다.",
+    "description": "The first paragraph of the 404 page"
+  },
+  "theme.NotFound.p2": {
+    "message": "사이트 관리자에게 링크가 깨진 것을 알려주세요.",
+    "description": "The 2nd paragraph of the 404 page"
+  },
+  "theme.NavBar.navAriaLabel": {
+    "message": "메인",
+    "description": "The ARIA label for the main navigation"
+  },
+  "theme.TOCCollapsible.toggleButtonLabel": {
+    "message": "이 페이지에서",
+    "description": "The label used by the button on the collapsible TOC component"
+  },
+  "theme.navbar.mobileLanguageDropdown.label": {
+    "message": "언어",
+    "description": "The label for the mobile language switcher dropdown"
+  },
+  "theme.blog.post.readingTime.plurals": {
+    "message": "약 {readingTime}분",
+    "description": "Pluralized label for \"{readingTime} min read\". Use as much plural forms (separated by \"|\") as your language support (see https://www.unicode.org/cldr/cldr-aux/charts/34/supplemental/language_plural_rules.html)"
+  },
+  "theme.blog.post.readMore": {
+    "message": "자세히 보기",
+    "description": "The label used in blog post item excerpts to link to full blog posts"
+  },
+  "theme.blog.post.readMoreLabel": {
+    "message": "{title} 에 대해 더 읽어보기",
+    "description": "The ARIA label for the link to full blog posts from excerpts"
+  },
+  "theme.CodeBlock.copy": {
+    "message": "복사",
+    "description": "The copy button label on code blocks"
+  },
+  "theme.CodeBlock.copied": {
+    "message": "복사했습니다",
+    "description": "The copied button label on code blocks"
+  },
+  "theme.CodeBlock.copyButtonAriaLabel": {
+    "message": "클립보드에 코드 복사",
+    "description": "The ARIA label for copy code blocks button"
+  },
+  "theme.CodeBlock.wordWrapToggle": {
+    "message": "줄 바꿈 전환",
+    "description": "The title attribute for toggle word wrapping button of code block lines"
+  },
+  "theme.docs.breadcrumbs.home": {
+    "message": "홈",
+    "description": "The ARIA label for the home page in the breadcrumbs"
+  },
+  "theme.docs.sidebar.collapseButtonTitle": {
+    "message": "사이드바 숨기기",
+    "description": "The title attribute for collapse button of doc sidebar"
+  },
+  "theme.docs.sidebar.collapseButtonAriaLabel": {
+    "message": "사이드바 숨기기",
+    "description": "The title attribute for collapse button of doc sidebar"
+  },
+  "theme.docs.sidebar.navAriaLabel": {
+    "message": "문서 사이드바",
+    "description": "The ARIA label for the sidebar navigation"
+  },
+  "theme.docs.sidebar.closeSidebarButtonAriaLabel": {
+    "message": "사이드바 닫기",
+    "description": "The ARIA label for close button of mobile sidebar"
+  },
+  "theme.navbar.mobileSidebarSecondaryMenu.backButtonLabel": {
+    "message": "← 메인 메뉴로 돌아가기",
+    "description": "The label of the back button to return to main menu, inside the mobile navbar sidebar secondary menu (notably used to display the docs sidebar)"
+  },
+  "theme.docs.sidebar.toggleSidebarButtonAriaLabel": {
+    "message": "사이드바 펼치거나 접기",
+    "description": "The ARIA label for hamburger menu button of mobile navigation"
+  },
+  "theme.navbar.mobileDropdown.collapseButton.expandAriaLabel": {
+    "message": "Expand the dropdown",
+    "description": "The ARIA label of the button to expand the mobile dropdown navbar item"
+  },
+  "theme.navbar.mobileDropdown.collapseButton.collapseAriaLabel": {
+    "message": "Collapse the dropdown",
+    "description": "The ARIA label of the button to collapse the mobile dropdown navbar item"
+  },
+  "theme.docs.sidebar.expandButtonTitle": {
+    "message": "사이드바 열기",
+    "description": "The ARIA label and title attribute for expand button of doc sidebar"
+  },
+  "theme.docs.sidebar.expandButtonAriaLabel": {
+    "message": "사이드바 열기",
+    "description": "The ARIA label and title attribute for expand button of doc sidebar"
+  },
+  "theme.blog.post.plurals": {
+    "message": "{count}개 게시물",
+    "description": "Pluralized label for \"{count} posts\". Use as much plural forms (separated by \"|\") as your language support (see https://www.unicode.org/cldr/cldr-aux/charts/34/supplemental/language_plural_rules.html)"
+  },
+  "theme.blog.tagTitle": {
+    "message": "\"{tagName}\" 태그로 연결된 {nPosts}개의 게시물이 있습니다.",
+    "description": "The title of the page for a blog tag"
+  },
+  "theme.blog.author.pageTitle": {
+    "message": "{authorName} - {nPosts}",
+    "description": "The title of the page for a blog author"
+  },
+  "theme.blog.authorsList.pageTitle": {
+    "message": "저자",
+    "description": "The title of the authors page"
+  },
+  "theme.blog.authorsList.viewAll": {
+    "message": "모든 저자 보기",
+    "description": "The label of the link targeting the blog authors page"
+  },
+  "theme.blog.author.noPosts": {
+    "message": "작성자가 아직 게시글을 작성하지 않았습니다.",
+    "description": "The text for authors with 0 blog post"
+  },
+  "theme.contentVisibility.unlistedBanner.title": {
+    "message": "색인되지 않은 문서",
+    "description": "The unlisted content banner title"
+  },
+  "theme.contentVisibility.unlistedBanner.message": {
+    "message": "이 문서는 색인되지 않습니다. 검색 엔진이 이 문서를 색인하지 않으며, 주소를 알고 있는 사용자만 접근할 수 있습니다.",
+    "description": "The unlisted content banner message"
+  },
+  "theme.contentVisibility.draftBanner.title": {
+    "message": "작성 중인 페이지",
+    "description": "The draft content banner title"
+  },
+  "theme.contentVisibility.draftBanner.message": {
+    "message": "이 페이지는 아직 작성 중입니다. 개발 환경에서만 보이며 프로덕션 빌드에서는 제외됩니다.",
+    "description": "The draft content banner message"
+  },
+  "theme.ErrorPageContent.tryAgain": {
+    "message": "다시 시도해 보세요",
+    "description": "The label of the button to try again rendering when the React error boundary captures an error"
+  },
+  "theme.common.skipToMainContent": {
+    "message": "본문으로 건너뛰기",
+    "description": "The skip to content label used for accessibility, allowing to rapidly navigate to main content with keyboard tab/enter navigation"
+  },
+  "theme.tags.tagsPageTitle": {
+    "message": "태그",
+    "description": "The title of the tag list page"
+  }
+}

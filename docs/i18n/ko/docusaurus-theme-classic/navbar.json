@@ -1,0 +1,38 @@
+{
+  "title": {
+    "message": "OMA",
+    "description": "The title in the navbar"
+  },
+  "logo.alt": {
+    "message": "oh-my-aidlcops",
+    "description": "The alt text of navbar logo"
+  },
+  "item.label.Docs": {
+    "message": "문서",
+    "description": "Navbar item with label Docs"
+  },
+  "item.label.Workflows": {
+    "message": "워크플로우",
+    "description": "Navbar item with label Workflows"
+  },
+  "item.label.Triggers": {
+    "message": "트리거",
+    "description": "Navbar item with label Triggers"
+  },
+  "item.label.Ontology": {
+    "message": "온톨로지",
+    "description": "Navbar item with label Ontology"
+  },
+  "item.label.DSL": {
+    "message": "DSL",
+    "description": "Navbar item with label DSL"
+  },
+  "item.label.Easy Button": {
+    "message": "이지버튼",
+    "description": "Navbar item with label Easy Button"
+  },
+  "item.label.Star": {
+    "message": "Star",
+    "description": "Navbar item with label Star"
+  }
+}
