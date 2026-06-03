@@ -43,11 +43,11 @@ const config: Config = {
 
   // Internationalization — Korean default, English secondary.
   i18n: {
-    defaultLocale: 'ko',
-    locales: ['ko', 'en'],
+    defaultLocale: 'en',
+    locales: ['en', 'ko'],
     localeConfigs: {
-      ko: { label: '한국어' },
       en: { label: 'English' },
+      ko: { label: '한국어' },
     },
   },
 

@@ -17,21 +17,12 @@ const __dirname = dirname(__filename);
 
 const repoRoot = resolve(__dirname, '..', '..');
 const sourcePath = resolve(repoRoot, 'REFERENCES.md');
-// Default-locale page plus the en i18n override. Both must exist so that
-// relative `./references.md` / `../references.md` links resolve in every
-// locale (otherwise the en build reports broken links and the lychee
-// check fails on root-relative `/docs/references` workarounds).
+// English is the default locale, so the source page under docs/docs is
+// all that is needed. REFERENCES.md is an English-only catalogue, so the
+// ko locale intentionally falls back to this source rather than carrying
+// an identical English override.
 const targetPaths = [
   resolve(__dirname, '..', 'docs', 'references.md'),
-  resolve(
-    __dirname,
-    '..',
-    'i18n',
-    'en',
-    'docusaurus-plugin-content-docs',
-    'current',
-    'references.md',
-  ),
 ];
 
 const FRONTMATTER = `---
