@@ -55,7 +55,7 @@ OMA_NON_INTERACTIVE=1 \
   OMA_AIDLC_PHASE=inception \
   OMA_APPROVAL_MODE=interactive \
   OMA_BUDGET_USD=200 \
-  OMA_OBSERVABILITY=langfuse-managed \
+  OMA_OBSERVABILITY=none \
   oma setup --non-interactive --skip-doctor
 ```
 

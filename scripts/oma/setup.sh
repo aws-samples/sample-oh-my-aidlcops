@@ -134,7 +134,7 @@ ask OMA_AWS_ENV        "Environment (sandbox/staging/prod)"        "${OMA_AWS_EN
 ask OMA_AIDLC_PHASE    "AIDLC entry phase (inception/construction/operations)" "${OMA_AIDLC_PHASE:-inception}"
 ask OMA_APPROVAL_MODE  "Approval mode (interactive/ci-auto-approve-safe/strict)" "${OMA_APPROVAL_MODE:-interactive}"
 ask OMA_BUDGET_USD     "Default monthly budget (USD)"              "${OMA_BUDGET_USD:-200}"
-ask OMA_OBSERVABILITY  "Observability (langfuse-managed/langfuse-self-hosted/opentelemetry-only/none)" "${OMA_OBSERVABILITY:-langfuse-managed}"
+ask OMA_OBSERVABILITY  "Observability backend — opt-in (none/opentelemetry-only/langfuse-self-hosted/langfuse-managed)" "${OMA_OBSERVABILITY:-none}"
 
 # Derive harness primary/secondary.
 case "$OMA_HARNESS" in
