@@ -17,12 +17,23 @@ const __dirname = dirname(__filename);
 
 const repoRoot = resolve(__dirname, '..', '..');
 const sourcePath = resolve(repoRoot, 'REFERENCES.md');
-// English is the default locale, so the source page under docs/docs is
-// all that is needed. REFERENCES.md is an English-only catalogue, so the
-// ko locale intentionally falls back to this source rather than carrying
-// an identical English override.
+// English is the default locale, so the source lives under docs/docs.
+// REFERENCES.md is an English-only catalogue, but the ko locale still
+// needs a copy at the same relative path so that ko docs linking to
+// `./references.md` / `../references.md` resolve (Docusaurus resolves
+// relative .md links within the active locale's tree). The ko copy is
+// intentionally the same English content.
 const targetPaths = [
   resolve(__dirname, '..', 'docs', 'references.md'),
+  resolve(
+    __dirname,
+    '..',
+    'i18n',
+    'ko',
+    'docusaurus-plugin-content-docs',
+    'current',
+    'references.md',
+  ),
 ];
 
 const FRONTMATTER = `---
