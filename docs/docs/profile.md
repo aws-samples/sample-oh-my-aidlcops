@@ -38,7 +38,7 @@ budgets:
   block_at_pct: 100
 
 observability:
-  mode: langfuse-managed      # langfuse-managed | langfuse-self-hosted | opentelemetry-only | none
+  mode: none                  # none (default, opt-in) | opentelemetry-only | langfuse-self-hosted | langfuse-managed
   endpoint: null
   trace_mcp: null             # { server_name: "langfuse", tools: ["mcp__langfuse__*"] } — trace-reading MCP server (for self-improving/continuous-eval/cost-governance feedback loops)
 
@@ -59,7 +59,7 @@ star_confirmed: false
 - `approval.mode` — `ci-auto-approve-safe` auto-approves within single-namespace blast radius. Otherwise human-in-the-loop.
 - `approval.blast_radius_ceiling` — If exceeded, enforce human approval + secondary review.
 - `budgets.*` — Seed `.omao/ontology/budgets/default.json`, and simultaneously set budget warning threshold for `user-prompt-submit.sh`.
-- `observability.*` — If Langfuse self-hosted, `langfuse-observability` skill reuses `endpoint` field.
+- `observability.*` — **Opt-in; defaults to `none`.** The ontology + harness core needs no backend. Set `opentelemetry-only` for a vendor-neutral OTLP target, or `langfuse-self-hosted` / `langfuse-managed` to use Langfuse (the `ai-infra` `langfuse-observability` skill then reuses the `endpoint` field).
 - `observability.trace_mcp` — (optional) Registers the trace-reading MCP server that agenticops feedback-loop skills (`self-improving-loop`, `continuous-eval`, `cost-governance`) will call. `null` disables trace-based feedback. Example: `{ server_name: "langfuse", tools: ["mcp__langfuse__get_traces", "mcp__langfuse__get_sessions"] }`.
 
 ## Manual editing

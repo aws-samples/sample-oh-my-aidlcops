@@ -41,7 +41,7 @@ Tier-0 workflows are high-leverage operations that start an entire flow with a s
 | `/oma:inception` | Phase 1 only |
 | `/oma:construction` | Phase 2 only |
 | `/oma:agenticops` | Operations mode (continuous-eval + incident-response + cost-governance running in parallel) |
-| `/oma:self-improving` | Langfuse traces → skill/prompt improvement PR feedback loop |
+| `/oma:self-improving` | Traces (via your opt-in trace MCP) → skill/prompt improvement PR feedback loop |
 | `/oma:platform-bootstrap` | Agentic AI Platform 5-checkpoint bootstrap on EKS |
 | `/oma:review` | AIDLC artifact review (ADR, spec, design, PR) |
 | `/oma:cancel` | Terminate active Tier-0 mode |

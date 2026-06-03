@@ -39,7 +39,7 @@ budgets:
   block_at_pct: 100
 
 observability:
-  mode: langfuse-managed      # langfuse-managed | langfuse-self-hosted | opentelemetry-only | none
+  mode: none                  # none (기본, opt-in) | opentelemetry-only | langfuse-self-hosted | langfuse-managed
   endpoint: null
   trace_mcp: null             # { server_name: "langfuse", tools: ["mcp__langfuse__*"] } — trace 읽기 MCP 서버 (self-improving/continuous-eval/cost-governance 피드백 루프용)
 
@@ -63,8 +63,10 @@ star_confirmed: false
 - `approval.blast_radius_ceiling` — 초과 시 강제 human approval + secondary review.
 - `budgets.*` — `.omao/ontology/budgets/default.json` 을 seed 하고, 동시에
   `user-prompt-submit.sh` 의 예산 경고 임계치를 지정.
-- `observability.*` — Langfuse self-hosted 이면 `langfuse-observability` 스킬이
-  endpoint 필드를 재사용.
+- `observability.*` — **opt-in이며 기본값은 `none`.** 온톨로지 + 하네스 코어는
+  백엔드가 필요 없습니다. 벤더 중립 OTLP 타깃은 `opentelemetry-only`, Langfuse를 쓰려면
+  `langfuse-self-hosted` / `langfuse-managed` 로 설정합니다(이때 `ai-infra`의
+  `langfuse-observability` 스킬이 `endpoint` 필드를 재사용).
 - `observability.trace_mcp` — (선택) agenticops 피드백 루프 스킬(`self-improving-loop`, `continuous-eval`, `cost-governance`)이 호출할 trace 읽기 MCP 서버를 등록. `null` 이면 trace 기반 피드백 비활성화. 예: `{ server_name: "langfuse", tools: ["mcp__langfuse__get_traces", "mcp__langfuse__get_sessions"] }`.
 
 ## 수동 편집

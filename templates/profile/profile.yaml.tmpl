@@ -27,6 +27,9 @@ budgets:
   warn_at_pct: {{BUDGET_WARN_PCT}}
   block_at_pct: {{BUDGET_BLOCK_PCT}}
 
+# Observability is opt-in. Default `none` — the ontology + harness core needs
+# no backend. Opt in to `opentelemetry-only` (vendor-neutral) or Langfuse
+# (`langfuse-self-hosted` / `langfuse-managed`) only if you want trace-fed ops.
 observability:
   mode: {{OBSERVABILITY_MODE}}
   endpoint: {{OBSERVABILITY_ENDPOINT}}

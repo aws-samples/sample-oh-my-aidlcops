@@ -36,6 +36,14 @@ breaking changes to non-stable surfaces as documented in
   supplies the server. Registered the Langfuse Public API in REFERENCES.
 
 ### Changed
+- **Observability is opt-in (default `none`).** `oma setup` no longer
+  defaults to `langfuse-managed`; the ontology + harness core needs no
+  observability backend. OTel (`opentelemetry-only`) and Langfuse
+  (`langfuse-self-hosted` / `langfuse-managed`) are explicit opt-in
+  choices. Updated the setup prompt, profile template/docs (en/ko),
+  easy-button CI example, the `/oma:self-improving` workflow descriptions,
+  and marked `ai-infra`'s `langfuse-observability` skill as an optional
+  backend. No schema change (the mode enum already included `none`).
 - **Repositioning.** README (en/ko), docs intro, philosophy, and the
   marketplace description now lead with the AIDLC methodology's
   reliability dual-axis — Ontology Engineering (correctness) and

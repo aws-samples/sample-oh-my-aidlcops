@@ -131,7 +131,7 @@ once and let run, with human approval only at checkpoints.
 | `/oma:autopilot` | Full AIDLC loop autopilot (Inception → Construction → Operations) |
 | `/oma:aidlc-loop` | Single-feature AIDLC one-pass |
 | `/oma:agenticops` | Operations mode (continuous-eval + incident-response + cost-governance) |
-| `/oma:self-improving` | Feedback loop — Langfuse traces to skill/prompt improvement PR |
+| `/oma:self-improving` | Feedback loop — traces (via your opt-in trace MCP) to skill/prompt improvement PR |
 | `/oma:platform-bootstrap` | 5-checkpoint Agentic AI Platform build on EKS |
 | `/oma:modernize` | Legacy workload modernization (6R decision → cutover) |
 | `/oma:review` | AIDLC artifact review (ADR, spec, design, PR) |

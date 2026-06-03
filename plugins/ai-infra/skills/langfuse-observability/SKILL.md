@@ -7,6 +7,8 @@ model: claude-sonnet-4-6
 allowed-tools: "Read,Write,Edit,Bash,Grep,Glob,mcp__eks,mcp__aws-documentation,mcp__cloudwatch,mcp__prometheus"
 ---
 
+> **Optional.** This is one observability backend within the `ai-infra` platform plugin. OMA's core (ontology + harness DSL) needs no observability backend — the default profile mode is `none`. Use this skill only if you have opted into Langfuse (`observability.mode: langfuse-self-hosted`); `opentelemetry-only` or any OTLP-compatible store are equally valid alternatives.
+
 ## When to Use
 
 - Agent / LLM 호출에 대한 end-to-end trace, token cost, quality 점수를 한곳에서 보고 싶을 때
