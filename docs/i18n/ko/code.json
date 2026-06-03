@@ -236,7 +236,7 @@
     "description": "Hero title line 2 accent text"
   },
   "landing.hero.lede": {
-    "message": "AIDLC는 설계와 구축을 자동화합니다. 운영 — 배포, 인시던트, 비용 편차, 회귀 — 은 여전히 팀의 몫입니다. OMA는 AgenticOps로 루프를 닫는 플러그인 마켓플레이스입니다: 사람은 승인하고, 에이전트가 체크포인트 사이의 모든 것을 실행합니다.",
+    "message": "AIDLC는 설계와 구축을 자동화합니다. 운영 — 배포, 인시던트, 비용 편차, 회귀 — 은 여전히 팀의 몫입니다. OMA는 AgenticOps로 루프를 완성하는 플러그인입니다: 사람은 승인하고, 에이전트가 체크포인트 사이의 모든 것을 가드레일과 규정에 따라서 실행하고 검증합니다.",
     "description": "Hero lead paragraph"
   },
   "landing.hero.cta_primary": {
@@ -328,7 +328,7 @@
     "description": "Superpowers section kicker"
   },
   "landing.superpowers.title": {
-    "message": "AIDLC가 스스로 닫히게 만드는 세 가지 메커니즘.",
+    "message": "AIDLC가 라이프사이클을 스스로 완성하도록 하는 세 가지 메커니즘.",
     "description": "Superpowers section title"
   },
   "landing.integration.kicker": {
