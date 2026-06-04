@@ -117,7 +117,7 @@ ontology document and every agent action runs inside a harness.
 | Plugin | What it does | Example skills |
 |---|---|---|
 | **`ai-infra`** | Build & run the Agentic AI Platform on EKS | `agentic-eks-bootstrap`, `vllm-serving-setup`, `inference-gateway-routing`, `langfuse-observability`, `gpu-resource-management`, `ai-gateway-guardrails` |
-| **`agenticops`** | Operate it with agents | `self-improving-loop`, `autopilot-deploy`, `incident-response`, `continuous-eval`, `cost-governance`, `audit-trail` |
+| **`agenticops`** | Operate it with agents | `self-improving-loop`, `autopilot-deploy`, `incident-response`, `continuous-eval`, `cost-governance`, `audit-trail`, `anomaly-detection`, `root-cause-analysis`, `automated-remediation`, `slo-management`, `predictive-scaling` |
 | **`aidlc`** | AIDLC Phase 1 (Inception) + Phase 2 (Construction) extensions | `requirements-analysis`, `user-stories`, `workflow-planning`, `component-design`, `code-generation`, `test-strategy`, `risk-discovery`, `quality-gates` |
 | **`modernization`** | Legacy workload modernization to AWS (6R strategy) | `workload-assessment`, `modernization-strategy`, `to-be-architecture`, `containerization`, `cutover-planning` |
 

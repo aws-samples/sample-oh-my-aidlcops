@@ -58,6 +58,8 @@ scripts/
 | `init-omao.sh`                 | Scaffold a `.omao/` workspace inside the current project directory. |
 | `dev/validate.py`              | JSON Schema validation for marketplace, plugin, skill, and MCP manifests. |
 | `dev/validate_strict.py`       | Same, using the `jsonschema` library with stricter messages. |
+| `dev/validate-skill-syntax.py` | Extract Python code blocks from SKILL.md files and verify syntax via `ast.parse()`. |
+| `dev/validate-skill-structure.py` | Check required sections, internal cross-references, and YAML block validity in SKILL.md files. |
 | `dev/eval-skills.py`           | Static quality evaluator for every SKILL.md and plugin.json. |
 | `dev/sync-from-playbook.py`    | Regenerate `plugins/*/references/playbook-index.md` from the engineering-playbook repository. |
 | `dev/make-tarball.sh`          | Produce a release tarball under `dist/`. |
@@ -72,6 +74,9 @@ scripts/
 | `python3` 3.9+  | `oma/compile.sh`, every `dev/*.py` |
 | `pyyaml`        | profile + DSL validation (falls back gracefully when missing) |
 | `jsonschema`    | `dev/validate.py` (optional — falls back to required-key checks) |
+| `pytest`        | `tests/test_aiops_skills.py`, `tests/test_promql_validation.py` |
+| `numpy`         | `tests/test_aiops_skills.py` |
+| `promql-parser` | `tests/test_promql_validation.py` |
 
 Install on Ubuntu/Debian:
 
