@@ -5,6 +5,9 @@ argument-hint: "[incident-id or symptom description]"
 user-invocable: true
 model: claude-opus-4-7
 allowed-tools: "Read,Grep,Bash,mcp__cloudwatch,mcp__prometheus,mcp__eks"
+ontology:
+  consumes: [Incident]
+  references: [Deployment, Agent]
 ---
 
 ## When to Use

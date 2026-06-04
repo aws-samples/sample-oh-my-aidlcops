@@ -5,6 +5,8 @@ argument-hint: "[service-name or scaling-target]"
 user-invocable: true
 model: claude-sonnet-4-6
 allowed-tools: "Read,Grep,Bash,mcp__cloudwatch,mcp__prometheus,mcp__eks"
+ontology:
+  references: [Deployment, Budget]
 ---
 
 ## When to Use

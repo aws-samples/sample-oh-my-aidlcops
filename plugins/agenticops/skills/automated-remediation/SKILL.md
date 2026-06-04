@@ -5,6 +5,9 @@ argument-hint: "[incident-id or runbook-name]"
 user-invocable: true
 model: claude-sonnet-4-6
 allowed-tools: "Read,Grep,Bash,mcp__cloudwatch,mcp__prometheus,mcp__eks"
+ontology:
+  consumes: [Incident]
+  references: [Deployment]
 ---
 
 ## When to Use

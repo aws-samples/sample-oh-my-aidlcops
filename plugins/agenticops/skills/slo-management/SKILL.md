@@ -5,6 +5,8 @@ argument-hint: "[service-name or slo-name]"
 user-invocable: true
 model: claude-sonnet-4-6
 allowed-tools: "Read,Grep,Bash,mcp__cloudwatch,mcp__prometheus"
+ontology:
+  references: [Deployment, Budget, Incident]
 ---
 
 ## When to Use

@@ -5,6 +5,9 @@ argument-hint: "[target-metric or agent-name]"
 user-invocable: true
 model: claude-sonnet-4-6
 allowed-tools: "Read,Grep,Bash,mcp__cloudwatch,mcp__prometheus"
+ontology:
+  produces: [Incident]
+  references: [Deployment, Agent]
 ---
 
 ## When to Use

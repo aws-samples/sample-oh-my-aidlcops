@@ -109,6 +109,64 @@ def check_yaml_blocks(filepath: Path, content: str) -> list[str]:
 
 
 # ============================================================
+# 4. Ontology Frontmatter Validation
+# ============================================================
+
+VALID_ENTITY_REFS = {"Agent", "Skill", "Deployment", "Incident", "Budget", "Risk", "Spec", "ADR"}
+ONTOLOGY_KEYS = {"produces", "consumes", "references"}
+
+
+def extract_frontmatter(content: str) -> dict | None:
+    """Extract YAML frontmatter from SKILL.md content."""
+    match = re.match(r"^---\n(.*?)\n---", content, re.DOTALL)
+    if not match:
+        return None
+    try:
+        return yaml.safe_load(match.group(1))
+    except yaml.YAMLError:
+        return None
+
+
+def check_ontology(filepath: Path, content: str) -> list[str]:
+    """Check that ontology block is present and valid."""
+    errors = []
+    fm = extract_frontmatter(content)
+    if fm is None:
+        errors.append("  Could not parse frontmatter")
+        return errors
+
+    if "ontology" not in fm:
+        errors.append("  Missing 'ontology' block in frontmatter")
+        return errors
+
+    ontology = fm["ontology"]
+    if not isinstance(ontology, dict):
+        errors.append("  'ontology' must be a mapping")
+        return errors
+
+    # Must have at least one of produces/consumes/references
+    if not any(k in ontology for k in ONTOLOGY_KEYS):
+        errors.append("  'ontology' must contain at least one of: produces, consumes, references")
+        return errors
+
+    # Validate entity refs
+    for key in ONTOLOGY_KEYS:
+        if key in ontology:
+            values = ontology[key]
+            if not isinstance(values, list) or len(values) == 0:
+                errors.append(f"  'ontology.{key}' must be a non-empty list")
+                continue
+            for val in values:
+                if val not in VALID_ENTITY_REFS:
+                    errors.append(
+                        f"  'ontology.{key}' contains invalid entity '{val}'. "
+                        f"Valid: {sorted(VALID_ENTITY_REFS)}"
+                    )
+
+    return errors
+
+
+# ============================================================
 # Main
 # ============================================================
 
@@ -158,7 +216,7 @@ def main():
             print(f"    {e}")
     
     # --- YAML Blocks ---
-    print("\n[3/3] YAML Block Validation")
+    print("\n[3/4] YAML Block Validation")
     print("-" * 50)
     
     total_yaml_blocks = 0
@@ -176,6 +234,20 @@ def main():
                 print(f"    {e}")
         else:
             print(f"  ⏭️  {filepath.parent.name} (no YAML blocks)")
+    
+    # --- Ontology ---
+    print("\n[4/4] Ontology Frontmatter Validation")
+    print("-" * 50)
+    
+    for filepath in skill_files:
+        content = filepath.read_text()
+        errors = check_ontology(filepath, content)
+        total_errors += len(errors)
+        
+        status = "✅" if not errors else "❌"
+        print(f"  {status} {filepath.parent.name}")
+        for e in errors:
+            print(f"    {e}")
     
     # --- Summary ---
     print("\n" + "=" * 70)
