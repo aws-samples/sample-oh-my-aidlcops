@@ -34,6 +34,89 @@ breaking changes to non-stable surfaces as documented in
   agenticops feedback-loop skills. OMA ships no trace MCP and runs no
   Langfuse — it defines the `mcp__<server_name>__*` socket; the user
   supplies the server. Registered the Langfuse Public API in REFERENCES.
+- `templates/permissions/{common,sandbox,staging,prod}.yaml` — abstract
+  deny-rule templates scoped by `profile.yaml` `aws.environment`. Each
+  template declares `deny.{bash,edit,write,mcp}` patterns plus
+  `auto_approve` defaults. See `templates/permissions/README.md` for the
+  schema and the abstract → harness mapping table.
+- `scripts/lib/permissions.sh` — shared resolver. Reads
+  `templates/permissions/<env>.yaml`, follows `extends` against
+  `common.yaml`, and emits a normalized JSON document plus Claude /
+  Kiro emitters (`perms_to_claude_deny`, `perms_to_kiro_autoapprove`).
+- `install_permissions()` in `scripts/install/{claude,kiro}.sh`:
+  Claude — append-uniq merge of `permissions.deny` into
+  `~/.claude/settings.json`; existing user-authored entries preserved.
+  Kiro — patch `~/.kiro/settings/cli.json` autoApprove and rewrite each
+  OMA-owned `~/.kiro/agents/*.agent.json` from the source repo (never
+  mutates the tracked repo files), tagging the result with
+  `_meta.oma_permissions_env` so the deny set is auditable from Kiro.
+  Hand-edited agent.json copies are detected and refused.
+- New install flags `--skip-permissions` / `OMA_SKIP_PERMISSIONS=1` and
+  override `OMA_PERMISSIONS_ENV=<env>` for CI smoke runs.
+- `scripts/oma/setup.sh` exports `OMA_PROJECT_DIR` so the install
+  scripts read the project's `.omao/profile.yaml`, not their own cwd.
+- `tests/installer/test_permissions_lib.bats` and
+  `tests/installer/test_install_permissions.bats` — 26 bats cases
+  covering the resolver (extends-merge, env validation, sandbox/staging/
+  prod superset, emitter shape) and the end-to-end install path
+  (idempotency, user-entry preservation, `--skip-permissions`,
+  `OMA_PERMISSIONS_ENV` override, hand-edited agent refusal, source
+  repo cleanliness).
+- New `permissions-applied` probe in `scripts/oma/doctor.sh` (13th
+  probe). Reports pass when `~/.claude/settings.json` deny set is a
+  superset of the resolved env template AND every Kiro
+  `~/.kiro/agents/*.agent.json` carries a matching
+  `_meta.oma_permissions_env`. Skips cleanly when no profile or no
+  harness install is detected; warns and points at `oma setup` when
+  drift is detected. `bin/oma` help reflects the new count.
+- `tests/installer/test_doctor_permissions.bats` — 9 cases pinning
+  the probe through skip / pass / warn paths for both harnesses,
+  including profile env-mismatch and missing/unsupported
+  aws.environment.
+- **Project-level permission overlay**:
+  `<project>/.omao/permissions.yaml` is now read on top of the
+  `common + <env>.yaml` chain. Overlay supports
+  `deny.add.{bash,edit,write,mcp}`, `deny.remove.{...}`, and
+  `auto_approve.{...}` overrides. `scripts/lib/permissions.sh` gains
+  `perms_apply_overlay` and `perms_resolve_with_overlays`; both install
+  scripts and the doctor probe call the new resolver so the overlay is
+  reflected in `~/.claude/settings.json`, Kiro autoApprove, and the
+  doctor superset check.
+- `oma permissions [show|path]` subcommand
+  (`scripts/oma/permissions.sh`). `show` prints the resolved chain with
+  per-entry provenance (`common.yaml` / `<env>.yaml` / `overlay`) plus
+  overlay add/remove counts; `--json` emits machine-readable output.
+  `path` prints `<project>/.omao/permissions.yaml` and creates the
+  parent directory so `$EDITOR $(oma permissions path)` works
+  immediately. Registered in `bin/oma`.
+- `tests/installer/test_permissions_overlay.bats` — 9 cases covering
+  the overlay add/remove/auto_approve semantics, the
+  `oma permissions show|path|--json` interface, install reflection,
+  and the doctor warn-on-overlay-but-no-reinstall path. The lib suite
+  also gains 6 unit cases for `perms_resolve_with_overlays`.
+- `hooks/{session-start,user-prompt-submit}.sh` emit a new
+  `[MAGIC KEYWORD: OMA_PERMISSIONS_DRIFT]` line when
+  `.omao/permissions.yaml` has been edited more recently than
+  `~/.claude/settings.json` or `~/.kiro/settings/cli.json`. The
+  per-prompt hook is the load-bearing one: a yaml edit is reflected
+  on the very next prompt, not just the next session. Detection is a
+  pure mtime check shared via `perms_overlay_drift` in
+  `scripts/lib/permissions.sh`. Kill switch:
+  `OMA_DISABLE_PERMISSIONS_DRIFT=1`. 9 new bats cases across
+  `tests/hooks/test_session_start.bats` and
+  `tests/hooks/test_user_prompt_submit_drift.bats` cover newer-overlay,
+  newer-settings, kill switch, missing-harness-config, and "trigger
+  keyword still wins" paths.
+- `hooks/user-prompt-submit.sh` no longer exits early on an empty
+  triggers list — the budget warning and the new drift block need
+  to run regardless. Triggers loop is now properly conditional on
+  non-empty `TRIGGERS`.
+- `oma setup` now seeds `<project>/.omao/permissions.yaml` from
+  `templates/permissions/overlay.yaml.tmpl` on first run. The seed is
+  fully commented out so it's a no-op overlay; users uncomment the
+  rules they need. Existing overlay files are preserved verbatim on
+  re-run. Two new bats cases in `tests/profile/test_setup_non_interactive.bats`
+  pin the no-op equivalence and the preservation behaviour.
 
 ### Changed
 - **Observability is opt-in (default `none`).** `oma setup` no longer
@@ -81,12 +164,13 @@ breaking changes to non-stable surfaces as documented in
   `{hookSpecificOutput: {hookEventName, additionalContext}}` instead
   of the bare `{additionalContext}` form. Claude Code 2.x ignores
   the legacy shape silently — the user sees no effect from any hook
-  output (trigger keywords, budget warnings, ontology status block,
-  active-mode reminder, project memory). Confirmed against
-  Anthropic's 2.1.x hook reference. Affected emit sites: session-start
-  jq + python3 + python fallbacks; user-prompt-submit trigger and
-  budget branches. Existing bats assertions migrated to the new jq
-  path `.hookSpecificOutput.additionalContext`.
+  output (drift alerts, trigger keywords, budget warnings, ontology
+  status block, active-mode reminder, project memory). Confirmed
+  against Anthropic's 2.1.x hook reference. Affected emit sites:
+  session-start jq + python3 + python fallbacks; user-prompt-submit
+  trigger, budget, and permission-drift branches. Existing bats
+  assertions migrated to the new jq path
+  `.hookSpecificOutput.additionalContext`.
 - `hooks/{session-start,user-prompt-submit}.sh` now resolve every
   `.omao/...` path against `$CLAUDE_PROJECT_DIR` (with `OMA_PROJECT_DIR`
   and `$PWD` as fallbacks) instead of the bare cwd. Claude Code spawns
@@ -98,6 +182,53 @@ breaking changes to non-stable surfaces as documented in
   (`.omao/project-memory.json`), ontology status block
   (`.omao/ontology/`), and the budget warning
   (`.omao/ontology/budgets/`).
+- `scripts/install/{claude,kiro}.sh` `install_permissions`: when the
+  PyYAML fallback path runs `python3 -c "import sys, yaml; ..."` against
+  `.omao/profile.yaml` and PyYAML is missing on the inherited python3,
+  the invocation used to dump a traceback to stderr and an empty stdout,
+  silently collapsing `env=""` and skipping the entire permissions step.
+  CI test 20 (`claude.sh stamps the OMA permissions sentinel`) failed
+  downstream when this happened. The fallback now probes `import yaml`
+  first and `die`s with a clear remediation message
+  (`pip install pyyaml`, or set `OMA_PERMISSIONS_ENV` /
+  `OMA_SKIP_PERMISSIONS=1`). The bats sentinel assertions also capture
+  the install status + output so any future regression surfaces here
+  instead of as a confusing `[ -f sentinel ]` failure two lines later.
+  `.github/workflows/oma-foundation.yml` adds a `python3 -c "import
+  yaml"` smoke check before the bats step so the missing dependency is
+  named at the top of the failure log.
+- `perms_overlay_drift` now compares `.omao/permissions.yaml` against
+  OMA-owned sentinel files (`<harness_home>/.oma-permissions-applied-at`)
+  instead of the harness config (`settings.json` / `cli.json`). Both
+  Claude Code and Kiro touch their own settings files for unrelated
+  reasons (session telemetry, model cache); using their mtime caused
+  the drift hook to silently false-negative as soon as the harness
+  bumped its config timestamp. install_permissions in both install
+  scripts now stamps a sentinel after a successful merge, and a harness
+  with no sentinel is treated as "never installed" — no false-positive
+  alerts on Kiro-less workstations either. Bats coverage updated to
+  exercise the sentinel mtime semantics.
+- `hooks/{session-start,user-prompt-submit}.sh` now resolve every
+  `.omao/...` path against `$CLAUDE_PROJECT_DIR` (with `OMA_PROJECT_DIR`
+  and `$PWD` as fallbacks) instead of the bare cwd. Claude Code spawns
+  hooks from whichever directory `claude` was invoked in, so the
+  previous relative-path lookups silently skipped when the cwd
+  diverged from the project root. Drift detection, trigger matching,
+  active-mode reminder, project-memory loading, ontology status block,
+  and the budget warning are all on the new resolution.
+- `scripts/lib/permissions.sh` `merge_one`: child template's explicit
+  `auto_approve.{read_only,file_writes,bash_commands}: false` now
+  overrides a parent's `true`. The previous `(child.k // parent.k)`
+  collapsed `false` into the parent value because jq's `//` operator
+  treats `false` as a null alternative. New `pick_scalar` helper uses
+  `has(k)` so child intent is honored regardless of the literal value.
+  Regression caught by `tests/installer/test_permissions_lib.bats`.
+- `scripts/install/claude.sh` `detect_claude_version`: trailing
+  `| awk '{print $1}' || true` keeps the silent-fallback intent under
+  `set -euo pipefail`. Wrapper `claude` binaries (toolbox / asdf /
+  similar) that exit non-zero on stale state no longer abort the
+  installer. The bug pre-dates this change set but only surfaced
+  through the new `tests/installer/test_doctor_permissions.bats`.
 
 ## [0.4.0-preview.1] — 2026-05-02
 

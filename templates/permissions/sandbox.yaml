@@ -1,0 +1,27 @@
+# OMA Permission Template — sandbox
+#
+# Loosest profile. Personal AWS accounts, dev clusters, the sandbox env used
+# by ai-on-eks demo stacks. Auto-approves both file writes and bash so the
+# agent can iterate quickly. The common.yaml audit-ledger guard still applies.
+
+version: 1
+extends: ["common.yaml"]
+applies_when:
+  aws.environment: sandbox
+
+description: |
+  Sandbox profile — minimal friction. Only the audit ledger destructive
+  patterns from common.yaml are blocked. File writes and bash commands
+  auto-approve so the agent can run end-to-end without confirmation
+  prompts at every step.
+
+deny:
+  bash:  []
+  edit:  []
+  write: []
+  mcp:   []
+
+auto_approve:
+  read_only: true
+  file_writes: true
+  bash_commands: true

@@ -218,6 +218,21 @@ if [ ! -f "$OMAO_DIR/triggers.json" ] && [ -f "$REPO_ROOT/.omao/triggers.json" ]
     ok "copied triggers.json"
 fi
 
+# Seed .omao/permissions.yaml — the project-level permission overlay.
+# This file is the user-owned customization point; install_permissions()
+# layers it on top of templates/permissions/<env>.yaml.
+# Never overwrite an existing overlay (user content is preserved verbatim).
+if [ "$DRY_RUN" = 0 ]; then
+    overlay_dst="$OMAO_DIR/permissions.yaml"
+    overlay_src="$REPO_ROOT/templates/permissions/overlay.yaml.tmpl"
+    if [ -f "$overlay_dst" ]; then
+        skip "permissions overlay already present: $overlay_dst"
+    elif [ -f "$overlay_src" ]; then
+        cp "$overlay_src" "$overlay_dst"
+        ok "seeded $overlay_dst (commented start; see \`oma permissions show\`)"
+    fi
+fi
+
 # Bootstrap notepad + project-memory (reuse init-omao.sh for consistency).
 if [ "$DRY_RUN" = 0 ]; then
     PROJECT_DIR="$PROJECT_DIR" bash "$REPO_ROOT/scripts/init-omao.sh" --force --dir "$PROJECT_DIR" >/dev/null 2>&1 || true
@@ -231,6 +246,9 @@ if [ "$SKIP_INSTALL" = 1 ]; then
 elif [ "$DRY_RUN" = 1 ]; then
     ok "dry-run: would install $HARNESS_PRIMARY${HARNESS_SECONDARY:+ + $HARNESS_SECONDARY}"
 else
+    # Pass OMA_PROJECT_DIR so install_permissions can locate
+    # .omao/profile.yaml from this project, not the install script's cwd.
+    export OMA_PROJECT_DIR="$PROJECT_DIR"
     case "$HARNESS_PRIMARY" in
         claude-code) bash "$REPO_ROOT/scripts/install/claude.sh" || warn "claude install returned non-zero" ;;
         kiro)        bash "$REPO_ROOT/scripts/install/kiro.sh"   || warn "kiro install returned non-zero" ;;

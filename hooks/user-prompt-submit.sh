@@ -47,9 +47,9 @@ PROMPT_LOWER=$(echo "$PROMPT" | tr '[:upper:]' '[:lower:]')
 # Parse triggers.json
 TRIGGERS=$(jq -c '.triggers[]' "$TRIGGERS_JSON" 2>/dev/null || echo "")
 
-if [[ -z "$TRIGGERS" ]]; then
-  exit 0
-fi
+# Empty triggers list is fine — drift detection and budget warnings below
+# still need to run. We just skip the per-trigger loop in that case.
+if [[ -n "$TRIGGERS" ]]; then
 
 # Iterate through triggers
 while IFS= read -r trigger; do
@@ -123,6 +123,8 @@ Invoke this command or proceed with the user's request using the relevant Tier-0
   fi
 done <<< "$TRIGGERS"
 
+fi  # close: if [[ -n "$TRIGGERS" ]]
+
 # ----- Ontology-aware budget warning -----------------------------------------
 # If any .omao/ontology/budgets/*.json has `spend_ratio > warn_at_pct/100`
 # we prepend a warning. This requires the user or agenticops to have written
@@ -152,6 +154,43 @@ Consider running /oma:agenticops or pausing high-cost operations."
       exit 0
     fi
   done < <(find "$OMA_PROJ_DIR/.omao/ontology/budgets" -maxdepth 1 -type f -name '*.json' 2>/dev/null)
+fi
+
+# ----- Permission overlay drift detection -----------------------------------
+# Last-priority check: if no trigger matched and no budget warning fired,
+# remind the user when .omao/permissions.yaml has been edited more recently
+# than the harness config the install scripts wrote. Surfaces on every
+# prompt until the user re-runs install. Kill switch:
+# OMA_DISABLE_PERMISSIONS_DRIFT=1.
+if [[ "${OMA_DISABLE_PERMISSIONS_DRIFT:-0}" != "1" ]]; then
+  __oma_repo_root="${OMA_REPO_ROOT:-}"
+  if [[ -z "$__oma_repo_root" ]]; then
+    __oma_repo_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." 2>/dev/null && pwd)" || __oma_repo_root=""
+  fi
+  if [[ -f "$__oma_repo_root/scripts/lib/permissions.sh" ]]; then
+    # shellcheck disable=SC1091
+    . "$__oma_repo_root/scripts/lib/permissions.sh"
+    drifted=$(perms_overlay_drift "$OMA_PROJ_DIR" "$HOME" 2>/dev/null || true)
+    if [[ -n "$drifted" ]]; then
+      ADDITIONAL_CONTEXT="[MAGIC KEYWORD: OMA_PERMISSIONS_DRIFT]
+
+.omao/permissions.yaml has been edited more recently than: $drifted
+
+The new overlay is NOT yet reflected in your harness config. Run one of:
+  oma setup --skip-doctor
+  bash scripts/install/claude.sh
+  bash scripts/install/kiro.sh
+
+Use \`oma permissions show\` to preview the resolved chain before applying."
+      jq -n --arg ctx "$ADDITIONAL_CONTEXT" '{
+        hookSpecificOutput: {
+          hookEventName: "UserPromptSubmit",
+          additionalContext: $ctx
+        }
+      }'
+      exit 0
+    fi
+  fi
 fi
 
 # No match found

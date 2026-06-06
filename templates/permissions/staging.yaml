@@ -1,0 +1,42 @@
+# OMA Permission Template — staging
+#
+# Mid-strength profile. Shared dev clusters, pre-prod accounts, environments
+# that hold non-production but real data. Inherits common.yaml audit guard.
+#
+# Staging blocks only the operations whose accidental execution would either
+# (a) cost the team noticeable money on a wrong region, or (b) overwrite the
+# user's local credentials. Everything else (kubectl, helm, IAM read/write
+# inside the user's own role) stays available — staging is where the team
+# rehearses the prod path.
+
+version: 1
+extends: ["common.yaml"]
+applies_when:
+  aws.environment: staging
+
+description: |
+  Staging profile — guards cross-region Bedrock inference profiles
+  (cost surprise risk) and the user's local AWS/SSH credentials.
+  Bash auto-approve disabled so destructive ad-hoc commands at least
+  surface a confirmation. File writes auto-approve to keep manifest
+  iteration smooth.
+
+deny:
+  bash:
+    # `global.*` Bedrock inference profiles span regions. Staging should pin
+    # the region explicitly so spend stays in the expected billing bucket.
+    - "aws bedrock-runtime invoke-model*global.anthropic*"
+    - "aws bedrock-runtime invoke-model*global.amazon*"
+  edit:
+    # Local credential and key material — never edit from agent context.
+    - "/Users/**/.aws/credentials"
+    - "/Users/**/.ssh/**"
+  write:
+    - "/Users/**/.aws/credentials"
+    - "/Users/**/.ssh/**"
+  mcp: []
+
+auto_approve:
+  read_only: true
+  file_writes: true
+  bash_commands: false
