@@ -57,6 +57,16 @@ jobs:
 
       - name: Run shell tests (bats)
         run: |
+          # The installers shell out to `python3 -c "import yaml; ..."` to
+          # parse profile.yaml. setup-python puts PyYAML on the same python3
+          # the bats step inherits via $PATH, but the contract is load-bearing
+          # enough that we assert it explicitly — a missing dependency here
+          # used to surface as `claude.sh stamps the OMA permissions sentinel`
+          # (test 20) failing far downstream.
+          python3 -c "import yaml" || {
+              echo "PyYAML missing on the python3 the bats step inherits" >&2
+              exit 1
+          }
           bats tests/installer
           bats tests/profile
           bats tests/doctor

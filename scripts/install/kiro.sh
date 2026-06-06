@@ -254,6 +254,14 @@ install_permissions() {
             if command -v yq >/dev/null 2>&1; then
                 env="$(yq -r '.aws.environment // ""' "$profile")"
             elif command -v python3 >/dev/null 2>&1; then
+                # PyYAML must be importable; otherwise the python invocation
+                # writes a traceback to stderr and an empty stdout, which would
+                # silently collapse to env="" and skip the whole permissions
+                # step (CI test 20 regression). Fail loud so the installer
+                # output names the missing dependency.
+                if ! python3 -c "import yaml" >/dev/null 2>&1; then
+                    die "permissions: profile.yaml needs yq or PyYAML (pip install pyyaml); set OMA_PERMISSIONS_ENV=<env> or OMA_SKIP_PERMISSIONS=1 to bypass"
+                fi
                 env="$(python3 -c "import sys, yaml; d=yaml.safe_load(open(sys.argv[1])); print(d.get('aws',{}).get('environment',''))" "$profile")"
             fi
         fi

@@ -182,6 +182,21 @@ breaking changes to non-stable surfaces as documented in
   (`.omao/project-memory.json`), ontology status block
   (`.omao/ontology/`), and the budget warning
   (`.omao/ontology/budgets/`).
+- `scripts/install/{claude,kiro}.sh` `install_permissions`: when the
+  PyYAML fallback path runs `python3 -c "import sys, yaml; ..."` against
+  `.omao/profile.yaml` and PyYAML is missing on the inherited python3,
+  the invocation used to dump a traceback to stderr and an empty stdout,
+  silently collapsing `env=""` and skipping the entire permissions step.
+  CI test 20 (`claude.sh stamps the OMA permissions sentinel`) failed
+  downstream when this happened. The fallback now probes `import yaml`
+  first and `die`s with a clear remediation message
+  (`pip install pyyaml`, or set `OMA_PERMISSIONS_ENV` /
+  `OMA_SKIP_PERMISSIONS=1`). The bats sentinel assertions also capture
+  the install status + output so any future regression surfaces here
+  instead of as a confusing `[ -f sentinel ]` failure two lines later.
+  `.github/workflows/oma-foundation.yml` adds a `python3 -c "import
+  yaml"` smoke check before the bats step so the missing dependency is
+  named at the top of the failure log.
 - `perms_overlay_drift` now compares `.omao/permissions.yaml` against
   OMA-owned sentinel files (`<harness_home>/.oma-permissions-applied-at`)
   instead of the harness config (`settings.json` / `cli.json`). Both

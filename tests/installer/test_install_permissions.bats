@@ -80,8 +80,21 @@ YAML
 
 @test "claude.sh stamps the OMA permissions sentinel after a successful install" {
     write_profile sandbox
-    bash "$CLAUDE_INSTALL" >/dev/null 2>&1
-    [ -f "$CLAUDE_HOME/.oma-permissions-applied-at" ]
+    # Capture status + output so that a silent install_permissions early-return
+    # (e.g. PyYAML missing on the python3 the test inherits) surfaces here
+    # instead of bubbling up as a confusing `[ -f sentinel ]` failure two
+    # lines later.
+    run bash "$CLAUDE_INSTALL"
+    [ "$status" -eq 0 ] || {
+        echo "claude install exit=$status; output below:" >&2
+        echo "$output" >&2
+        return 1
+    }
+    [ -f "$CLAUDE_HOME/.oma-permissions-applied-at" ] || {
+        echo "sentinel missing — install output:" >&2
+        echo "$output" >&2
+        return 1
+    }
     # Sentinel mtime should not be older than the overlay file we'd compare it against.
     sentinel_mtime=$(stat -f %m "$CLAUDE_HOME/.oma-permissions-applied-at" 2>/dev/null || stat -c %Y "$CLAUDE_HOME/.oma-permissions-applied-at")
     [ "$sentinel_mtime" -gt 0 ]
@@ -89,7 +102,12 @@ YAML
 
 @test "kiro.sh stamps the OMA permissions sentinel after a successful install" {
     write_profile prod
-    bash "$KIRO_INSTALL" >/dev/null 2>&1
+    run bash "$KIRO_INSTALL"
+    [ "$status" -eq 0 ] || {
+        echo "kiro install exit=$status; output below:" >&2
+        echo "$output" >&2
+        return 1
+    }
     [ -f "$KIRO_HOME/.oma-permissions-applied-at" ]
 }
 
