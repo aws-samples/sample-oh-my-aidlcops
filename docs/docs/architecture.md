@@ -20,7 +20,7 @@ OMA's architecture compresses into three statements. §1, §2, and §3 of this p
    - **Claude Code** is *active*. Hooks registered in `~/.claude/settings.json` run on every session start and every user prompt; they read the cwd's `.omao/` and inject the result into the system context as `additionalContext` JSON.
    - **Kiro** is *declarative*. There are no hooks. Instead the Kiro engine reloads `~/.kiro/steering/`, `kiro.meta.yaml`, and `agents/*.json` on every invocation, and SKILL bodies explicitly Read `.omao/` when they need policy values.
 
-3. **`.omao/` is the shared surface across both harnesses.** You can switch between Claude Code and Kiro on the same project without losing work — both read and write the same `profile.yaml`, `ontology/`, `plans/`, `state/`, and `audit.jsonl` under the same conventions. There is one asymmetry caused by the absence of Kiro hooks (see §2.6).
+3. **`.omao/` is the shared surface across both harnesses.** You can switch between Claude Code and Kiro on the same project without losing work — both read and write the same `profile.yaml`, `ontology/`, `plans/`, `state/`, and `audit.jsonl` under the same conventions. One asymmetry, caused by the absence of Kiro hooks, is documented in §2.6.
 
 The safety property that holds across both harnesses is that *the session is never mutated — only context is appended*. In a project without `.omao/`, Claude Code hooks all no-op out, and Kiro simply runs without policy values, falling back to its static assets.
 
@@ -434,7 +434,8 @@ Implications:
 
 | Behavior to change | Single edit point | Follow-up command |
 | --- | --- | --- |
-| Kiro agent's MCP pins / permissions | `agents:` block in `<plugin>.oma.yaml` (runtime: kiro) | `python3 -m tools.oma_compile <file>` then re-run `bash scripts/install/kiro.sh` (refreshes symlinks) |
+| Kiro agent's MCP pins | `agents:` block in `<plugin>.oma.yaml` (runtime: kiro) | `python3 -m tools.oma_compile <file>` then re-run `bash scripts/install/kiro.sh` (refreshes symlinks) |
+| Kiro agent's `autoApprove` defaults | The compiler hardcodes `{readOnly: true, fileWrites: false, bashCommands: false}` ([compile.py:213-217](https://github.com/aws-samples/sample-oh-my-aidlcops/blob/main/tools/oma_compile/compile.py#L213-L217)); change there or hand-edit the emitted `kiro-agents/<id>.agent.json` | Re-run install if you edited the compiler |
 | New Kiro agent profile | Same place — agent id, description, tools, mcp, resources | Same — `kiro-agents/<id>.agent.json` is regenerated |
 | SKILL `trigger_keywords` | The SKILL directory's `kiro.meta.yaml` (create one if absent) | Symlink already points; restart Kiro |
 | Absolute rules / new workflow definition | `steering/oma-hub.md` or `steering/workflows/<name>.md` | Reflected in every Kiro session immediately (steering auto-load) |
@@ -460,7 +461,6 @@ Implications:
   audit.jsonl                         # schema-validated audit log
   notepad.md
   project-memory.json
-  permissions.yaml                    # optional permission overlay
 ```
 
 A single `oma setup` ([scripts/oma/setup.sh](https://github.com/aws-samples/sample-oh-my-aidlcops/blob/main/scripts/oma/setup.sh)) configures both user-global (`~/.claude/` or `~/.kiro/`) and project-local (`.omao/`) at once. For subsequent projects, `oma init` alone creates a fresh `.omao/` without re-running the wizard.
@@ -482,36 +482,6 @@ Each artifact has a clearly separated producer and consumer. To make a change, l
 | `state/sessions/<id>/checkpoint.json` | `aidlc-full-loop` workflow | Human approver · resume | (free-form) |
 | `state/gates/<phase>.json` | `aidlc.quality-gates` | Downstream skills | (free-form) |
 | `audit.jsonl` | [`tools/oma_audit/append.py`](https://github.com/aws-samples/sample-oh-my-aidlcops/blob/main/tools/oma_audit/append.py) or audit-trail skill | Auditors · `oma enterprise-status` | [`event.schema.json`](https://github.com/aws-samples/sample-oh-my-aidlcops/blob/main/schemas/audit/event.schema.json) |
-| `permissions.yaml` | User-authored overlay | `oma permissions resolve` → merged into **`~/.claude/settings.json#permissions`** (Claude only — see §3.3 for Kiro) | (see the resolution chain in `.omao/permissions.yaml`'s header comments) |
-
-### 3.3 Permission surface — Claude and Kiro behave differently
-
-Permission handling is the one place where the two harnesses diverge sharply. A side-by-side comparison:
-
-| Aspect | Claude Code | Kiro |
-| --- | --- | --- |
-| **Source (where you edit)** | `<project>/.omao/permissions.yaml` (overlay, optional) plus SOURCE `templates/permissions/{common,<env>}.yaml` (baseline) | ① `~/.kiro/settings/cli.json#autoApprove` (CLI-wide) ② `<plugin>.oma.yaml#agents[].autoApprove` → compiled into `kiro-agents/<a>.agent.json#autoApprove` (per-agent) |
-| **Resolution chain** | `common.yaml` → `<env>.yaml` → `.omao/permissions.yaml` (lowest → highest priority) | None — CLI and agent settings apply independently |
-| **Apply target (where the runtime reads)** | **`~/.claude/settings.json#permissions.{allow,deny}`** (user-global, in-place merge) | ① `~/.kiro/settings/cli.json` (user-global; **one-time copy at install, then user-edited**) ② `~/.kiro/agents/<a>.agent.json` (user-global, symlinked from SOURCE) |
-| **Reload trigger** | `oma setup` or `bash scripts/install/claude.sh` (re-run after overlay edits) | CLI: immediate (Kiro re-reads `cli.json` per invocation). Agent: edit `<plugin>.oma.yaml`, run `oma compile`, then re-run `bash scripts/install/kiro.sh` |
-| **Effect of `<project>/.omao/permissions.yaml`** | ✅ Auto-merged | ❌ **Not merged** — `kiro.sh#install_settings` only one-shot copies `cli.json` and never reads `.omao/permissions.yaml` ([kiro.sh:199-216](https://github.com/aws-samples/sample-oh-my-aidlcops/blob/main/scripts/install/kiro.sh#L199-L216)) |
-| **Permission grain** | Pattern-based `allow` / `deny` lists (e.g., `Bash(git *)`, `Edit(infra/secrets/**)`) | Boolean toggles (`readOnly` · `fileWrites` · `bashCommands`) |
-
-**Implications — the gap Kiro operators should know about**:
-
-- A deny pattern in `<project>/.omao/permissions.yaml` is enforced **only** under Claude. Open the same project under Kiro and that deny is **silently ignored**.
-- To isolate Kiro permissions per project, choose one of:
-  1. Hand-edit `~/.kiro/settings/cli.json` (global, so it leaks to other projects).
-  2. For SKILL-level scope, edit `<plugin>.oma.yaml#agents[].autoApprove` and `oma compile` (isolation at the agent level).
-  3. Force human approval per SKILL with `kiro.meta.yaml#approval_required: true` (edited inside the SKILL directory).
-- OMA's `.omao/permissions.yaml` convention exists primarily to **standardize Claude permissions**. The header comment in [`.omao/permissions.yaml`](https://github.com/aws-samples/sample-oh-my-aidlcops/blob/main/.omao/permissions.yaml) advertises *"push the change into `~/.claude/settings.json` and `~/.kiro/`"*, but the install scripts only implement the former today (no Kiro-side `permissions` schema yet).
-
-Summary: **You should not create permission files under `<project>/.claude/` or `<project>/.kiro/`.** OMA's permission edit points are exactly three:
-- Claude permissions → `<project>/.omao/permissions.yaml`
-- Kiro CLI permissions → `~/.kiro/settings/cli.json`
-- Kiro per-agent permissions → `<plugin>.oma.yaml#agents[].autoApprove`
-
-(`<project>/.claude/settings.local.json` is a separate file Claude Code itself auto-generates as the user clicks "allow this command" in the IDE; OMA does not manage it.)
 
 ---
 
