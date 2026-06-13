@@ -1,28 +1,30 @@
 ---
 title: Architecture
-description: OMA 가 PC 에 설치되는 구조와 Claude Code · Kiro 두 하네스에서 세션이 시작될 때 플러그인 · hook · `.omao/` 가 어떻게 맞물려 동작하는지를 한 페이지로 정리한 엔지니어 레퍼런스. 어느 파일을 수정해야 어떤 동작이 바뀌는지까지 매핑한다.
+description: Engineer reference that maps how OMA installs onto the user's machine and how plugins, hooks, and `.omao/` interlock when a Claude Code or Kiro session starts. Includes a single-edit-point map so you can locate which file to change for a given behavior.
 sidebar_position: 4
 ---
 
-# Architecture — OMA 의 두 층 모델
+# Architecture — OMA's Two-Layer Model
 
-이 문서는 **`oh-my-aidlcops` 가 사용자 PC 에 설치되는 구조** 와 **Claude Code · Kiro 세션이 시작될 때 무엇이 일어나는지** 를 한 화면에 정리한다. "어디를 고쳐야 어느 동작이 바뀌나" 를 즉시 찾을 수 있는 게 목표다.
+This page consolidates **how `oh-my-aidlcops` lays itself out on the user's machine** and **what happens when a Claude Code or Kiro session starts**. The goal is that an engineer can answer "which file do I edit to change behavior X" in one read.
 
-## 핵심 모델 — 세 가지 사실
+Diagram labels are English, body prose is English, and every mermaid node and edge label is double-quoted.
 
-OMA 아키텍처는 다음 세 문장으로 압축된다. 본 문서의 §1 · §2 · §3 가 각 문장 하나에 대응한다.
+## Core model — three facts
 
-1. **자산은 두 층으로 나뉜다.** OMA repo (`~/.oma/` 또는 git checkout) 의 자산은 설치 시 한 번 user-global 디렉터리(`~/.claude/` 또는 `~/.kiro/`) 로 symlink · merge 된다. 사용자가 작업하는 프로젝트마다 별도로 `<project>/.omao/` 가 만들어지고 *그 프로젝트의 정책과 상태만* 들어간다. 즉 **능력(capability) 은 user-global, 정책(policy) 은 project-local**.
+OMA's architecture compresses into three statements. §1, §2, and §3 of this page each correspond to one statement.
 
-2. **두 하네스는 정책을 가져오는 방식이 다르다.**
-   - **Claude Code** 는 능동적(active). `~/.claude/settings.json` 에 등록된 hook 이 매 세션·매 프롬프트마다 cwd 의 `.omao/` 를 읽어 `additionalContext` JSON 으로 시스템 컨텍스트에 주입한다.
-   - **Kiro** 는 선언적(declarative). hook 이 없는 대신 엔진이 매 invocation 마다 `~/.kiro/steering/` · `kiro.meta.yaml` · `agents/*.json` 을 재로드하고, SKILL 본문이 필요한 시점에 `.omao/` 를 명시적으로 Read 한다.
+1. **Assets are split into two layers.** Assets in the OMA repo (`~/.oma/` or a git checkout) are symlinked or merged once into a user-global directory (`~/.claude/` or `~/.kiro/`) at install time. Each project the user works in gets its own `<project>/.omao/` containing *only that project's policy and state*. In short, **capability is user-global; policy is project-local**.
 
-3. **`.omao/` 는 두 하네스의 공통 표면이다.** 한 프로젝트에서 Claude Code 와 Kiro 를 번갈아 써도 작업이 끊기지 않는다 — 둘 다 같은 `profile.yaml` · `ontology/` · `plans/` · `state/` · `audit.jsonl` 을 같은 컨벤션으로 읽고 쓰기 때문이다. 단, hook 부재로 인한 비대칭이 존재한다 (§2.6 참조).
+2. **The two harnesses pull policy in different ways.**
+   - **Claude Code** is *active*. Hooks registered in `~/.claude/settings.json` run on every session start and every user prompt; they read the cwd's `.omao/` and inject the result into the system context as `additionalContext` JSON.
+   - **Kiro** is *declarative*. There are no hooks. Instead the Kiro engine reloads `~/.kiro/steering/`, `kiro.meta.yaml`, and `agents/*.json` on every invocation, and SKILL bodies explicitly Read `.omao/` when they need policy values.
 
-세션을 변경하지 않고 컨텍스트만 누적한다는 점이 양쪽 모두의 안전 장치다. `.omao/` 가 없는 프로젝트에서는 Claude Code hook 이 모두 no-op 으로 종료되고 Kiro 도 정책 값 없이 정적 자산만으로 동작한다.
+3. **`.omao/` is the shared surface across both harnesses.** You can switch between Claude Code and Kiro on the same project without losing work — both read and write the same `profile.yaml`, `ontology/`, `plans/`, `state/`, and `audit.jsonl` under the same conventions. There is one asymmetry caused by the absence of Kiro hooks (see §2.6).
 
-## 본 문서가 다루는 것 — 개요 그래프
+The safety property that holds across both harnesses is that *the session is never mutated — only context is appended*. In a project without `.omao/`, Claude Code hooks all no-op out, and Kiro simply runs without policy values, falling back to its static assets.
+
+## What this document covers — overview diagram
 
 ```mermaid
 flowchart TB
@@ -50,28 +52,28 @@ flowchart TB
     OMAO -- "policy · state · ontology" --> AGENT
 ```
 
-이 다이어그램이 본 문서의 뼈대다. 각 화살표가 어떻게 동작하는지를 두 하네스로 나누어 §1 (Claude Code) 과 §2 (Kiro) 에서 상세화하고, 공통 부분을 §3 에서 정리한다.
+This diagram is the spine of the document. Each arrow is detailed in the per-harness sections — §1 (Claude Code) and §2 (Kiro) — and the shared piece is summarized in §3.
 
-| 층 | 역할 | 변경 빈도 | 누가 만드나 |
+| Layer | Role | Change frequency | Created by |
 | --- | --- | --- | --- |
-| **`~/.oma/` 또는 `~/Dev/sample-oh-my-aidlcops/`** | OMA 코드 트리(플러그인 · 스킬 · hook 스크립트 · 컴파일러) | OMA 릴리스 시 | `install.sh` 또는 `git clone` |
-| **`~/.claude/`** | Claude Code 가 읽는 user-global 설정 | OMA 설치 시 1 회 | [`scripts/install/claude.sh`](https://github.com/aws-samples/sample-oh-my-aidlcops/blob/main/scripts/install/claude.sh) 또는 `/plugin marketplace add` |
-| **`~/.kiro/`** | Kiro 가 읽는 user-global 자산 | OMA 설치 시 1 회 | [`scripts/install/kiro.sh`](https://github.com/aws-samples/sample-oh-my-aidlcops/blob/main/scripts/install/kiro.sh) |
-| **`<project>/.omao/`** | 그 프로젝트의 정책 · 상태 | 매 작업 | [`oma setup`](https://github.com/aws-samples/sample-oh-my-aidlcops/blob/main/scripts/oma/setup.sh) · [`oma init`](https://github.com/aws-samples/sample-oh-my-aidlcops/blob/main/scripts/oma/init.sh) · 각 skill |
+| **`~/.oma/` or `~/Dev/sample-oh-my-aidlcops/`** | OMA source tree (plugins, skills, hook scripts, compiler) | At each OMA release | `install.sh` or `git clone` |
+| **`~/.claude/`** | User-global config consumed by Claude Code | Once per OMA install | [`scripts/install/claude.sh`](https://github.com/aws-samples/sample-oh-my-aidlcops/blob/main/scripts/install/claude.sh) or `/plugin marketplace add` |
+| **`~/.kiro/`** | User-global assets consumed by Kiro | Once per OMA install | [`scripts/install/kiro.sh`](https://github.com/aws-samples/sample-oh-my-aidlcops/blob/main/scripts/install/kiro.sh) |
+| **`<project>/.omao/`** | That project's policy and state | Continuously, per task | [`oma setup`](https://github.com/aws-samples/sample-oh-my-aidlcops/blob/main/scripts/oma/setup.sh), [`oma init`](https://github.com/aws-samples/sample-oh-my-aidlcops/blob/main/scripts/oma/init.sh), and individual skills |
 
-본 문서의 흐름:
+Document flow:
 
-1. **§1 Claude Code 하네스** — settings.json 에 박힌 hook 이 `.omao/` 를 어떻게 매 호출마다 컨텍스트로 변환하는지.
-2. **§2 Kiro 하네스** — hook 없이 steering · sidecar · agent profile 이 어떻게 정책 *규칙* 을 매 invocation 마다 다시 가져오는지.
-3. **§3 공통 — `<project>/.omao/`** — 두 하네스가 공유하는 정책 표면. producer / consumer 매핑과 수정 지점.
+1. **§1 Claude Code harness** — how hooks pinned in `settings.json` turn `.omao/` into context on every call.
+2. **§2 Kiro harness** — how steering, sidecars, and agent profiles re-pull policy *rules* every invocation without hooks.
+3. **§3 Shared — `<project>/.omao/`** — the policy surface both harnesses share. Producer/consumer mapping and edit points.
 
 ---
 
-## 1. Claude Code 하네스
+## 1. Claude Code harness
 
-Claude Code 의 핵심은 **hook 스크립트가 stdout 으로 `additionalContext` JSON 을 emit 해서 시스템 프롬프트에 누적시키는 능동적(active) 모델** 이다. 정적 자산(plugins · commands · MCP) 은 `~/.claude/settings.json` 으로 노출되고, 동적 정책(`.omao/`) 은 hook 이 매 세션 · 매 프롬프트마다 직접 읽는다.
+The Claude Code harness centers on an **active model**: hook scripts emit `additionalContext` JSON on stdout, and Claude Code appends it to the system prompt. Static assets (plugins, commands, MCP) are exposed via `~/.claude/settings.json`. Dynamic policy (`.omao/`) is read by the hooks on every session and every prompt.
 
-### 1.1 자산이 무엇을 바라보나
+### 1.1 What each asset references
 
 ```mermaid
 flowchart LR
@@ -115,20 +117,20 @@ flowchart LR
     AGENT -- "writes plans · audit" --> PLAN
 ```
 
-다이어그램의 각 화살표가 의미하는 코드 위치를 §1.2~§1.6 에서 상세화한다.
+§1.2 through §1.6 detail what every arrow above corresponds to in code.
 
-### 1.2 Install — `~/.claude/` 가 어떻게 만들어지나
+### 1.2 Install — how `~/.claude/` gets populated
 
-[`scripts/install/claude.sh`](https://github.com/aws-samples/sample-oh-my-aidlcops/blob/main/scripts/install/claude.sh) 가 4 단계로 user-global 자산을 박는다. native marketplace 경로 (`/plugin marketplace add ...`) 도 같은 결과를 만든다 — `~/.claude/plugins/cache/` 에 사본이 생기고 `~/.claude/installed_plugins.json` 에 기록된다는 점만 다르다.
+[`scripts/install/claude.sh`](https://github.com/aws-samples/sample-oh-my-aidlcops/blob/main/scripts/install/claude.sh) seats the user-global assets in four steps. The native marketplace path (`/plugin marketplace add ...`) yields the same result — it just additionally caches a copy under `~/.claude/plugins/cache/` and records it in `~/.claude/installed_plugins.json`.
 
-| Step | 함수 | 결과 | 다이어그램 노드 |
+| Step | Function | Result | Diagram node |
 | --- | --- | --- | --- |
-| 1 | `install_plugins` ([claude.sh:108](https://github.com/aws-samples/sample-oh-my-aidlcops/blob/main/scripts/install/claude.sh#L108)) | `~/.claude/plugins/<name>/` 4 개 symlink → SOURCE `plugins/<name>/` | `PLUG` |
+| 1 | `install_plugins` ([claude.sh:108](https://github.com/aws-samples/sample-oh-my-aidlcops/blob/main/scripts/install/claude.sh#L108)) | 4 symlinks under `~/.claude/plugins/<name>/` → SOURCE `plugins/<name>/` | `PLUG` |
 | 2 | `install_commands` ([claude.sh:130](https://github.com/aws-samples/sample-oh-my-aidlcops/blob/main/scripts/install/claude.sh#L130)) | `~/.claude/commands/oma/` symlink → SOURCE `steering/commands/oma/` | `CMD` |
-| 3 | `install_mcp_servers` ([claude.sh:143](https://github.com/aws-samples/sample-oh-my-aidlcops/blob/main/scripts/install/claude.sh#L143)) | 각 플러그인 `.mcp.json` 의 `mcpServers` 를 `~/.claude/settings.json` 에 jq merge (기존 키 보존) | `SET#mcpServers` |
-| 4 | `install_hooks` ([claude.sh:169](https://github.com/aws-samples/sample-oh-my-aidlcops/blob/main/scripts/install/claude.sh#L169)) | `~/.claude/settings.json` 의 `hooks.SessionStart` · `hooks.UserPromptSubmit` 에 hook 스크립트 경로 등록 | `SET#hooks` |
+| 3 | `install_mcp_servers` ([claude.sh:143](https://github.com/aws-samples/sample-oh-my-aidlcops/blob/main/scripts/install/claude.sh#L143)) | jq-merge each plugin's `.mcp.json` `mcpServers` into `~/.claude/settings.json` (existing keys preserved) | `SET#mcpServers` |
+| 4 | `install_hooks` ([claude.sh:169](https://github.com/aws-samples/sample-oh-my-aidlcops/blob/main/scripts/install/claude.sh#L169)) | Register hook script paths under `~/.claude/settings.json#hooks.SessionStart` and `hooks.UserPromptSubmit` | `SET#hooks` |
 
-설치 결과:
+Resulting layout:
 
 ```text
 ~/.claude/
@@ -142,9 +144,9 @@ flowchart LR
     }
 ```
 
-### 1.3 SessionStart hook — 세션 시작 시 컨텍스트 주입
+### 1.3 SessionStart hook — context injection at session start
 
-`SET → SS → ST · ONT → AGENT` 화살표의 상세.
+Detail of the `SET → SS → ST · ONT → AGENT` arrows.
 
 ```mermaid
 sequenceDiagram
@@ -168,23 +170,23 @@ sequenceDiagram
     Claude-->>User: "ready"
 ```
 
-매 세션 시작 시 emit 되는 컨텍스트 블록.
+Context blocks emitted at every session start:
 
-| 블록 | 출처 | 코드 위치 |
+| Block | Source | Code location |
 | --- | --- | --- |
 | `[OMA Session Context] Active Tier-0 Mode: ...` | `cwd/.omao/state/active-mode` | [session-start.sh:25](https://github.com/aws-samples/sample-oh-my-aidlcops/blob/main/hooks/session-start.sh#L25) |
 | `Project Memory: { ... }` | `cwd/.omao/project-memory.json` | [session-start.sh:39](https://github.com/aws-samples/sample-oh-my-aidlcops/blob/main/hooks/session-start.sh#L39) |
-| `[OMA Ontology]` 한 줄씩 (Budget · Incident · Deployment) | `cwd/.omao/ontology/<type>/*.json` | [session-start.sh:53-87](https://github.com/aws-samples/sample-oh-my-aidlcops/blob/main/hooks/session-start.sh#L53-L87) |
-| `Available OMA Tier-0 Commands: ...` (정적 카탈로그) | hardcoded | [session-start.sh:92](https://github.com/aws-samples/sample-oh-my-aidlcops/blob/main/hooks/session-start.sh#L92) |
+| `[OMA Ontology]` (one line per Budget · Incident · Deployment) | `cwd/.omao/ontology/<type>/*.json` | [session-start.sh:53-87](https://github.com/aws-samples/sample-oh-my-aidlcops/blob/main/hooks/session-start.sh#L53-L87) |
+| `Available OMA Tier-0 Commands: ...` (static catalog) | hardcoded | [session-start.sh:92](https://github.com/aws-samples/sample-oh-my-aidlcops/blob/main/hooks/session-start.sh#L92) |
 
-안전 장치:
-- **cwd 가 아닌 `CLAUDE_PROJECT_DIR` 우선** — Claude 가 다른 cwd 로 hook 을 띄워도 올바른 `.omao/` 를 읽는다 ([session-start.sh:20](https://github.com/aws-samples/sample-oh-my-aidlcops/blob/main/hooks/session-start.sh#L20)).
-- **JSON emit 은 `jq` / `python3` / `python` 셋 중 하나** — 셋 다 없으면 `exit 1`. 문자열 보간으로 JSON 을 만들지 않으므로 ontology 파일이 따옴표·백슬래시·줄바꿈을 포함해도 안전 ([session-start.sh:118-150](https://github.com/aws-samples/sample-oh-my-aidlcops/blob/main/hooks/session-start.sh#L118-L150)).
-- **Kill switch** — `OMA_DISABLE_TRIGGERS=1` 또는 `OMA_DISABLE_ONTOLOGY=1` 환경변수 ([session-start.sh:12,53](https://github.com/aws-samples/sample-oh-my-aidlcops/blob/main/hooks/session-start.sh#L12)).
+Safety guarantees:
+- **Honors `CLAUDE_PROJECT_DIR` over cwd** — the hook reads the right `.omao/` even when Claude Code spawns it from a different working directory ([session-start.sh:20](https://github.com/aws-samples/sample-oh-my-aidlcops/blob/main/hooks/session-start.sh#L20)).
+- **JSON is emitted via `jq`, `python3`, or `python` (in that order)** — if none are present the hook exits 1. The hook never builds JSON via shell interpolation, so ontology files containing quotes, backslashes, or newlines remain safe ([session-start.sh:118-150](https://github.com/aws-samples/sample-oh-my-aidlcops/blob/main/hooks/session-start.sh#L118-L150)).
+- **Kill switches** — `OMA_DISABLE_TRIGGERS=1` or `OMA_DISABLE_ONTOLOGY=1` env vars ([session-start.sh:12,53](https://github.com/aws-samples/sample-oh-my-aidlcops/blob/main/hooks/session-start.sh#L12)).
 
-### 1.4 UserPromptSubmit hook — 매 프롬프트마다 키워드·예산 검사
+### 1.4 UserPromptSubmit hook — keyword and budget checks per prompt
 
-`SET → UPS → TRIG · ONT → AGENT` 화살표의 상세.
+Detail of the `SET → UPS → TRIG · ONT → AGENT` arrows.
 
 ```mermaid
 sequenceDiagram
@@ -212,20 +214,20 @@ sequenceDiagram
     Claude->>User: "agent response"
 ```
 
-| 출력 | 트리거 조건 | 코드 위치 |
+| Output | Trigger condition | Code location |
 | --- | --- | --- |
-| `[MAGIC KEYWORD: OMA_TRIGGER]` | `.omao/triggers.json` 의 keyword 가 prompt 에 매칭 + (있다면) `context_required` 모두 포함 | [user-prompt-submit.sh:55-124](https://github.com/aws-samples/sample-oh-my-aidlcops/blob/main/hooks/user-prompt-submit.sh#L55-L124) |
-| `[MAGIC KEYWORD: OMA_BUDGET_WARN]` | 임의 budget 의 `spend_usd / limit_usd > 0.8` | [user-prompt-submit.sh:130-155](https://github.com/aws-samples/sample-oh-my-aidlcops/blob/main/hooks/user-prompt-submit.sh#L130-L155) |
-| (없음) | 어느 것도 매칭 안 됨 — 일반 프롬프트로 통과 | `exit 0` |
+| `[MAGIC KEYWORD: OMA_TRIGGER]` | A `.omao/triggers.json` keyword matches the prompt and (if present) every `context_required` token is also present | [user-prompt-submit.sh:55-124](https://github.com/aws-samples/sample-oh-my-aidlcops/blob/main/hooks/user-prompt-submit.sh#L55-L124) |
+| `[MAGIC KEYWORD: OMA_BUDGET_WARN]` | Any budget's `spend_usd / limit_usd > 0.8` | [user-prompt-submit.sh:130-155](https://github.com/aws-samples/sample-oh-my-aidlcops/blob/main/hooks/user-prompt-submit.sh#L130-L155) |
+| (none) | Nothing matches — prompt passes through normally | `exit 0` |
 
-매칭 규칙:
-- 키워드가 슬래시 명령(`/oma:agenticops`) 이거나 다중 단어이면 substring 매칭
-- 단일 토큰이면 `grep -qw` 단어 경계 매칭 (예: `auto` 가 `automobile` 에 매칭하지 않음)
-- 명시적 슬래시 명령 입력 시 `context_required` 우회
+Match rules:
+- Slash commands (`/oma:agenticops`) and multi-word phrases use substring matching.
+- Single tokens use `grep -qw` word-boundary matching (e.g., `auto` does not match inside `automobile`).
+- Explicit slash commands bypass `context_required`.
 
-### 1.5 Tier-0 명령 집행 — 정적 자산 + 동적 정책의 합류
+### 1.5 Tier-0 dispatch — where static assets meet dynamic policy
 
-세션이 가동되면 사용자는 `/oma:autopilot` 같은 슬래시 명령을 호출한다. 이때부터 정적 자산(`PLUG`, `CMD`) 과 동적 정책(`PROF`, `ONT`, `ST`) 이 한 컨텍스트에서 만난다.
+Once the session is up, the user invokes a slash command such as `/oma:autopilot`. From that point on, static assets (`PLUG`, `CMD`) and dynamic policy (`PROF`, `ONT`, `ST`) coexist in the same context.
 
 ```mermaid
 flowchart TB
@@ -262,26 +264,26 @@ flowchart TB
     PROF -. "overrides every<br/>heuristic" .-> SKM
 ```
 
-상위 위계는 [`steering/oma-hub.md:9-30`](https://github.com/aws-samples/sample-oh-my-aidlcops/blob/main/steering/oma-hub.md#L9-L30) 과 [`steering/workflows/ontology-harness-mandate.md:11-49`](https://github.com/aws-samples/sample-oh-my-aidlcops/blob/main/steering/workflows/ontology-harness-mandate.md#L11-L49) 가 강제한다 — 이 7 개 절대 규칙은 모든 SKILL.md 의 본문보다 **우선** 한다.
+The top-of-stack hierarchy is enforced by [`steering/oma-hub.md:9-30`](https://github.com/aws-samples/sample-oh-my-aidlcops/blob/main/steering/oma-hub.md#L9-L30) and [`steering/workflows/ontology-harness-mandate.md:11-49`](https://github.com/aws-samples/sample-oh-my-aidlcops/blob/main/steering/workflows/ontology-harness-mandate.md#L11-L49) — the seven absolute rules there **override** every SKILL.md body.
 
-### 1.6 Claude Code 측에서 무엇을 고치면 무엇이 바뀌나
+### 1.6 Where to edit (Claude Code side)
 
-| 바꾸고 싶은 동작 | 단일 편집 지점 | 후속 명령 |
+| Behavior to change | Single edit point | Follow-up command |
 | --- | --- | --- |
-| MCP 서버 추가 / 버전 변경 | `plugins/<plugin>/<plugin>.oma.yaml` 의 `mcp:` 블록 | `python3 -m tools.oma_compile <file>` → `bash scripts/install/claude.sh` 재머지 |
-| 새 키워드 트리거 | `<plugin>.oma.yaml` 의 `triggers:` 블록 | `oma compile` 후 `.omao/triggers.json` 사용자 프로젝트로 복사 |
-| 새 Tier-0 슬래시 명령 | `steering/commands/oma/<name>.md` 추가 + `<plugin>.oma.yaml#triggers` 업데이트 | symlink 가 이미 `~/.claude/commands/oma/` 를 가리키므로 재시작만 필요 |
-| 새 SKILL | `plugins/<plugin>/skills/<skill>/SKILL.md` 추가 | Claude Code 는 즉시 인식 (symlink) |
-| 세션 시작 컨텍스트 블록 추가 | `hooks/session-start.sh` 의 ADDITIONAL_CONTEXT 누적부 | `bash hooks/session-start.sh` 로 직접 출력 검증 |
-| 프롬프트 매칭 규칙 변경 | `hooks/user-prompt-submit.sh` (단어 경계 등) | `echo '{"prompt":"..."}' \| bash hooks/user-prompt-submit.sh` |
+| Add or version-bump an MCP server | `mcp:` block in `plugins/<plugin>/<plugin>.oma.yaml` | `python3 -m tools.oma_compile <file>` then re-merge with `bash scripts/install/claude.sh` |
+| New keyword trigger | `triggers:` block in `<plugin>.oma.yaml` | `oma compile`, then copy `.omao/triggers.json` into the user's project |
+| New Tier-0 slash command | Add `steering/commands/oma/<name>.md` and update `<plugin>.oma.yaml#triggers` | The symlink already points at `~/.claude/commands/oma/`, so a CLI restart is enough |
+| New SKILL | Add `plugins/<plugin>/skills/<skill>/SKILL.md` | Claude Code picks it up immediately (symlink) |
+| New session-start context block | Update the ADDITIONAL_CONTEXT accumulator in `hooks/session-start.sh` | Verify with `bash hooks/session-start.sh` |
+| Change prompt match rules | `hooks/user-prompt-submit.sh` (e.g., word boundaries) | `echo '{"prompt":"..."}' \| bash hooks/user-prompt-submit.sh` |
 
 ---
 
-## 2. Kiro 하네스
+## 2. Kiro harness
 
-Kiro 는 **hook 이 없다**. Claude Code 가 hook 으로 능동적으로 컨텍스트를 emit 하는 모델이라면, Kiro 는 엔진이 매 invocation 마다 `~/.kiro/steering/` · `kiro.meta.yaml` · `agents/*.json` 을 *직접 다시 읽는* declarative 모델이다. SKILL 본문이 필요할 때 `.omao/` 를 명시적으로 Read 한다.
+Kiro **has no hooks**. Where Claude Code actively emits context via hook scripts, Kiro is declarative — its engine re-reads `~/.kiro/steering/`, `kiro.meta.yaml`, and `agents/*.json` on every invocation, and SKILL bodies explicitly Read `.omao/` when needed.
 
-### 2.1 자산이 무엇을 바라보나
+### 2.1 What each asset references
 
 ```mermaid
 flowchart LR
@@ -313,21 +315,21 @@ flowchart LR
     AGENT -- "writes plans · state · audit" --> PLAN
 ```
 
-다이어그램의 각 화살표가 의미하는 코드 위치를 §2.2~§2.5 에서 상세화한다.
+§2.2 through §2.5 detail every arrow above with code locations.
 
-### 2.2 Install — `~/.kiro/` 가 어떻게 만들어지나
+### 2.2 Install — how `~/.kiro/` gets populated
 
-[`scripts/install/kiro.sh`](https://github.com/aws-samples/sample-oh-my-aidlcops/blob/main/scripts/install/kiro.sh) 의 5 단계. **hook 등록 단계가 없다** — 이게 Claude Code 와의 결정적 차이.
+[`scripts/install/kiro.sh`](https://github.com/aws-samples/sample-oh-my-aidlcops/blob/main/scripts/install/kiro.sh) runs five steps. **There is no hook-registration step** — that is the decisive difference from Claude Code.
 
-| Step | 함수 | 결과 | 다이어그램 노드 |
+| Step | Function | Result | Diagram node |
 | --- | --- | --- | --- |
-| 1 | `install_skills` ([kiro.sh:91](https://github.com/aws-samples/sample-oh-my-aidlcops/blob/main/scripts/install/kiro.sh#L91)) | `~/.kiro/skills/<p>/<s>/` 평탄화 symlink. `aidlc/skills/inception/<s>` 같은 2 단계 그룹은 한 단계 더 들어간다 | `SK` |
-| 2 | `install_steering` ([kiro.sh:145](https://github.com/aws-samples/sample-oh-my-aidlcops/blob/main/scripts/install/kiro.sh#L145)) | `~/.kiro/steering` → SOURCE `steering/` (manifest · workflows · oma-hub.md) | `ST` |
-| 3 | `install_guides` ([kiro.sh:157](https://github.com/aws-samples/sample-oh-my-aidlcops/blob/main/scripts/install/kiro.sh#L157)) | 플러그인별 stage-gated guide 디렉터리 | `GD` |
-| 4 | `install_agents` ([kiro.sh:176](https://github.com/aws-samples/sample-oh-my-aidlcops/blob/main/scripts/install/kiro.sh#L176)) | Kiro `.agent.json` 프로파일 (MCP 핀 + `autoApprove`) | `AG` |
-| 5 | `install_settings` ([kiro.sh:199](https://github.com/aws-samples/sample-oh-my-aidlcops/blob/main/scripts/install/kiro.sh#L199)) | `~/.kiro/settings/cli.json` 템플릿 복사 (이미 있으면 보존) | `CFG` |
+| 1 | `install_skills` ([kiro.sh:91](https://github.com/aws-samples/sample-oh-my-aidlcops/blob/main/scripts/install/kiro.sh#L91)) | Flattened symlinks under `~/.kiro/skills/<p>/<s>/`. Two-level groups like `aidlc/skills/inception/<s>` get one extra descent | `SK` |
+| 2 | `install_steering` ([kiro.sh:145](https://github.com/aws-samples/sample-oh-my-aidlcops/blob/main/scripts/install/kiro.sh#L145)) | `~/.kiro/steering` → SOURCE `steering/` (manifest, workflows, oma-hub.md) | `ST` |
+| 3 | `install_guides` ([kiro.sh:157](https://github.com/aws-samples/sample-oh-my-aidlcops/blob/main/scripts/install/kiro.sh#L157)) | Per-plugin stage-gated guide directories | `GD` |
+| 4 | `install_agents` ([kiro.sh:176](https://github.com/aws-samples/sample-oh-my-aidlcops/blob/main/scripts/install/kiro.sh#L176)) | Kiro `.agent.json` profiles (MCP pins + `autoApprove`) | `AG` |
+| 5 | `install_settings` ([kiro.sh:199](https://github.com/aws-samples/sample-oh-my-aidlcops/blob/main/scripts/install/kiro.sh#L199)) | Copy template into `~/.kiro/settings/cli.json` (preserved if already present) | `CFG` |
 
-설치 결과:
+Resulting layout:
 
 ```text
 ~/.kiro/
@@ -338,28 +340,28 @@ flowchart LR
   settings/cli.json         (file copy from scripts/kiro-cli.template.json) # CFG
 ```
 
-### 2.3 Steering 자동 로드 — 절대 규칙 주입
+### 2.3 Steering auto-load — absolute rule injection
 
-`ST → AGENT` 화살표.
+The `ST → AGENT` arrow.
 
-Kiro 엔진은 `~/.kiro/steering/` 디렉터리 내용을 매 invocation 마다 자동으로 컨텍스트에 로드한다. 결과적으로 다음 두 절대 규칙 묶음이 모든 Kiro 세션에 항상 박혀 있다:
+The Kiro engine auto-loads everything under `~/.kiro/steering/` on every invocation. Consequently the following content is always present in every Kiro session:
 
-- [`oma-hub.md`](https://github.com/aws-samples/sample-oh-my-aidlcops/blob/main/steering/oma-hub.md) — 라우팅 허브 + 7 개 ABSOLUTE RULES
-- [`workflows/ontology-harness-mandate.md`](https://github.com/aws-samples/sample-oh-my-aidlcops/blob/main/steering/workflows/ontology-harness-mandate.md) — 비-override 절대 규칙 본문
-- [`workflows/diagram-authoring-standard.md`](https://github.com/aws-samples/sample-oh-my-aidlcops/blob/main/steering/workflows/diagram-authoring-standard.md) — 다이어그램 도구 강제
-- `workflows/aidlc-full-loop.md`, `workflows/platform-bootstrap.md`, ... — 5-checkpoint 워크플로우 정의
-- `commands/oma/*.md` — Kiro 는 슬래시 명령으로 dispatch 하지 않지만, 파일 본문을 skill orchestration 참고 자료로 사용
+- [`oma-hub.md`](https://github.com/aws-samples/sample-oh-my-aidlcops/blob/main/steering/oma-hub.md) — routing hub plus the seven ABSOLUTE RULES
+- [`workflows/ontology-harness-mandate.md`](https://github.com/aws-samples/sample-oh-my-aidlcops/blob/main/steering/workflows/ontology-harness-mandate.md) — non-overridable absolute-rules text
+- [`workflows/diagram-authoring-standard.md`](https://github.com/aws-samples/sample-oh-my-aidlcops/blob/main/steering/workflows/diagram-authoring-standard.md) — diagram-tool mandate
+- `workflows/aidlc-full-loop.md`, `workflows/platform-bootstrap.md`, ... — 5-checkpoint workflow definitions
+- `commands/oma/*.md` — Kiro does not dispatch slash commands but uses these files as skill-orchestration reference material
 
-이 부분이 Claude Code 의 SessionStart hook 의 *규칙 측* 기능과 동등하다 — 차이는 다음 §2.6 에서 정리한다.
+This is equivalent to the *rules side* of Claude Code's SessionStart hook — the differences are summarized in §2.6.
 
-### 2.4 SKILL 매칭 — sidecar trigger_keywords
+### 2.4 SKILL matching — sidecar `trigger_keywords`
 
-`SK → AGENT` 화살표.
+The `SK → AGENT` arrow.
 
-각 SKILL 디렉터리에는 `kiro.meta.yaml` sidecar 가 함께 들어 있을 수 있다 ([kiro-setup.md:98-134](https://github.com/aws-samples/sample-oh-my-aidlcops/blob/main/docs/docs/kiro-setup.md#L98-L134) 참조). Kiro 엔진이 이 sidecar 를 읽어 자연어 입력을 SKILL 에 자동 매칭한다.
+A `kiro.meta.yaml` sidecar can sit next to each SKILL (see [kiro-setup.md:98-134](https://github.com/aws-samples/sample-oh-my-aidlcops/blob/main/docs/docs/kiro-setup.md#L98-L134)). The Kiro engine reads it to auto-match natural-language inputs to a SKILL.
 
 ```yaml
-# kiro.meta.yaml — vllm-serving-setup 예
+# kiro.meta.yaml — example for vllm-serving-setup
 kiro:
   trigger_keywords:
     - "vllm"
@@ -375,21 +377,21 @@ kiro:
   approval_required: true
 ```
 
-| 필드 | 효과 |
+| Field | Effect |
 | --- | --- |
-| `trigger_keywords` | 자연어 매칭 시 우선순위 부여 |
-| `context_files` | SKILL 실행 시 함께 로드할 보조 파일 |
-| `mcp_required` | 실행 전 필요 MCP 서버 연결 검증 |
-| `phase` | Inception / Construction / Operations 분류 |
-| `approval_required` | checkpoint 승인 필요 여부 |
+| `trigger_keywords` | Boost SKILL matching priority on natural-language input |
+| `context_files` | Additional files to load alongside the SKILL |
+| `mcp_required` | Verify required MCP servers are connected before invocation |
+| `phase` | Tag as Inception / Construction / Operations |
+| `approval_required` | Whether checkpoint approval is required |
 
-Sidecar 가 없는 SKILL 도 SKILL.md frontmatter 만으로 정상 동작한다.
+A SKILL without a sidecar still works fine — just on its `SKILL.md` frontmatter alone.
 
 ### 2.5 Agent profile — `agents/*.agent.json`
 
-`AG → AGENT` 화살표.
+The `AG → AGENT` arrow.
 
-각 Kiro agent profile 은 [`tools/oma_compile`](https://github.com/aws-samples/sample-oh-my-aidlcops/blob/main/tools/oma_compile/compile.py) 가 SOURCE 의 `<plugin>.oma.yaml#agents` 에서 컴파일해 만든 결과물이다. **Claude Code 가 settings.json 한 곳에 11 개 MCP 서버를 모으는 것과 달리, Kiro 는 agent 마다 자체 MCP 핀을 가진다**.
+Each Kiro agent profile is a compile output of [`tools/oma_compile`](https://github.com/aws-samples/sample-oh-my-aidlcops/blob/main/tools/oma_compile/compile.py) reading SOURCE `<plugin>.oma.yaml#agents`. **Where Claude Code consolidates 11 MCP servers in a single `settings.json`, Kiro pins MCPs per agent.**
 
 ```json
 // ~/.kiro/agents/ai-infra.agent.json — symlink → SOURCE/plugins/ai-infra/kiro-agents/...
@@ -408,127 +410,127 @@ Sidecar 가 없는 SKILL 도 SKILL.md frontmatter 만으로 정상 동작한다.
 }
 ```
 
-런타임에서 `@ai-infra deploy vllm 70b` 같이 활성화한다.
+At runtime the user activates a profile with `@ai-infra deploy vllm 70b` or similar.
 
-### 2.6 Kiro 의 비대칭 — hook 부재가 만드는 갭
+### 2.6 Kiro asymmetry — the gap left by absent hooks
 
-Claude Code 의 hook 이 능동적으로 박아 주던 정보 중 **Kiro 에서는 자동으로 박히지 않는 것** 이 있다. 운영자는 이 갭을 인지하고 SKILL 절차에서 명시 Read 로 보완해야 한다.
+Some context that Claude Code's hooks actively push is **not** auto-pushed under Kiro. Operators must close the gap by Reading the relevant files explicitly inside SKILL procedures.
 
-| 컨텍스트 | Claude Code | Kiro |
+| Context | Claude Code | Kiro |
 | --- | --- | --- |
-| **Steering 절대 규칙** (`oma-hub.md`, `mandate.md`) | hook 없이도 Claude Code 가 자동 로드 | `~/.kiro/steering/` 자동 로드 ✅ |
-| **SKILL 본문** | `~/.claude/plugins/<p>/skills/<s>/SKILL.md` | `~/.kiro/skills/<p>/<s>/SKILL.md` ✅ |
-| **MCP 서버 카탈로그** | `settings.json#mcpServers` 전역 | agent profile 인-프로파일 ✅ |
-| **온톨로지 *현재 값* 스냅샷** (Budget 잔액, 열린 incident, draft deployment) | `session-start.sh` 가 매 세션 시작에 push ✅ | ❌ 자동 push 없음. SKILL 본문이 명시 Read 필요 |
-| **active-mode / project-memory** | `session-start.sh` 가 push ✅ | ❌ 자동 push 없음 |
-| **매 프롬프트 budget 임계 경고** (`[OMA_BUDGET_WARN]`) | `user-prompt-submit.sh` 가 매번 검사 ✅ | ❌ 매 프롬프트 자동 검사 없음 |
-| **키워드 트리거** (자연어 → Tier-0 명령) | `user-prompt-submit.sh` + `.omao/triggers.json` 전역 카탈로그 ✅ | △ `kiro.meta.yaml#trigger_keywords` 가 *SKILL 매칭* 만 처리 (Tier-0 카탈로그 없음) |
+| **Steering absolute rules** (`oma-hub.md`, `mandate.md`) | Auto-loaded by Claude Code without hooks | `~/.kiro/steering/` auto-load ✅ |
+| **SKILL bodies** | `~/.claude/plugins/<p>/skills/<s>/SKILL.md` | `~/.kiro/skills/<p>/<s>/SKILL.md` ✅ |
+| **MCP server catalog** | Global in `settings.json#mcpServers` | Per-agent in agent profile ✅ |
+| **Ontology *current values* snapshot** (Budget remaining, open incidents, draft deployments) | Pushed by `session-start.sh` at every session start ✅ | ❌ No auto-push. SKILL body must Read explicitly |
+| **active-mode / project-memory** | Pushed by `session-start.sh` ✅ | ❌ No auto-push |
+| **Per-prompt budget threshold warning** (`[OMA_BUDGET_WARN]`) | Checked by `user-prompt-submit.sh` on every prompt ✅ | ❌ No per-prompt check |
+| **Keyword triggers** (natural language → Tier-0 command) | `user-prompt-submit.sh` + global `.omao/triggers.json` catalog ✅ | △ `kiro.meta.yaml#trigger_keywords` handles only *SKILL matching* (no Tier-0 catalog) |
 
-함의:
-- Kiro 사용자가 `@ai-infra deploy ...` 를 띄울 때 에이전트는 *현재 예산이 80% 도달했는지·draft deployment 가 있는지* 를 **모르는 상태로 시작** 한다. SKILL 절차가 명시적으로 `.omao/ontology/budgets/*.json` · `.omao/ontology/deployments/*.json` 을 Read 해야 비로소 본다.
-- [`steering/workflows/ontology-harness-mandate.md`](https://github.com/aws-samples/sample-oh-my-aidlcops/blob/main/steering/workflows/ontology-harness-mandate.md) 의 절대 규칙 4 — *"`[MAGIC KEYWORD: OMA_BUDGET_WARN]` 수신 시 첫 응답에서 경고를 명시한다"* — 는 Claude Code 전제다. Kiro 에서는 매직 키워드가 emit 되지 않으므로 규칙이 자동으로 비활성된다. 운영 차원에서는 `cost-governance` skill 을 명시 호출하거나 `kiro.meta.yaml#context_files` 에 budget 파일을 등록하는 우회가 필요하다.
+Implications:
+- When a Kiro user runs `@ai-infra deploy ...`, the agent **starts unaware** of whether the budget is at 80%, whether a draft deployment exists, etc. The SKILL procedure must explicitly Read `.omao/ontology/budgets/*.json` and `.omao/ontology/deployments/*.json` to surface that.
+- Absolute Rule #4 from [`steering/workflows/ontology-harness-mandate.md`](https://github.com/aws-samples/sample-oh-my-aidlcops/blob/main/steering/workflows/ontology-harness-mandate.md) — *"on receiving `[MAGIC KEYWORD: OMA_BUDGET_WARN]`, the agent must surface the warning in its first response"* — is Claude-Code-specific. Under Kiro the magic keyword is never emitted, so the rule lapses. Operationally, work around this by invoking the `cost-governance` skill explicitly or registering the budget file under `kiro.meta.yaml#context_files`.
 
-### 2.7 Kiro 측에서 무엇을 고치면 무엇이 바뀌나
+### 2.7 Where to edit (Kiro side)
 
-| 바꾸고 싶은 동작 | 단일 편집 지점 | 후속 명령 |
+| Behavior to change | Single edit point | Follow-up command |
 | --- | --- | --- |
-| Kiro agent 의 MCP 핀 / 권한 | `<plugin>.oma.yaml` 의 `agents:` 블록 (runtime: kiro) | `python3 -m tools.oma_compile <file>` → `bash scripts/install/kiro.sh` 재실행 (symlink 갱신) |
-| 새 Kiro 에이전트 프로파일 | 같은 곳 — agent id · description · tools · mcp · resources | 위와 동일 — `kiro-agents/<id>.agent.json` 가 자동 재생성 |
-| SKILL 의 trigger_keywords | 해당 SKILL 디렉터리의 `kiro.meta.yaml` (없으면 신규 작성) | symlink 가 이미 가리키므로 재시작만 필요 |
-| 절대 규칙 / 새 워크플로우 정의 | `steering/oma-hub.md` 또는 `steering/workflows/<name>.md` | 즉시 모든 Kiro 세션에 반영 (steering 자동 로드) |
-| 새 SKILL | `plugins/<plugin>/skills/<skill>/` (SKILL.md + 옵션으로 kiro.meta.yaml) | `bash scripts/install/kiro.sh` 재실행 (skill symlink 추가) |
-| Kiro 기본 모델 / autoApprove 정책 | `~/.kiro/settings/cli.json` (사용자 편집 가능 — 1 회 복사본) | Kiro 재시작 |
-| stage-gated 가이드 추가 | `plugins/<plugin>/guides/stages/<stage>.md` | symlink 가 이미 가리키므로 즉시 반영 |
+| Kiro agent's MCP pins / permissions | `agents:` block in `<plugin>.oma.yaml` (runtime: kiro) | `python3 -m tools.oma_compile <file>` then re-run `bash scripts/install/kiro.sh` (refreshes symlinks) |
+| New Kiro agent profile | Same place — agent id, description, tools, mcp, resources | Same — `kiro-agents/<id>.agent.json` is regenerated |
+| SKILL `trigger_keywords` | The SKILL directory's `kiro.meta.yaml` (create one if absent) | Symlink already points; restart Kiro |
+| Absolute rules / new workflow definition | `steering/oma-hub.md` or `steering/workflows/<name>.md` | Reflected in every Kiro session immediately (steering auto-load) |
+| New SKILL | `plugins/<plugin>/skills/<skill>/` (SKILL.md plus optional `kiro.meta.yaml`) | Re-run `bash scripts/install/kiro.sh` to add the skill symlink |
+| Kiro default model / autoApprove | `~/.kiro/settings/cli.json` (user-editable; one-time copy from template) | Restart Kiro |
+| Stage-gated guide | `plugins/<plugin>/guides/stages/<stage>.md` | Symlink already points; effect is immediate |
 
 ---
 
-## 3. 공통 — `<project>/.omao/`
+## 3. Shared — `<project>/.omao/`
 
-두 하네스가 공유하는 정책 표면이다. 같은 프로젝트에서 Claude Code 와 Kiro 를 번갈아 써도 작업이 끊기지 않는 이유는 둘 다 `.omao/` 를 동일한 컨벤션으로 읽고 쓰기 때문이다.
+`.omao/` is the policy surface both harnesses share. The reason switching between Claude Code and Kiro on the same project does not lose work is that both read and write `.omao/` under identical conventions.
 
-### 3.1 디스크 레이아웃
+### 3.1 Disk layout
 
 ```text
 <project>/.omao/
-  profile.yaml                        # 7-Q wizard 결과 (oma setup)
+  profile.yaml                        # 7-Q wizard output (oma setup)
   ontology/{budgets,deployments,risks,incidents}/*.json
-  triggers.json                       # repo 의 컴파일 산출물 사본
-  plans/                              # AIDLC artefact (spec, design, ADR, stories)
+  triggers.json                       # copy of repo's compile output
+  plans/                              # AIDLC artifacts (spec, design, ADR, stories)
   state/                              # active-mode, sessions, gates, audit/...
-  audit.jsonl                         # schema-validated 감사 로그
+  audit.jsonl                         # schema-validated audit log
   notepad.md
   project-memory.json
-  permissions.yaml                    # 선택적 권한 overlay
+  permissions.yaml                    # optional permission overlay
 ```
 
-`oma setup` ([scripts/oma/setup.sh](https://github.com/aws-samples/sample-oh-my-aidlcops/blob/main/scripts/oma/setup.sh)) 한 번이면 user-global (`~/.claude/` 또는 `~/.kiro/`) 과 project-local (`.omao/`) 양쪽이 모두 설정된다. 다른 프로젝트에서는 `oma init` 만 돌리면 `.omao/` 만 새로 만들어진다.
+A single `oma setup` ([scripts/oma/setup.sh](https://github.com/aws-samples/sample-oh-my-aidlcops/blob/main/scripts/oma/setup.sh)) configures both user-global (`~/.claude/` or `~/.kiro/`) and project-local (`.omao/`) at once. For subsequent projects, `oma init` alone creates a fresh `.omao/` without re-running the wizard.
 
-### 3.2 producer / consumer 매핑
+### 3.2 Producer / consumer mapping
 
-각 산출물은 producer 와 consumer 가 명확히 분리되어 있다. 수정하려면 이 표에서 producer 를 찾는다.
+Each artifact has a clearly separated producer and consumer. To make a change, locate the producer in this table.
 
-| `.omao/` 경로 | Producer | Consumer | Schema |
+| `.omao/` path | Producer | Consumer | Schema |
 | --- | --- | --- | --- |
-| `profile.yaml` | `oma setup` ([setup.sh:152](https://github.com/aws-samples/sample-oh-my-aidlcops/blob/main/scripts/oma/setup.sh#L152)) | 모든 SKILL · `oma doctor` · `enterprise-status` | [`schemas/profile/profile.schema.json`](https://github.com/aws-samples/sample-oh-my-aidlcops/blob/main/schemas/profile/profile.schema.json) |
-| `ontology/budgets/*.json` | `oma setup` 시드 + finops 팀 수기 | `cost-governance` · Claude `user-prompt-submit.sh` · `session-start.sh` | [`budget.schema.json`](https://github.com/aws-samples/sample-oh-my-aidlcops/blob/main/schemas/ontology/budget.schema.json) |
+| `profile.yaml` | `oma setup` ([setup.sh:152](https://github.com/aws-samples/sample-oh-my-aidlcops/blob/main/scripts/oma/setup.sh#L152)) | every SKILL · `oma doctor` · `enterprise-status` | [`schemas/profile/profile.schema.json`](https://github.com/aws-samples/sample-oh-my-aidlcops/blob/main/schemas/profile/profile.schema.json) |
+| `ontology/budgets/*.json` | `oma setup` seed plus the FinOps team manually | `cost-governance` · Claude `user-prompt-submit.sh` · `session-start.sh` | [`budget.schema.json`](https://github.com/aws-samples/sample-oh-my-aidlcops/blob/main/schemas/ontology/budget.schema.json) |
 | `ontology/deployments/*.json` | `aidlc.code-generation` · `autopilot-deploy` | `incident-response` · strict-enterprise gate | `deployment.schema.json` |
-| `ontology/incidents/*.json` | `agenticops.incident-response` | Claude `session-start.sh` 스냅샷 · 사람 approver | `incident.schema.json` |
+| `ontology/incidents/*.json` | `agenticops.incident-response` | Claude `session-start.sh` snapshot · human approver | `incident.schema.json` |
 | `ontology/risks/*.json` | `aidlc.risk-discovery` · `modernization.risk-discovery` | `quality-gates` · strict-enterprise gate | `risk.schema.json` |
-| `triggers.json` | `oma compile` ([compile.py:41](https://github.com/aws-samples/sample-oh-my-aidlcops/blob/main/tools/oma_compile/compile.py#L41)) | Claude `user-prompt-submit.sh` (Kiro 는 sidecar 사용) | `dsl.schema.json#triggers` |
-| `plans/<slug>/*.md` | `aidlc.inception.*` · `aidlc.construction.*` | 사람 reviewer · 후속 skill | (자유 형식) |
-| `state/active-mode` | Tier-0 진입 시 · `/oma:cancel` 시 비움 | Claude `session-start.sh` · 다른 Tier-0 (중복 방지) | (단일 라인) |
-| `state/sessions/<id>/checkpoint.json` | `aidlc-full-loop` workflow | 사람 approver · 재시작 | (자유 형식) |
-| `state/gates/<phase>.json` | `aidlc.quality-gates` | 하류 skill | (자유 형식) |
-| `audit.jsonl` | [`tools/oma_audit/append.py`](https://github.com/aws-samples/sample-oh-my-aidlcops/blob/main/tools/oma_audit/append.py) 또는 audit-trail skill | 감사자 · `oma enterprise-status` | [`event.schema.json`](https://github.com/aws-samples/sample-oh-my-aidlcops/blob/main/schemas/audit/event.schema.json) |
-| `permissions.yaml` | 사용자 수기 (overlay) | `oma permissions resolve` → **`~/.claude/settings.json#permissions`** 에 머지 (Claude 전용 — Kiro 는 §3.3 참조) | (`.omao/permissions.yaml` 헤더 코멘트의 resolution chain 참고) |
+| `triggers.json` | `oma compile` ([compile.py:41](https://github.com/aws-samples/sample-oh-my-aidlcops/blob/main/tools/oma_compile/compile.py#L41)) | Claude `user-prompt-submit.sh` (Kiro uses sidecars instead) | `dsl.schema.json#triggers` |
+| `plans/<slug>/*.md` | `aidlc.inception.*` · `aidlc.construction.*` | Human reviewers · downstream skills | (free-form) |
+| `state/active-mode` | Set when entering a Tier-0; cleared by `/oma:cancel` | Claude `session-start.sh` · other Tier-0 commands (collision avoidance) | (single line) |
+| `state/sessions/<id>/checkpoint.json` | `aidlc-full-loop` workflow | Human approver · resume | (free-form) |
+| `state/gates/<phase>.json` | `aidlc.quality-gates` | Downstream skills | (free-form) |
+| `audit.jsonl` | [`tools/oma_audit/append.py`](https://github.com/aws-samples/sample-oh-my-aidlcops/blob/main/tools/oma_audit/append.py) or audit-trail skill | Auditors · `oma enterprise-status` | [`event.schema.json`](https://github.com/aws-samples/sample-oh-my-aidlcops/blob/main/schemas/audit/event.schema.json) |
+| `permissions.yaml` | User-authored overlay | `oma permissions resolve` → merged into **`~/.claude/settings.json#permissions`** (Claude only — see §3.3 for Kiro) | (see the resolution chain in `.omao/permissions.yaml`'s header comments) |
 
-### 3.3 Permission 표면 — Claude 와 Kiro 가 다르다
+### 3.3 Permission surface — Claude and Kiro behave differently
 
-권한 설정은 두 하네스가 처리 방식이 결정적으로 다르다. 한 표로 비교:
+Permission handling is the one place where the two harnesses diverge sharply. A side-by-side comparison:
 
-| 측면 | Claude Code | Kiro |
+| Aspect | Claude Code | Kiro |
 | --- | --- | --- |
-| **소스 (사용자 편집 지점)** | `<project>/.omao/permissions.yaml` (overlay, optional) + SOURCE `templates/permissions/{common,<env>}.yaml` (baseline) | ① `~/.kiro/settings/cli.json#autoApprove` (CLI 전체) ② `<plugin>.oma.yaml#agents[].autoApprove` → 컴파일 → `kiro-agents/<a>.agent.json#autoApprove` (agent 별) |
-| **Resolution chain** | `common.yaml` → `<env>.yaml` → `.omao/permissions.yaml` (lowest → highest priority) | (chain 없음 — CLI 와 agent 가 독립적으로 적용) |
-| **적용 위치 (런타임이 읽는 곳)** | **`~/.claude/settings.json#permissions.{allow,deny}`** (user-global, in-place merge) | ① `~/.kiro/settings/cli.json` (user-global, **첫 install 1 회 복사 후 사용자 편집**) ② `~/.kiro/agents/<a>.agent.json` (user-global, symlink → SOURCE) |
-| **반영 트리거** | `oma setup` 또는 `bash scripts/install/claude.sh` (overlay 변경 시 재실행 필요) | CLI: 즉시 (Kiro 가 매 invocation 마다 cli.json 재로드). Agent: `<plugin>.oma.yaml` 편집 → `oma compile` → `bash scripts/install/kiro.sh` 재실행 |
-| **`<project>/.omao/permissions.yaml` 의 효과** | ✅ 자동 머지됨 | ❌ **머지되지 않음** — `kiro.sh` 의 `install_settings` 는 cli.json 을 1 회 복사만 하고 `.omao/permissions.yaml` 을 보지 않는다 ([kiro.sh:199-216](https://github.com/aws-samples/sample-oh-my-aidlcops/blob/main/scripts/install/kiro.sh#L199-L216)) |
-| **권한 단위** | 패턴 기반 `allow` / `deny` 리스트 (예: `Bash(git *)`, `Edit(infra/secrets/**)`) | boolean 토글 (`readOnly` · `fileWrites` · `bashCommands`) |
+| **Source (where you edit)** | `<project>/.omao/permissions.yaml` (overlay, optional) plus SOURCE `templates/permissions/{common,<env>}.yaml` (baseline) | ① `~/.kiro/settings/cli.json#autoApprove` (CLI-wide) ② `<plugin>.oma.yaml#agents[].autoApprove` → compiled into `kiro-agents/<a>.agent.json#autoApprove` (per-agent) |
+| **Resolution chain** | `common.yaml` → `<env>.yaml` → `.omao/permissions.yaml` (lowest → highest priority) | None — CLI and agent settings apply independently |
+| **Apply target (where the runtime reads)** | **`~/.claude/settings.json#permissions.{allow,deny}`** (user-global, in-place merge) | ① `~/.kiro/settings/cli.json` (user-global; **one-time copy at install, then user-edited**) ② `~/.kiro/agents/<a>.agent.json` (user-global, symlinked from SOURCE) |
+| **Reload trigger** | `oma setup` or `bash scripts/install/claude.sh` (re-run after overlay edits) | CLI: immediate (Kiro re-reads `cli.json` per invocation). Agent: edit `<plugin>.oma.yaml`, run `oma compile`, then re-run `bash scripts/install/kiro.sh` |
+| **Effect of `<project>/.omao/permissions.yaml`** | ✅ Auto-merged | ❌ **Not merged** — `kiro.sh#install_settings` only one-shot copies `cli.json` and never reads `.omao/permissions.yaml` ([kiro.sh:199-216](https://github.com/aws-samples/sample-oh-my-aidlcops/blob/main/scripts/install/kiro.sh#L199-L216)) |
+| **Permission grain** | Pattern-based `allow` / `deny` lists (e.g., `Bash(git *)`, `Edit(infra/secrets/**)`) | Boolean toggles (`readOnly` · `fileWrites` · `bashCommands`) |
 
-**함의 — Kiro 운영자가 알아야 할 갭**:
+**Implications — the gap Kiro operators should know about**:
 
-- `<project>/.omao/permissions.yaml` 에 적은 deny 패턴은 Claude 에서만 enforce 된다. 같은 프로젝트를 Kiro 로 띄우면 그 deny 가 **무시된다**.
-- Kiro 측 권한을 프로젝트별로 격리하려면 다음 중 하나를 선택:
-  1. `~/.kiro/settings/cli.json` 을 사용자가 직접 편집 (전역이라 다른 프로젝트에도 영향)
-  2. SKILL 별 권한이 필요하면 `<plugin>.oma.yaml#agents[].autoApprove` 를 고치고 `oma compile` (agent 단위로 격리)
-  3. `kiro.meta.yaml#approval_required: true` 로 SKILL 마다 사람 승인 강제 (편집 지점은 SKILL 디렉터리)
-- OMA 의 `.omao/permissions.yaml` 컨벤션은 **Claude 측 권한 표준화** 를 위한 것이다 — Kiro 측 권한 통합은 [`.omao/permissions.yaml`](https://github.com/aws-samples/sample-oh-my-aidlcops/blob/main/.omao/permissions.yaml) 의 헤더 코멘트가 *"push the change into `~/.claude/settings.json` and `~/.kiro/`"* 라고 적었지만 현재 install 스크립트가 후자를 구현하지 않은 상태다 (Kiro 측 `permissions` 스키마 부재).
+- A deny pattern in `<project>/.omao/permissions.yaml` is enforced **only** under Claude. Open the same project under Kiro and that deny is **silently ignored**.
+- To isolate Kiro permissions per project, choose one of:
+  1. Hand-edit `~/.kiro/settings/cli.json` (global, so it leaks to other projects).
+  2. For SKILL-level scope, edit `<plugin>.oma.yaml#agents[].autoApprove` and `oma compile` (isolation at the agent level).
+  3. Force human approval per SKILL with `kiro.meta.yaml#approval_required: true` (edited inside the SKILL directory).
+- OMA's `.omao/permissions.yaml` convention exists primarily to **standardize Claude permissions**. The header comment in [`.omao/permissions.yaml`](https://github.com/aws-samples/sample-oh-my-aidlcops/blob/main/.omao/permissions.yaml) advertises *"push the change into `~/.claude/settings.json` and `~/.kiro/`"*, but the install scripts only implement the former today (no Kiro-side `permissions` schema yet).
 
-요약: **`<project>/.claude/` 또는 `<project>/.kiro/` 에 권한 파일을 만들 필요는 없다**. OMA 컨벤션의 권한 편집 지점은 다음 셋뿐:
-- Claude 권한 → `<project>/.omao/permissions.yaml`
-- Kiro CLI 권한 → `~/.kiro/settings/cli.json`
-- Kiro agent 별 권한 → `<plugin>.oma.yaml#agents[].autoApprove`
+Summary: **You should not create permission files under `<project>/.claude/` or `<project>/.kiro/`.** OMA's permission edit points are exactly three:
+- Claude permissions → `<project>/.omao/permissions.yaml`
+- Kiro CLI permissions → `~/.kiro/settings/cli.json`
+- Kiro per-agent permissions → `<plugin>.oma.yaml#agents[].autoApprove`
 
-(Claude Code 자체가 자동 생성하는 `<project>/.claude/settings.local.json` 은 사용자가 IDE 에서 "이 명령 허용" 을 누를 때 누적되는 별도 파일로, OMA 가 관리하지 않는다.)
+(`<project>/.claude/settings.local.json` is a separate file Claude Code itself auto-generates as the user clicks "allow this command" in the IDE; OMA does not manage it.)
 
 ---
 
-## 참고 자료
+## References
 
-### OMA 내부 문서
+### OMA internal docs
 
-- [Claude Code Setup](./claude-code-setup.md) — `~/.claude/` 설치 절차의 1차 레퍼런스
-- [Kiro Setup](./kiro-setup.md) — `~/.kiro/` 설치와 sidecar 메커니즘
-- [Keyword Triggers](./keyword-triggers.md) — `UserPromptSubmit` hook 동작 상세
-- [Profile](./profile.md) — `.omao/profile.yaml` 의 모든 필드 의미
-- [Ontology](./ontology.md) — 8 entity 와 traceability chain
-- [Harness DSL](./harness-dsl.md) — `<plugin>.oma.yaml` 작성법
-- [Tier-0 Workflows](./tier-0-workflows.md) — `/oma:*` 명령 카탈로그
-- [`steering/oma-hub.md`](https://github.com/aws-samples/sample-oh-my-aidlcops/blob/main/steering/oma-hub.md) — 라우팅 허브 (절대 규칙 7 개 포함)
-- [`steering/workflows/ontology-harness-mandate.md`](https://github.com/aws-samples/sample-oh-my-aidlcops/blob/main/steering/workflows/ontology-harness-mandate.md) — 비-override 절대 규칙 본문
-- [`steering/workflows/diagram-authoring-standard.md`](https://github.com/aws-samples/sample-oh-my-aidlcops/blob/main/steering/workflows/diagram-authoring-standard.md) — 다이어그램 도구 강제
+- [Claude Code Setup](./claude-code-setup.md) — Primary reference for installing into `~/.claude/`
+- [Kiro Setup](./kiro-setup.md) — Installing into `~/.kiro/` and the sidecar mechanism
+- [Keyword Triggers](./keyword-triggers.md) — Detail on the `UserPromptSubmit` hook
+- [Profile](./profile.md) — Every field in `.omao/profile.yaml`
+- [Ontology](./ontology.md) — The 8 entities and their traceability chain
+- [Harness DSL](./harness-dsl.md) — Authoring `<plugin>.oma.yaml`
+- [Tier-0 Workflows](./tier-0-workflows.md) — The `/oma:*` command catalog
+- [`steering/oma-hub.md`](https://github.com/aws-samples/sample-oh-my-aidlcops/blob/main/steering/oma-hub.md) — Routing hub (also contains the seven absolute rules)
+- [`steering/workflows/ontology-harness-mandate.md`](https://github.com/aws-samples/sample-oh-my-aidlcops/blob/main/steering/workflows/ontology-harness-mandate.md) — Non-overridable absolute-rules text
+- [`steering/workflows/diagram-authoring-standard.md`](https://github.com/aws-samples/sample-oh-my-aidlcops/blob/main/steering/workflows/diagram-authoring-standard.md) — Diagram-tool mandate
 
-### 핵심 소스
+### Core sources
 
 - [`hooks/session-start.sh`](https://github.com/aws-samples/sample-oh-my-aidlcops/blob/main/hooks/session-start.sh) · [`hooks/user-prompt-submit.sh`](https://github.com/aws-samples/sample-oh-my-aidlcops/blob/main/hooks/user-prompt-submit.sh)
 - [`scripts/install/claude.sh`](https://github.com/aws-samples/sample-oh-my-aidlcops/blob/main/scripts/install/claude.sh) · [`scripts/install/kiro.sh`](https://github.com/aws-samples/sample-oh-my-aidlcops/blob/main/scripts/install/kiro.sh)
