@@ -18,6 +18,11 @@ const sidebars: SidebarsConfig = {
       label: 'Philosophy',
     },
     {
+      type: 'doc',
+      id: 'architecture',
+      label: 'Architecture',
+    },
+    {
       type: 'category',
       label: 'Reliability dual-axis',
       collapsed: false,
