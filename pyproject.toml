@@ -21,6 +21,8 @@ dependencies = [
 [project.optional-dependencies]
 dev = [
     "pytest>=7.4,<9",
+    "numpy>=1.26,<3",
+    "promql-parser>=0.4,<1",
 ]
 
 [project.urls]
