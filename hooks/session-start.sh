@@ -88,6 +88,37 @@ $ONTOLOGY_BLOCK
   fi
 fi
 
+# ----- Permission overlay drift detection ----------------------------------
+# Surface a one-liner when .omao/permissions.yaml has been edited more
+# recently than the harness config the install scripts wrote to. The actual
+# detection lives in scripts/lib/permissions.sh so user-prompt-submit.sh
+# can reuse it on every keystroke.
+if [[ "${OMA_DISABLE_PERMISSIONS_DRIFT:-0}" != "1" ]]; then
+  __oma_repo_root="${OMA_REPO_ROOT:-}"
+  if [[ -z "$__oma_repo_root" ]]; then
+    __oma_repo_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." 2>/dev/null && pwd)" || __oma_repo_root=""
+  fi
+  if [[ -f "$__oma_repo_root/scripts/lib/permissions.sh" ]]; then
+    # shellcheck disable=SC1091
+    . "$__oma_repo_root/scripts/lib/permissions.sh"
+    drifted=$(perms_overlay_drift "$OMA_PROJ_DIR" "$HOME" 2>/dev/null || true)
+    if [[ -n "$drifted" ]]; then
+      ADDITIONAL_CONTEXT+="[MAGIC KEYWORD: OMA_PERMISSIONS_DRIFT]
+
+.omao/permissions.yaml has been edited more recently than: $drifted
+
+The new overlay is NOT yet reflected in your harness config. Run one of:
+  oma setup --skip-doctor
+  bash scripts/install/claude.sh
+  bash scripts/install/kiro.sh
+
+Use \`oma permissions show\` to preview the resolved chain before applying.
+
+"
+    fi
+  fi
+fi
+
 # Add OMA command reference
 ADDITIONAL_CONTEXT+="Available OMA Tier-0 Commands:
 - /oma:autopilot           — AIDLC full-loop autopilot (Inception→Construction→Operations)

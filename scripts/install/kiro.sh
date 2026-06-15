@@ -23,6 +23,9 @@ KIRO_META_FOUND=0
 GUIDES_LINKED=0
 AGENTS_LINKED=0
 SETTINGS_INSTALLED=0
+PERMISSIONS_APPLIED=0
+PERMISSIONS_ENV=""
+SKIP_PERMISSIONS="${OMA_SKIP_PERMISSIONS:-0}"
 
 # ---------------------------------------------------------------------------
 # Usage
@@ -32,11 +35,15 @@ usage() {
 install-kiro.sh — Install oh-my-aidlcops (OMA) into ~/.kiro/
 
 Usage:
-    bash scripts/install-kiro.sh [--help]
+    bash scripts/install-kiro.sh [--help] [--skip-permissions]
 
 Environment:
-    OMA_OWNER    GitHub owner for the marketplace (default: aws-samples).
-    KIRO_HOME    Target Kiro directory (default: $HOME/.kiro).
+    OMA_OWNER             GitHub owner for the marketplace (default: aws-samples).
+    KIRO_HOME             Target Kiro directory (default: $HOME/.kiro).
+    OMA_PROJECT_DIR       Project that holds .omao/profile.yaml. Used to pick
+                          the permission template (default: $PWD).
+    OMA_SKIP_PERMISSIONS  Set to 1 to skip the install_permissions step.
+    OMA_PERMISSIONS_ENV   Override the env (sandbox/staging/prod).
 
 What it does:
     1. Create ~/.kiro/skills/<plugin>/<skill>/ symlinks for every skill in every
@@ -47,6 +54,8 @@ What it does:
     5. Install default settings/cli.json template if not present.
     6. Emit a note for any SKILL.md that has a kiro.meta.yaml sidecar — Kiro
        reads those for trigger and context hints.
+    7. Apply env-scoped autoApprove from templates/permissions/ to
+       ~/.kiro/settings/cli.json and every linked agent.json (safe overlay).
 
 Dependencies: jq, bash 4+.
 Idempotent — re-running refreshes stale symlinks only.
@@ -216,6 +225,162 @@ install_settings() {
     log "settings installed: $cli_json"
 }
 
+# Apply env-scoped autoApprove from templates/permissions/ to:
+#   - ~/.kiro/settings/cli.json     (global default)
+#   - ~/.kiro/agents/*.agent.json   (per-agent, only the OMA-installed ones)
+#
+# Kiro has no permissions.deny list — it relies on autoApprove gates plus the
+# `tools` whitelist on each agent profile. We tighten autoApprove to whatever
+# the resolved template specifies; we do NOT touch the `tools` list because
+# that risks disabling MCP servers Kiro itself relies on.
+#
+# Resolved deny.bash / deny.edit / deny.write / deny.mcp patterns are mirrored
+# into agent.json `_meta.oma_permissions_deny` so they are auditable from the
+# Kiro side even though Kiro does not enforce them as a permission gate.
+install_permissions() {
+    if [ "$SKIP_PERMISSIONS" = 1 ]; then
+        log "permissions: skipped (OMA_SKIP_PERMISSIONS=1)"
+        return 0
+    fi
+
+    # shellcheck disable=SC1091
+    . "$OMA_REPO_DIR/scripts/lib/permissions.sh"
+
+    env="${OMA_PERMISSIONS_ENV:-}"
+    if [ -z "$env" ]; then
+        project_dir="${OMA_PROJECT_DIR:-$PWD}"
+        profile="$project_dir/.omao/profile.yaml"
+        if [ -f "$profile" ]; then
+            if command -v yq >/dev/null 2>&1; then
+                env="$(yq -r '.aws.environment // ""' "$profile")"
+            elif command -v python3 >/dev/null 2>&1; then
+                # PyYAML must be importable; otherwise the python invocation
+                # writes a traceback to stderr and an empty stdout, which would
+                # silently collapse to env="" and skip the whole permissions
+                # step (CI test 20 regression). Fail loud so the installer
+                # output names the missing dependency.
+                if ! python3 -c "import yaml" >/dev/null 2>&1; then
+                    die "permissions: profile.yaml needs yq or PyYAML (pip install pyyaml); set OMA_PERMISSIONS_ENV=<env> or OMA_SKIP_PERMISSIONS=1 to bypass"
+                fi
+                env="$(python3 -c "import sys, yaml; d=yaml.safe_load(open(sys.argv[1])); print(d.get('aws',{}).get('environment',''))" "$profile")"
+            fi
+        fi
+    fi
+
+    if [ -z "$env" ]; then
+        log "permissions: no .omao/profile.yaml aws.environment found; skipping (run 'oma setup' first)"
+        return 0
+    fi
+
+    case "$env" in
+        sandbox|staging|prod) ;;
+        *) warn "permissions: unsupported env '$env'; skipping"; return 0 ;;
+    esac
+
+    PERMISSIONS_ENV="$env"
+    resolved="$(perms_resolve_with_overlays "$env" "${OMA_PROJECT_DIR:-$PWD}")"
+    autoapprove="$(printf '%s' "$resolved" | perms_to_kiro_autoapprove)"
+    deny_bash="$(printf  '%s' "$resolved" | jq '.deny.bash  // []')"
+    deny_edit="$(printf  '%s' "$resolved" | jq '.deny.edit  // []')"
+    deny_write="$(printf '%s' "$resolved" | jq '.deny.write // []')"
+    deny_mcp="$(printf   '%s' "$resolved" | jq '.deny.mcp   // []')"
+
+    log "permissions: applying template chain for env=$env"
+    perms_print_summary "$resolved" >&2
+    if [ "$(printf '%s' "$resolved" | jq -r '._meta.overlay_applied // false')" = "true" ]; then
+        log "permissions: overlay $(printf '%s' "$resolved" | jq -r '._meta.overlay_path') applied"
+    fi
+
+    # 1) cli.json — global autoApprove. Other keys (defaultModel, steering, …)
+    #    preserved. Existing autoApprove keys win where the template did not
+    #    set them; template wins where it did (it is the security floor).
+    cli_json="$KIRO_HOME/settings/cli.json"
+    if [ -f "$cli_json" ]; then
+        tmp="$(mktemp)"
+        if jq --argjson a "$autoapprove" '.autoApprove = ((.autoApprove // {}) + $a)' "$cli_json" > "$tmp"; then
+            mv "$tmp" "$cli_json"
+            log "permissions: patched $cli_json autoApprove"
+            PERMISSIONS_APPLIED=$((PERMISSIONS_APPLIED + 1))
+        else
+            warn "permissions: failed to patch $cli_json (left untouched)"
+            rm -f "$tmp"
+        fi
+    else
+        log "permissions: $cli_json not present yet (run install_settings first); skipping cli.json"
+    fi
+
+    # 2) agents/*.agent.json — patch the user-side copies under
+    #    ~/.kiro/agents/, never the source repo files. install_agents has
+    #    already symlinked the source files into KIRO_HOME/agents/. We
+    #    materialize each OMA-owned symlink as a real copy on first run
+    #    so we never mutate the tracked repo files (and `git status`
+    #    stays clean).
+    agents_target="$KIRO_HOME/agents"
+    while IFS= read -r plugin; do
+        [ -n "$plugin" ] || continue
+        plugin_agents="$OMA_REPO_DIR/plugins/$plugin/kiro-agents"
+        [ -d "$plugin_agents" ] || continue
+        for src_agent in "$plugin_agents"/*.json; do
+            [ -f "$src_agent" ] || continue
+            agent_name="$(basename "$src_agent")"
+            dst="$agents_target/$agent_name"
+
+            # Always materialize from the source repo: drop any existing
+            # symlink, then write a patched real-file copy. This keeps user
+            # copies in sync with upstream agent.json updates while never
+            # mutating the tracked repo files. Refuse to overwrite a
+            # non-symlink, non-OMA-meta file so we never trample a user
+            # who hand-edited an agent profile.
+            if [ -e "$dst" ] && [ ! -L "$dst" ]; then
+                if ! jq -e '._meta.oma_permissions_env' "$dst" >/dev/null 2>&1; then
+                    warn "permissions: refusing to overwrite hand-edited $dst (delete it to re-apply)"
+                    continue
+                fi
+            fi
+
+            ensure_dir "$agents_target"
+            tmp="$(mktemp)"
+            if jq \
+                --argjson a   "$autoapprove" \
+                --argjson db  "$deny_bash"   \
+                --argjson de  "$deny_edit"   \
+                --argjson dw  "$deny_write"  \
+                --argjson dm  "$deny_mcp"    \
+                --arg     env "$env"         '
+                .autoApprove = ((.autoApprove // {}) + $a)
+                | ._meta //= {}
+                | ._meta.oma_permissions_env = $env
+                | ._meta.oma_permissions_deny = {
+                    bash:  $db,
+                    edit:  $de,
+                    write: $dw,
+                    mcp:   $dm
+                  }
+                ' "$src_agent" > "$tmp"; then
+                # Replace whatever currently lives at $dst (symlink or
+                # OMA-meta-tagged file) with the freshly patched copy.
+                if [ -e "$dst" ] || [ -L "$dst" ]; then
+                    rm -f "$dst"
+                fi
+                mv "$tmp" "$dst"
+                log "permissions: wrote ${dst#"$KIRO_HOME"/}"
+                PERMISSIONS_APPLIED=$((PERMISSIONS_APPLIED + 1))
+            else
+                warn "permissions: failed to render $src_agent → $dst (left untouched)"
+                rm -f "$tmp"
+            fi
+        done
+    done < <(jq -r '.plugins[].name' "$MARKETPLACE_JSON")
+
+    # Stamp the OMA sentinel so the drift hook compares against our own
+    # timestamp, not against cli.json (which Kiro itself touches for
+    # unrelated reasons). Sentinel: <KIRO_HOME>/.oma-permissions-applied-at.
+    sentinel="$KIRO_HOME/.oma-permissions-applied-at"
+    mkdir -p "$(dirname "$sentinel")"
+    : > "$sentinel"
+    log "permissions: stamped $sentinel"
+}
+
 summary() {
     cat <<EOF
 
@@ -225,6 +390,7 @@ Installation complete.
     guides linked         : $GUIDES_LINKED
     agents linked         : $AGENTS_LINKED
     settings installed    : $SETTINGS_INSTALLED
+    permissions applied   : $PERMISSIONS_APPLIED files${PERMISSIONS_ENV:+ (env=$PERMISSIONS_ENV)}
 EOF
     if [ "$KIRO_META_FOUND" -gt 0 ]; then
         cat <<'NOTE'
@@ -253,9 +419,13 @@ NOTE
 # Main
 # ---------------------------------------------------------------------------
 main() {
-    case "${1:-}" in
-        -h|--help) usage; exit 0 ;;
-    esac
+    while [ $# -gt 0 ]; do
+        case "$1" in
+            -h|--help) usage; exit 0 ;;
+            --skip-permissions) SKIP_PERMISSIONS=1; shift ;;
+            *) die "unknown argument: $1 (try --help)" ;;
+        esac
+    done
     require jq
     log "OMA repo : $OMA_REPO_DIR"
     log "KIRO_HOME: $KIRO_HOME"
@@ -265,6 +435,7 @@ main() {
     install_guides
     install_agents
     install_settings
+    install_permissions
     summary
 }
 

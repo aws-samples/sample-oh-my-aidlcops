@@ -1,0 +1,67 @@
+# OMA Permission Template — prod
+#
+# Production AWS accounts. Inherits common.yaml audit guard. The deny set
+# is intentionally narrow — only operations that are almost never the right
+# choice from an agent context. The user can still run them directly; the
+# deny just forces them out of any auto-approve flow.
+
+version: 1
+extends: ["common.yaml"]
+applies_when:
+  aws.environment: prod
+
+description: |
+  Production profile — confirmation gate on the handful of operations
+  that have caused real outages when run reflexively (cluster delete,
+  IAM detach, secret deletion, force-pushing manifests). Routine reads
+  and edits remain auto-approved; the agent stays useful in prod, just
+  not autonomous on destructive paths.
+
+deny:
+  bash:
+    # Cross-region Bedrock — same reason as staging, but enforced.
+    - "aws bedrock-runtime invoke-model*global.anthropic*"
+    - "aws bedrock-runtime invoke-model*global.amazon*"
+    # Cluster-wide kubectl deletes. Namespaced delete remains allowed so
+    # the agent can clean up its own resources.
+    - "kubectl delete ns*"
+    - "kubectl delete clusterrole*"
+    - "kubectl delete clusterrolebinding*"
+    - "kubectl delete crd*"
+    # Helm uninstall. Reinstalls/upgrades remain available.
+    - "helm uninstall*"
+    # IAM destructive ops. Create/update remain available because they're
+    # the common path for adding least-privilege bindings.
+    - "aws iam delete-*"
+    - "aws iam detach-*"
+    # Secret destruction.
+    - "aws secretsmanager delete-secret*"
+    - "aws kms schedule-key-deletion*"
+    # ECR repository delete. Single-image delete remains.
+    - "aws ecr delete-repository*"
+    # S3 bucket-level delete.
+    - "aws s3 rb*"
+    - "aws s3api delete-bucket*"
+  edit:
+    # Local credentials and SSH/kube config — never edit from agent context.
+    - "/Users/**/.aws/credentials"
+    - "/Users/**/.ssh/**"
+    - "/Users/**/.kube/**"
+    # System paths.
+    - "/etc/**"
+  write:
+    - "/Users/**/.aws/credentials"
+    - "/Users/**/.ssh/**"
+    - "/Users/**/.kube/**"
+    - "/etc/**"
+  mcp:
+    # The single MCP class that historically caused prod outages: cluster
+    # deletion via the EKS MCP server. Other EKS write ops (update node
+    # group, scale, etc.) remain available so the agent can still help
+    # with operations work.
+    - "mcp__eks__*delete*"
+
+auto_approve:
+  read_only: true
+  file_writes: true
+  bash_commands: false

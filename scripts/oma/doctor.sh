@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # scripts/oma/doctor.sh — OMA environment doctor.
 #
-# Runs 12 probes and emits a human-readable report (default) or
+# Runs 13 probes and emits a human-readable report (default) or
 # a machine-readable JSON report (`--json`). Exit codes:
 #   0 — all pass (skips allowed)
 #   1 — at least one warning (no failures)
@@ -10,7 +10,7 @@
 # Probes:
 #   bash-version, jq-installed, git-installed, python3-installed, uvx-installed,
 #   claude-cli, kiro-cli, claude-settings, mcp-pin-integrity, aws-credentials,
-#   profile-valid, ontology-valid
+#   profile-valid, ontology-valid, permissions-applied
 
 set -euo pipefail
 
@@ -162,6 +162,97 @@ probe_ontology_valid() {
     fi
 }
 
+probe_permissions_applied() {
+    profile="$PROJECT_DIR/.omao/profile.yaml"
+    if [ ! -f "$profile" ]; then
+        record permissions-applied "Permission templates applied" skip "no profile yet"
+        return
+    fi
+    if ! command -v jq >/dev/null 2>&1; then
+        record permissions-applied "Permission templates applied" skip "jq missing"
+        return
+    fi
+
+    # shellcheck disable=SC1091
+    . "$REPO_ROOT/scripts/lib/permissions.sh"
+
+    env=""
+    if command -v yq >/dev/null 2>&1; then
+        env="$(yq -r '.aws.environment // ""' "$profile" 2>/dev/null || true)"
+    elif command -v python3 >/dev/null 2>&1; then
+        env="$(python3 -c "import sys, yaml; print(yaml.safe_load(open(sys.argv[1])).get('aws',{}).get('environment',''))" "$profile" 2>/dev/null || true)"
+    fi
+    if [ -z "$env" ]; then
+        record permissions-applied "Permission templates applied" warn \
+            "profile.yaml missing aws.environment" \
+            "Edit .omao/profile.yaml or re-run \`oma setup\`."
+        return
+    fi
+    case "$env" in
+        sandbox|staging|prod) ;;
+        *) record permissions-applied "Permission templates applied" warn \
+                  "unsupported aws.environment: $env" \
+                  "Set aws.environment to sandbox|staging|prod and re-run \`oma setup\`."
+           return ;;
+    esac
+
+    expected_deny="$(perms_resolve_with_overlays "$env" "$PROJECT_DIR" 2>/dev/null | perms_to_claude_deny 2>/dev/null || echo '[]')"
+
+    claude_settings="$HOME/.claude/settings.json"
+    kiro_dir="$HOME/.kiro"
+    claude_present=0; kiro_present=0
+    [ -f "$claude_settings" ] && claude_present=1
+    [ -d "$kiro_dir/agents" ] && kiro_present=1
+    if [ "$claude_present" -eq 0 ] && [ "$kiro_present" -eq 0 ]; then
+        record permissions-applied "Permission templates applied" skip \
+            "no Claude or Kiro install detected"
+        return
+    fi
+
+    issues=""
+
+    if [ "$claude_present" -eq 1 ]; then
+        cur_deny="$(jq -c '.permissions.deny // []' "$claude_settings" 2>/dev/null || echo '[]')"
+        # Count expected entries that are NOT present in the live deny list.
+        missing="$(jq --argjson exp "$expected_deny" --argjson cur "$cur_deny" -nr '
+            [ $exp[] | select(. as $x | $cur | index($x) | not) ] | length
+        ')"
+        if [ "${missing:-0}" -gt 0 ]; then
+            issues="${issues:+$issues; }claude: $missing missing deny entries"
+        fi
+    fi
+
+    if [ "$kiro_present" -eq 1 ]; then
+        # Walk every OMA-installed agent.json and confirm the env tag matches.
+        mismatched=0; untagged=0
+        while IFS= read -r agent; do
+            [ -n "$agent" ] || continue
+            tag="$(jq -r '._meta.oma_permissions_env // empty' "$agent" 2>/dev/null || true)"
+            if [ -z "$tag" ]; then
+                untagged=$((untagged + 1))
+            elif [ "$tag" != "$env" ]; then
+                mismatched=$((mismatched + 1))
+            fi
+        done < <(find "$kiro_dir/agents" -maxdepth 1 -type f -name '*.agent.json' 2>/dev/null)
+
+        if [ "$untagged" -gt 0 ] || [ "$mismatched" -gt 0 ]; then
+            parts=""
+            [ "$untagged"   -gt 0 ] && parts="$untagged untagged"
+            [ "$mismatched" -gt 0 ] && parts="${parts:+$parts, }$mismatched env-mismatch"
+            issues="${issues:+$issues; }kiro: $parts"
+        fi
+    fi
+
+    if [ -z "$issues" ]; then
+        record permissions-applied "Permission templates applied" pass \
+            "env=$env applied to $( [ $claude_present = 1 ] && printf 'claude '; [ $kiro_present = 1 ] && printf 'kiro')"
+    else
+        record permissions-applied "Permission templates applied" warn \
+            "env=$env: $issues" \
+            "Re-run \`oma setup\` or \`bash scripts/install/{claude,kiro}.sh\`."
+    fi
+}
+
 # -----------------------------------------------------------------------------
 # Run all probes
 # -----------------------------------------------------------------------------
@@ -177,6 +268,7 @@ probe_mcp_pins
 probe_aws_credentials
 probe_profile_valid
 probe_ontology_valid
+probe_permissions_applied
 
 # -----------------------------------------------------------------------------
 # Emit report
