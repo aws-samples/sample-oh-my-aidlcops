@@ -96,7 +96,11 @@ YAML
         return 1
     }
     # Sentinel mtime should not be older than the overlay file we'd compare it against.
-    sentinel_mtime=$(stat -f %m "$CLAUDE_HOME/.oma-permissions-applied-at" 2>/dev/null || stat -c %Y "$CLAUDE_HOME/.oma-permissions-applied-at")
+    # GNU stat (Linux/CI) first, BSD stat (macOS) as the fallback. The previous
+    # order tried `stat -f %m` first; on GNU stat that reads %m as a filename,
+    # exits non-zero BUT still prints filesystem info to stdout, so the captured
+    # value became multi-line garbage and `-gt 0` died with status 2.
+    sentinel_mtime=$(stat -c %Y "$CLAUDE_HOME/.oma-permissions-applied-at" 2>/dev/null || stat -f %m "$CLAUDE_HOME/.oma-permissions-applied-at" 2>/dev/null)
     [ "$sentinel_mtime" -gt 0 ]
 }
 
