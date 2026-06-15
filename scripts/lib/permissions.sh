@@ -312,13 +312,16 @@ perms_overlay_drift() {
     user_home="${2:-$HOME}"
     overlay="$project_dir/.omao/permissions.yaml"
     [ -f "$overlay" ] || return 0
-    overlay_mtime=$(stat -f %m "$overlay" 2>/dev/null || stat -c %Y "$overlay" 2>/dev/null || echo 0)
+    # GNU stat (Linux) first, BSD stat (macOS) as the fallback. `stat -f %m`
+    # first was wrong: on GNU stat, -f reads %m as a filename, exits non-zero
+    # but still writes filesystem info to stdout, polluting the captured mtime.
+    overlay_mtime=$(stat -c %Y "$overlay" 2>/dev/null || stat -f %m "$overlay" 2>/dev/null || echo 0)
     drifted=""
     for sentinel in \
         "$user_home/.claude/.oma-permissions-applied-at" \
         "$user_home/.kiro/.oma-permissions-applied-at"; do
         [ -f "$sentinel" ] || continue   # never installed for this harness
-        sentinel_mtime=$(stat -f %m "$sentinel" 2>/dev/null || stat -c %Y "$sentinel" 2>/dev/null || echo 0)
+        sentinel_mtime=$(stat -c %Y "$sentinel" 2>/dev/null || stat -f %m "$sentinel" 2>/dev/null || echo 0)
         if [ "$overlay_mtime" -gt "$sentinel_mtime" ]; then
             label="${sentinel/#$user_home/~}"
             drifted+="${drifted:+, }$label"
