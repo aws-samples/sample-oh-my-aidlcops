@@ -19,11 +19,13 @@ v2 adds four optional top-level sections on top of v1:
 | `metadata` | Accepted, ignored by the compiler | Kubernetes-style `labels` / `annotations` |
 | `workflows` | Validated as a DAG; no runtime executor | Named sequences of agent/skill steps |
 | `telemetry` | Free-form object (body validated in v0.4) | OpenTelemetry Collector wiring |
-| `policies` | Free-form array (body validated in v0.4) | OPA/Rego policy-as-code references |
+| `policies` | Validated body; **compiled into a PreToolUse enforcement hook** | Declarative runtime deny rules — pure Claude Code, no external policy engine |
 
-None of these sections change the files emitted by `oma-compile`. A
-plugin can adopt v2 solely to annotate its intent, without touching its
-runtime surface.
+`metadata`, `workflows`, and `telemetry` do not change the files emitted by
+`oma-compile`. **`policies` is the exception**: each policy carries an
+`enforce` block that the compiler turns into `hooks/harness-rules.json` plus a
+`PreToolUse` entry in `hooks/hooks.json`, bundling `hooks/enforce.py` into the
+plugin. Once installed, those rules block matching tool calls before they run.
 
 ## Migrating a v1 file
 
@@ -75,6 +77,57 @@ The compiler rejects the file before emission if any of these hold:
 - an `agent_ref` does not match an `agents[].id` in the same file;
 - two steps share the same `id` inside one workflow.
 
+## Policy enforcement (pure Claude Code)
+
+A `policies` entry declares a **runtime deny rule**. The compiler translates
+the block into `hooks/harness-rules.json` and registers a `PreToolUse` hook in
+`hooks/hooks.json` that runs the bundled `hooks/enforce.py`. Because the hook
+fires at the harness level, a denied tool call never reaches the model — this
+is enforcement, not prompt guidance.
+
+**Before (v0.4-preview, OPA/Rego — removed):**
+
+```yaml
+policies:
+  - id: require-approval-for-prod
+    rego_ref: policies/examples/deployment-approval.rego   # external .rego file
+    severity: blocking
+    phase: [construction, operations]
+```
+
+That path shelled out to an `opa` binary at validate time. If `opa` was not
+installed it silently fell through (fail-open) — fatal for a safety device.
+
+**After (pure Claude Code — declarative `enforce`):**
+
+```yaml
+policies:
+  - id: deny-eks-mutating-kubectl
+    severity: blocking
+    phase: [construction, operations]
+    description: Block mutating kubectl; EKS writes need an approved Deployment.
+    enforce:
+      tool: Bash                       # omit to match every tool
+      deny_if:
+        command_matches: "kubectl\\s+(apply|delete|patch|scale)"
+      decision: deny                   # deny | ask
+      reason: "Harness: mutating kubectl is blocked. Use platform-bootstrap."
+```
+
+`deny_if` supports `command_matches`, `command_matches_any` (list),
+`file_path_matches` (Write/Edit/Read), and `input_field` (`{path, matches}` for
+arbitrary tool inputs). A rule fires when the tool matches **and every**
+declared condition matches; the first firing rule wins.
+
+The compiler rejects the file before emission if any policy:
+
+- has an `enforce.deny_if` regex that does not compile (fail-closed at build);
+- declares an empty `deny_if` (the schema requires at least one condition).
+
+At runtime `enforce.py` fails **open** only when there is no ruleset or the
+event cannot be parsed, and fails **closed per rule** — one malformed rule is
+skipped without disabling the others.
+
 `skill_ref` is **not** validated against the plugin file — skills are
 resolved at runtime by the harness.
 
@@ -88,8 +141,11 @@ resolved at runtime by the harness.
 
 ## What comes next
 
-- **v0.4** fills in the body schemas for `telemetry` and `policies` and
-  wires `scripts/oma/validate.sh` to shell out to `opa eval` when a
-  plugin declares policies.
+- **v0.4** fills in the body schemas for `telemetry` and `policies`.
+  Policies are enforced as **pure Claude Code**: the compiler emits a
+  PreToolUse hook (`hooks/enforce.py` + `hooks/harness-rules.json`) that
+  blocks matching tool calls at the harness level. There is no external
+  policy engine and no `opa` dependency — enforcement travels inside the
+  installed plugin via `${CLAUDE_PLUGIN_ROOT}`.
 - **v0.5** regenerates `ai-infra.oma.yaml`'s native outputs as a
   byte-diff baseline and migrates the remaining four plugins to v2.

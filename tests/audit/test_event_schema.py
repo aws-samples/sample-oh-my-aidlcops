@@ -43,7 +43,7 @@ BUDGET_BREACH_OK = {
 
 POLICY_DENY_OK = {
     "timestamp": "2026-04-30T12:10:00Z",
-    "actor": {"id": "opa-guard"},
+    "actor": {"id": "harness-enforce"},
     "action": "policy-deny",
     "target": {"entity_type": "Risk", "entity_id": "prompt-injection-vllm"},
     "phase": "construction",

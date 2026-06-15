@@ -38,7 +38,7 @@ artifact:
 | `digest`                    | SHA-256 hash emitted by the builder                               | image-pull policy, cosign verify  |
 | `provenance_uri`            | SLSA v1.1 JSON document URI                                       | auditors, SBOM correlation        |
 | `signing.cosign_bundle_uri` | cosign bundle or transparent log link                             | `oma validate` (v0.4+)            |
-| `signing.issuer`            | OIDC issuer of the signing identity                               | policy-as-code allow-list         |
+| `signing.issuer`            | OIDC issuer of the signing identity                               | cosign verify, CI allow-list      |
 | `builder`                   | Free-form builder tag (github-actions, buildkite, …)              | attestation aggregator            |
 
 ## Why OMA keeps the legacy string form
@@ -56,8 +56,10 @@ operators migrate at their own pace.
 - **Strict enterprise**: rejects string artefacts and object artefacts
   with missing `digest`.
 - **Runtime (v0.4+)**: `oma validate <deployment.yaml>` checks the
-  shape and, when OPA is installed, evaluates any Rego policies that
-  reference `input.artifact.digest` / `input.artifact.signing.issuer`.
+  entity shape only (JSON Schema). Policy enforcement is not part of
+  `validate`; it runs as the compiled `PreToolUse` harness hook
+  (`hooks/enforce.py`), which blocks matching tool calls at the harness
+  level — pure Claude Code, no external policy engine.
 - **CI**: projects can call `cosign verify --certificate-identity …` on
   `artifact.uri@digest` using the `signing.issuer` field from the
   Deployment record.

@@ -23,7 +23,7 @@ codes; risks spanning multiple categories fan out via
 
 | Code  | OWASP title                            | Primary OMA field / skill                                                 | Typical mitigation                                     |
 |-------|----------------------------------------|---------------------------------------------------------------------------|--------------------------------------------------------|
-| LLM01 | Prompt Injection                       | `ai-infra.ai-gateway-guardrails` skill; OPA policy `data.oma.deny` | Pre-prompt sanitisation + egress allow-list.           |
+| LLM01 | Prompt Injection                       | `ai-infra.ai-gateway-guardrails` skill; PreToolUse harness enforcer (`hooks/enforce.py` via `policies[].enforce` deny rules) | Pre-prompt sanitisation + egress allow-list.           |
 | LLM02 | Sensitive Information Disclosure       | `Budget.notify_targets` redaction; Presidio scan upstream of Langfuse.    | PII scrubbing in trace exports.                        |
 | LLM03 | Supply Chain                           | `Deployment.artifact.provenance_uri` (SLSA v1.1); MCP server pinning.     | Signed provenance + pinned `==X.Y.Z` dependencies.     |
 | LLM04 | Data and Model Poisoning               | `Risk.category=data-migration` with `Risk.evidence[]` lineage.             | Training-set diffs captured as ADRs.                   |

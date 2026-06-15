@@ -16,9 +16,10 @@ scripts — those stay hand-authored.
 from __future__ import annotations
 
 import json
+import os
 import re
 import warnings
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Iterable
 
@@ -56,6 +57,11 @@ def _build_ref_store() -> dict:
 
 PINNED_VERSION_RE = re.compile(r"==\d+\.\d+\.\d+")
 
+# The runtime enforcer bundled into each plugin that ships policies. A
+# marketplace plugin only ships its own directory, so the compiler copies this
+# file into plugins/<name>/hooks/ where ${CLAUDE_PLUGIN_ROOT} can reach it.
+HARNESS_ENFORCER_SRC = REPO_ROOT / "tools" / "oma_harness" / "enforce.py"
+
 
 class CompileError(RuntimeError):
     """Raised when a *.oma.yaml is invalid or references missing assets."""
@@ -67,6 +73,7 @@ class CompileResult:
     mcp_json_path: Path
     agent_json_paths: list[Path]
     triggers: list[dict]
+    harness_paths: list[Path] = field(default_factory=list)
 
 
 def _load_schema() -> dict:
@@ -109,20 +116,61 @@ def _validate(dsl: dict, source: Path) -> None:
     # need to keep the v1 file untouched here.
     if dsl.get("version") == 2:
         _validate_workflows(dsl, source)
-        _verify_rego_refs(dsl, source)
+        _verify_policy_regexes(dsl, source)
 
 
-def _verify_rego_refs(dsl: dict, source: Path) -> None:
-    """Verify every policies[].rego_ref points at an existing .rego file."""
+def _verify_policy_regexes(dsl: dict, source: Path) -> None:
+    """Compile every regex in a policy's enforce.deny_if so a malformed pattern
+    fails the build instead of silently disabling that rule at runtime."""
     for policy in dsl.get("policies") or []:
-        rel = policy.get("rego_ref")
-        if not rel:
-            continue
-        candidate = (REPO_ROOT / rel).resolve()
-        if not candidate.exists():
-            raise CompileError(
-                f"{source}: policy {policy['id']!r} rego_ref points at missing file {rel!r}"
-            )
+        enforce = policy.get("enforce") or {}
+        cond = enforce.get("deny_if") or {}
+        patterns: list[str] = []
+        if "command_matches" in cond:
+            patterns.append(cond["command_matches"])
+        patterns.extend(cond.get("command_matches_any") or [])
+        if "file_path_matches" in cond:
+            patterns.append(cond["file_path_matches"])
+        if "input_field" in cond:
+            patterns.append(cond["input_field"]["matches"])
+        for pat in patterns:
+            try:
+                re.compile(pat)
+            except re.error as exc:
+                raise CompileError(
+                    f"{source}: policy {policy['id']!r} has invalid regex {pat!r}: {exc}"
+                )
+
+
+def _harness_matcher(dsl: dict) -> str:
+    """Tool matcher for the emitted PreToolUse entry. Any rule without an
+    explicit tool must see every tool, so it widens the matcher to ".*"."""
+    tools = set()
+    for policy in dsl.get("policies") or []:
+        enforce = policy.get("enforce") or {}
+        tool = enforce.get("tool")
+        if not tool:
+            return ".*"
+        tools.add(tool)
+    return "|".join(sorted(tools)) if tools else ".*"
+
+
+def _build_harness_rules(dsl: dict) -> dict:
+    """Translate the DSL policies block into the enforcer's ruleset format."""
+    rules = []
+    for policy in dsl.get("policies") or []:
+        enforce = policy.get("enforce") or {}
+        rule = {"id": policy["id"], "deny_if": enforce["deny_if"]}
+        if enforce.get("tool"):
+            rule["tool"] = enforce["tool"]
+        rule["decision"] = enforce.get("decision", "deny")
+        if enforce.get("reason"):
+            rule["reason"] = enforce["reason"]
+        rules.append(rule)
+    return {
+        "$generated_by": "oma-compile; edit the plugin's .oma.yaml policies block instead",
+        "rules": rules,
+    }
 
 
 def _validate_workflows(dsl: dict, source: Path) -> None:
@@ -237,6 +285,86 @@ def _verify_hooks(dsl: dict, plugin_dir: Path, source: Path) -> None:
             )
 
 
+# Marker so the compiler can re-own the PreToolUse entry it manages without
+# clobbering hand-authored hooks in the same hooks.json.
+HARNESS_HOOK_MARKER = "oma-harness-enforce"
+
+
+def _build_hooks_json(dsl: dict, existing: dict | None) -> dict | None:
+    """Merge the harness PreToolUse entry into a plugin's hooks/hooks.json.
+
+    Returns the new hooks.json payload, or None when the plugin declares no
+    policies (in which case the compiler removes any stale managed entry).
+    Hand-authored entries (without the harness marker) are preserved.
+    """
+    policies = dsl.get("policies") or []
+    payload = dict(existing or {})
+    pre = [
+        e for e in (payload.get("PreToolUse") or [])
+        if e.get("_oma") != HARNESS_HOOK_MARKER
+    ]
+    if policies:
+        pre.append({
+            "_oma": HARNESS_HOOK_MARKER,
+            "matcher": _harness_matcher(dsl),
+            "hooks": [{
+                "type": "command",
+                "command": "python3 \"${CLAUDE_PLUGIN_ROOT}/hooks/enforce.py\"",
+            }],
+        })
+    if pre:
+        payload["PreToolUse"] = pre
+    else:
+        payload.pop("PreToolUse", None)
+    return payload or None
+
+
+def _emit_harness(dsl: dict, plugin_dir: Path, write: bool) -> list[Path]:
+    """Emit the bundled enforcer + ruleset + hooks.json for policy enforcement.
+
+    No policies → ensure no stale managed artifacts linger, emit nothing.
+    """
+    hooks_dir = plugin_dir / "hooks"
+    rules_path = hooks_dir / "harness-rules.json"
+    enforcer_path = hooks_dir / "enforce.py"
+    hooks_json_path = hooks_dir / "hooks.json"
+    written: list[Path] = []
+
+    existing_hooks = None
+    if hooks_json_path.exists():
+        existing_hooks = json.loads(hooks_json_path.read_text(encoding="utf-8"))
+    hooks_payload = _build_hooks_json(dsl, existing_hooks)
+
+    policies = dsl.get("policies") or []
+    if not write:
+        if policies:
+            written += [rules_path, enforcer_path, hooks_json_path]
+        return written
+
+    if policies:
+        if not HARNESS_ENFORCER_SRC.exists():
+            raise CompileError(
+                f"harness enforcer missing at {HARNESS_ENFORCER_SRC}; cannot bundle into plugin"
+            )
+        hooks_dir.mkdir(parents=True, exist_ok=True)
+        _write_json(rules_path, _build_harness_rules(dsl))
+        enforcer_path.write_text(
+            HARNESS_ENFORCER_SRC.read_text(encoding="utf-8"), encoding="utf-8"
+        )
+        os.chmod(enforcer_path, 0o755)
+        written += [rules_path, enforcer_path]
+
+    if hooks_payload is not None:
+        hooks_dir.mkdir(parents=True, exist_ok=True)
+        _write_json(hooks_json_path, hooks_payload)
+        written.append(hooks_json_path)
+    elif hooks_json_path.exists():
+        # No policies and nothing else in hooks.json → remove the empty file.
+        hooks_json_path.unlink()
+
+    return written
+
+
 def compile_plugin(dsl_path: Path, write: bool = True) -> CompileResult:
     dsl_path = dsl_path.resolve()
     plugin_dir = dsl_path.parent
@@ -279,11 +407,14 @@ def compile_plugin(dsl_path: Path, write: bool = True) -> CompileResult:
             agent_path.parent.mkdir(parents=True, exist_ok=True)
             _write_json(agent_path, payload)
 
+    harness_paths = _emit_harness(dsl, plugin_dir, write=write)
+
     return CompileResult(
         plugin=dsl["plugin"],
         mcp_json_path=mcp_path,
         agent_json_paths=agent_json_paths,
         triggers=triggers,
+        harness_paths=harness_paths,
     )
 
 

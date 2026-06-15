@@ -19,6 +19,8 @@ Claude Code and Kiro already understand:
 <plugin>.oma.yaml  ──(oma-compile)──▶  .mcp.json
                                    ▶  kiro-agents/<agent>.agent.json
                                    ▶  .omao/triggers.json   (merged across plugins)
+                                   ▶  hooks/hooks.json       (PreToolUse enforcement)
+                                   ▶  hooks/harness-rules.json + hooks/enforce.py
 ```
 
 Plugins keep shipping the compiled output, so `/plugin install` from the
@@ -67,9 +69,43 @@ triggers:
   the top-level `mcp:` map. Unknown references fail the build.
 - **Real hook scripts.** `hooks.<event>.runs` must point at an existing file
   under the plugin. No phantom hook declarations.
+- **Valid enforcement rules.** Every `policies[].enforce.deny_if` regex must
+  compile, or the build fails — a broken rule can never ship and silently stop
+  enforcing (fail-closed at build time).
 - **Stable output.** Emitted JSON is sorted deterministically; CI fails the
   build if committed `.mcp.json` or `.agent.json` drift from the DSL source
   (`oma-compile --check`).
+
+## Runtime enforcement (`policies`)
+
+A `policies` entry turns a declarative rule into **real enforcement** — pure
+Claude Code, no external policy engine and no `opa` binary. The compiler emits
+`hooks/harness-rules.json` plus a `PreToolUse` entry in `hooks/hooks.json` that
+runs the bundled `hooks/enforce.py`. Because the hook fires at the harness layer
+*before* a tool executes, a denied call never reaches the model — this is
+enforcement, not prompt-level guidance.
+
+```yaml
+policies:
+  - id: deny-eks-mutating-kubectl
+    severity: blocking
+    phase: [construction, operations]
+    description: Block mutating kubectl; EKS writes need an approved Deployment.
+    enforce:
+      tool: Bash                       # omit to match every tool
+      deny_if:
+        command_matches: "kubectl\\s+(apply|create|delete|patch|exec|rollout)"
+      decision: deny                   # deny | ask
+      reason: "Harness: mutating kubectl is blocked. Use platform-bootstrap."
+```
+
+`deny_if` supports `command_matches`, `command_matches_any` (list),
+`file_path_matches` (Write/Edit), and `input_field` (`{path, matches}`). A rule
+fires when the tool matches **and every** declared condition matches; the first
+firing rule wins. At runtime the enforcer fails **open** only when no ruleset is
+present, and fails **closed** when a shipped ruleset is unreadable. See the
+[Harness DSL v2](./harness-dsl-v2.md) page for the full enforcement model and a
+before/after (OPA → pure-CC) migration example.
 
 ## Commands
 

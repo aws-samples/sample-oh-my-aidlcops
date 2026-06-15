@@ -46,8 +46,11 @@ features, no destructive schema changes.
 
 1. Revert the `dsl.schema.json` v2 additions (version enum, workflows,
    telemetry/policies reserved slots, metadata).
-2. Remove `_validate_workflows` and `_verify_rego_refs` from
-   `tools/oma_compile/compile.py`.
+2. Remove `_validate_workflows` and `_verify_policy_regexes` from
+   `tools/oma_compile/compile.py`, along with the harness emission path
+   (`_build_harness_rules`, `_build_hooks_json`, `_emit_harness`) that
+   writes each plugin's `hooks/harness-rules.json`, `hooks/enforce.py`,
+   and the managed `PreToolUse` entry in `hooks/hooks.json`.
 3. `oma compile --all` still succeeds — v0.3a files are already v1 or
    they only added ontology fields.
 

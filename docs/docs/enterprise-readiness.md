@@ -46,7 +46,7 @@ files. Use it during phased adoption to see what is still missing.
 | 3 | risk-classification   | Every Risk has at least one of `owasp_llm_top10_id` or `nist_ai_rmf_subcategory`.                    | Consult `docs/compliance/owasp-llm-top10.md` + NIST mapping. |
 | 4 | audit-jsonl           | Every line of `.omao/audit.jsonl` validates against `schemas/audit/event.schema.json`.               | Replace `echo >> audit.md` with `tools.oma_audit.append`.   |
 | 5 | dsl-version           | Every `*.oma.yaml` uses `version: 2`.                                                                | Bump the DSL header; all other keys stay unchanged.         |
-| 6 | policies-rego         | Every `policies[].rego_ref` resolves to an existing `.rego` file.                                    | Commit the `.rego` or drop the entry from DSL.              |
+| 6 | policies-enforce      | Every `policies[].enforce.deny_if` regex compiles (a broken pattern fails the probe).                | Fix the offending regex in the DSL `enforce` block.        |
 | 7 | plugin-dsl            | Every plugin directory has a `*.oma.yaml` (warning only — raw `plugin.json` still permitted).        | Run the v0.5 migration for the offending plugin.            |
 | 8 | mcp-pinned            | Every MCP `args[]` contains a `==X.Y.Z` pin.                                                         | Pin floating versions (`@latest` / `@canary`).              |
 
@@ -99,6 +99,7 @@ The error lines are stable enough to parse from CI logs.
 - The mapping docs cover ~14 NIST AI RMF subcategories out of 72. Teams
   with stricter audit scopes extend their own matrix and attach extra
   `Risk.compliance_refs[]` rows.
-- `oma validate` shells out to a pre-installed `opa` binary. When `opa`
-  is absent the policy phase is skipped with a warning; schema
-  validation still runs.
+- `oma validate` is JSON-Schema-only — it checks entity shape and never
+  evaluates policy. Runtime policy enforcement is the compiled
+  `PreToolUse` hook (`hooks/enforce.py` + `hooks/harness-rules.json`),
+  which blocks matching tool calls at the harness level before they run.

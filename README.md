@@ -53,7 +53,12 @@ harness surface introduced in v0.3:
   `Budget`, `Risk`, plus `Spec` and `ADR` (Draft 2020-12) closing the
   Phase-1 → Construction traceability chain.
 - **Harness DSL v2** — optional `workflows` (DAG), `telemetry` (OpenTelemetry),
-  `policies` (OPA/Rego), `metadata.labels`. `version: 1` files compile unchanged.
+  `policies` (declarative runtime deny rules), `metadata.labels`. `version: 1`
+  files compile unchanged.
+- **Pure-CC policy enforcement** — a plugin's `policies` block compiles into a
+  `PreToolUse` hook (`hooks/enforce.py` + `hooks/harness-rules.json`) that
+  blocks matching tool calls before they run. Pure Claude Code, no external
+  policy engine, no `opa` binary.
 - **Enterprise gates** — `oma doctor --enterprise` (8 probes),
   `oma compile --strict-enterprise`, `oma validate <entity.yaml>`, and JSON-L
   audit events via `python -m tools.oma_audit.append`.
@@ -93,7 +98,7 @@ OMA is the installable implementation of that dual-axis on AWS.
 | Methodology axis | Guarantees | OMA implementation | Entry point |
 |---|---|---|---|
 | **Ontology Engineering** | Correctness (WHAT · WHEN) | 8 JSON-Schema entities in `schemas/ontology/`, `oma validate`, schema-evolution rules | `/oma:inception`, `oma validate` |
-| **Harness Engineering** | Safety (HOW) | Harness DSL v2 (`policies`/OPA, `telemetry`), `oma compile --strict-enterprise`, pinned MCP, sandboxed budget eval | `oma doctor --enterprise`, `oma compile` |
+| **Harness Engineering** | Safety (HOW) | Harness DSL v2 (`policies` → `PreToolUse` enforcement, `telemetry`), `oma compile --strict-enterprise`, pinned MCP, sandboxed budget eval | `oma doctor --enterprise`, `oma compile` |
 | **AgenticOps (Outer Loop)** | Living ontology | `self-improving-loop`, `continuous-eval`, `incident-response` feeding operational signal back into the ontology | `/oma:agenticops`, `/oma:self-improving` |
 
 **AIDLC Workflows** — the AWS-official
@@ -231,7 +236,7 @@ oma compile --strict-enterprise
 # → compiled ai-infra: plugins/ai-infra/.mcp.json ...
 
 # 3. Validate an ontology entity (Spec / ADR / Deployment / Incident /
-#    Budget / Risk / Agent / Skill). OPA is shelled out when declared.
+#    Budget / Risk / Agent / Skill) against its JSON Schema.
 oma validate path/to/deployment.yaml
 # → [oma validate] path/to/deployment.yaml: schema OK
 

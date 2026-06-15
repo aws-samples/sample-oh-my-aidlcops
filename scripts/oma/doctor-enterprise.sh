@@ -103,16 +103,37 @@ for dsl in (root / "plugins").glob("*/*.oma.yaml"):
             "(warning only; upgrade to 2 before --strict-enterprise)"
         )
 
-# ---------- Probe #6: policies[].rego_ref all exist -----------------------
+# ---------- Probe #6: policies[].enforce rules are well-formed -------------
+# Pure-CC harness: each policy declares an `enforce` block compiled into a
+# PreToolUse hook. Verify deny_if exists and every regex compiles, so a broken
+# rule fails the doctor instead of silently not enforcing at runtime.
 for dsl in (root / "plugins").glob("*/*.oma.yaml"):
     doc = yaml.safe_load(dsl.read_text(encoding="utf-8")) or {}
     for policy in doc.get("policies") or []:
-        ref = policy.get("rego_ref")
-        if ref and not (root / ref).exists():
+        enforce = policy.get("enforce") or {}
+        cond = enforce.get("deny_if") or {}
+        if not cond:
             failures.append(
-                f"probe-6 policies-rego: {dsl.relative_to(root)}: policy {policy.get('id')!r} "
-                f"rego_ref {ref!r} missing"
+                f"probe-6 policies-enforce: {dsl.relative_to(root)}: policy "
+                f"{policy.get('id')!r} has no enforce.deny_if"
             )
+            continue
+        pats = []
+        if "command_matches" in cond:
+            pats.append(cond["command_matches"])
+        pats.extend(cond.get("command_matches_any") or [])
+        if "file_path_matches" in cond:
+            pats.append(cond["file_path_matches"])
+        if "input_field" in cond:
+            pats.append(cond["input_field"].get("matches", ""))
+        for pat in pats:
+            try:
+                re.compile(pat)
+            except re.error as exc:
+                failures.append(
+                    f"probe-6 policies-enforce: {dsl.relative_to(root)}: policy "
+                    f"{policy.get('id')!r} invalid regex {pat!r}: {exc}"
+                )
 
 # ---------- Probe #7: plugins without *.oma.yaml (warn only) --------------
 for plugin_dir in (root / "plugins").iterdir():

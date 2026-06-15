@@ -1,22 +1,17 @@
 #!/usr/bin/env bash
-# scripts/oma/validate.sh — validate a Deployment (or other ontology entity)
-# YAML/JSON file against its schema, and optionally evaluate any Rego
-# policies declared in the same plugin's *.oma.yaml.
+# scripts/oma/validate.sh — validate an ontology entity (Deployment / Incident /
+# Budget / Risk / Agent / Skill / Spec / ADR) YAML/JSON file against its schema.
 #
 # Usage:
 #   oma validate <path-to-entity.yaml> [--plugin <plugin-name>]
 #
 # Behaviour:
-#   1. Loads <entity> and validates it against the matching ontology schema
-#      (currently Deployment only; other entity types print a warning).
-#   2. Discovers `<plugin>/*.oma.yaml`; reads `spec.policies[]`.
-#   3. For each policy with severity in {blocking, warning, advisory}:
-#        - if `opa` is installed → runs `opa eval` with the policy and input,
-#          interprets `data.oma.deny` as a list of human-readable messages.
-#        - if `opa` is missing → prints install hint, falls back to
-#          schema-only validation (exits 0 with a warning).
-#   4. Exit code: 0 if no blocking findings; 1 if any blocking finding.
-#   Warnings and advisories never change the exit code.
+#   1. Loads <entity> and validates it against the matching ontology schema.
+#   2. Exit code: 0 if schema-valid, 1 on schema violation.
+#
+# Runtime tool-call enforcement is NOT done here. It is compiled from each
+# plugin's `policies:` block into a PreToolUse hook (hooks/enforce.py +
+# hooks/harness-rules.json) — pure Claude Code, no external policy engine.
 
 set -euo pipefail
 
@@ -25,13 +20,14 @@ warn() { printf "[oma validate] %s\n" "$*" >&2; }
 
 OMA_ROOT="${OMA_REPO_ROOT:-$(cd "$(dirname "$0")/../.." && pwd)}"
 ENTITY_FILE=""
-PLUGIN_NAME=""
 
 while [[ $# -gt 0 ]]; do
     case "$1" in
-        --plugin) PLUGIN_NAME="$2"; shift 2 ;;
+        # --plugin is accepted for backward compatibility and ignored; policy
+        # enforcement no longer happens here (see header).
+        --plugin) shift 2 ;;
         -h|--help)
-            sed -n '2,18p' "$0" | sed 's/^# //; s/^#//'
+            sed -n '2,14p' "$0" | sed 's/^# //; s/^#//'
             exit 0
             ;;
         -*) die "unknown flag: $1" ;;
@@ -135,67 +131,10 @@ if errs:
 print(f"[oma validate] {entity_path}: schema OK")
 PY
 
-# ----- Policy evaluation (optional, requires opa) --------------------------
-POLICY_FOUND=0
-if [[ -n "$PLUGIN_NAME" ]]; then
-    DSL="$OMA_ROOT/plugins/$PLUGIN_NAME/${PLUGIN_NAME}.oma.yaml"
-else
-    DSL=$(find "$OMA_ROOT/plugins" -maxdepth 2 -name '*.oma.yaml' 2>/dev/null | head -n1 || true)
-fi
-
-if [[ -z "$DSL" || ! -f "$DSL" ]]; then
-    exit 0
-fi
-
-POLICIES_JSON=$(python3 - "$DSL" <<'PY'
-import json, sys
-import yaml
-dsl = yaml.safe_load(open(sys.argv[1], "r", encoding="utf-8"))
-pols = dsl.get("policies") or []
-print(json.dumps(pols))
-PY
-)
-
-if [[ "$POLICIES_JSON" == "[]" ]]; then
-    exit 0
-fi
-
-if ! command -v opa >/dev/null 2>&1; then
-    warn "opa binary not found; skipping policy evaluation."
-    warn "Install: https://www.openpolicyagent.org/docs/latest/#running-opa"
-    exit 0
-fi
-
-BLOCKING_VIOLATIONS=0
-while IFS= read -r policy; do
-    [[ -z "$policy" ]] && continue
-    id=$(echo "$policy" | python3 -c 'import json,sys;print(json.loads(sys.stdin.read())["id"])')
-    rego=$(echo "$policy" | python3 -c 'import json,sys;print(json.loads(sys.stdin.read())["rego_ref"])')
-    severity=$(echo "$policy" | python3 -c 'import json,sys;print(json.loads(sys.stdin.read()).get("severity","blocking"))')
-    rego_path="$OMA_ROOT/$rego"
-    if [[ ! -f "$rego_path" ]]; then
-        warn "policy $id: rego file missing at $rego_path (skipping)"
-        continue
-    fi
-    # opa eval --data <rego> --input <entity> 'data.oma.deny'
-    result=$(opa eval --data "$rego_path" --input "$ENTITY_FILE" --format json 'data.oma.deny' 2>/dev/null || echo '{}')
-    count=$(echo "$result" | python3 -c 'import json,sys;d=json.loads(sys.stdin.read() or "{}");print(len((d.get("result") or [{}])[0].get("expressions",[{}])[0].get("value") or []))')
-    if [[ "$count" != "0" ]]; then
-        echo "[oma validate] policy $id (severity=$severity): $count finding(s)"
-        echo "$result" | python3 -c 'import json,sys;d=json.loads(sys.stdin.read());
-for msg in (d.get("result") or [{}])[0].get("expressions",[{}])[0].get("value") or []:
-    print(f"  - {msg}")'
-        if [[ "$severity" == "blocking" ]]; then
-            BLOCKING_VIOLATIONS=$((BLOCKING_VIOLATIONS + count))
-        fi
-    fi
-done < <(echo "$POLICIES_JSON" | python3 -c '
-import json, sys
-for p in json.loads(sys.stdin.read()):
-    print(json.dumps(p))
-')
-
-if [[ "$BLOCKING_VIOLATIONS" -gt 0 ]]; then
-    exit 1
-fi
+# ----- Runtime policy enforcement note --------------------------------------
+# `oma validate` checks an ontology entity against its JSON Schema only.
+# Runtime tool-call enforcement (deny mutating kubectl, secret writes, ...) is
+# handled by the plugin's compiled PreToolUse hook — see the `policies:` block
+# in each <plugin>.oma.yaml, compiled into hooks/harness-rules.json and enforced
+# by hooks/enforce.py. There is no external policy engine and no opa dependency.
 exit 0

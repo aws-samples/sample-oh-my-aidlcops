@@ -43,7 +43,7 @@
       }
     },
     "policies": {
-      "description": "(v2 only) Policy-as-code references. Each entry points to a Rego file the compiler checks for existence; OPA is shelled out by scripts/oma/validate.sh at evaluation time.",
+      "description": "(v2 only) Declarative runtime-enforcement rules. Each entry carries an `enforce` block the compiler translates into hooks/harness-rules.json plus a PreToolUse entry in hooks/hooks.json, enforced by the bundled enforce.py before a tool runs. Pure Claude Code; no external policy engine.",
       "type": "array",
       "items": { "$ref": "#/definitions/policyRef" }
     },
@@ -234,19 +234,61 @@
       }
     },
     "policyRef": {
+      "description": "(v2 only) A declarative runtime-enforcement rule. The compiler emits these into hooks/harness-rules.json plus a PreToolUse entry in hooks/hooks.json, so the bundled enforcer (tools/oma_harness/enforce.py) blocks matching tool calls before they run — pure Claude Code, no external policy engine.",
       "type": "object",
       "additionalProperties": false,
-      "required": ["id", "rego_ref"],
+      "required": ["id", "enforce"],
       "properties": {
         "id": {
           "type": "string",
           "pattern": "^[a-z][a-z0-9-]*$",
           "maxLength": 64
         },
-        "rego_ref": {
-          "description": "Path to a .rego file relative to the repository root. Compiler verifies existence.",
-          "type": "string",
-          "pattern": "\\.rego$"
+        "enforce": {
+          "description": "Runtime deny rule evaluated by the PreToolUse hook. Fires when (tool matches or is omitted) AND every declared deny_if condition matches.",
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["deny_if"],
+          "properties": {
+            "tool": {
+              "description": "Exact Claude Code tool name to match (e.g. Bash, Write, Edit). Omit to match any tool.",
+              "type": "string"
+            },
+            "deny_if": {
+              "description": "Conditions that must all match for the rule to fire. At least one condition key is required.",
+              "type": "object",
+              "additionalProperties": false,
+              "minProperties": 1,
+              "properties": {
+                "command_matches": { "type": "string" },
+                "command_matches_any": {
+                  "type": "array",
+                  "items": { "type": "string" },
+                  "minItems": 1
+                },
+                "file_path_matches": { "type": "string" },
+                "input_field": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": ["path", "matches"],
+                  "properties": {
+                    "path": { "type": "string" },
+                    "matches": { "type": "string" }
+                  }
+                }
+              }
+            },
+            "decision": {
+              "description": "What the PreToolUse hook returns when the rule fires.",
+              "enum": ["deny", "ask"],
+              "default": "deny"
+            },
+            "reason": {
+              "description": "Human-readable reason shown to the model when the call is blocked.",
+              "type": "string",
+              "maxLength": 500
+            }
+          }
         },
         "severity": {
           "enum": ["advisory", "warning", "blocking"],

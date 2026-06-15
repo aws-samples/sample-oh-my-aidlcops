@@ -17,6 +17,7 @@ on:
       - 'tools/oma_compile/**'
       - 'tests/**'
       - 'plugins/**/*.oma.yaml'
+      - 'pyproject.toml'
       - '.github/workflows/oma-foundation.yml'
   pull_request:
     paths:
@@ -25,6 +26,7 @@ on:
       - 'tools/oma_compile/**'
       - 'tests/**'
       - 'plugins/**/*.oma.yaml'
+      - 'pyproject.toml'
       - '.github/workflows/oma-foundation.yml'
   workflow_dispatch: {}
 

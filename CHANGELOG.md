@@ -140,6 +140,23 @@ breaking changes to non-stable surfaces as documented in
   reliability axes, with a stated roadmap toward AWS Hosted MCP + DevOps
   agent + Security agent integrations forming an open toolset for
   enterprise operations automation.
+- **Harness policy enforcement migrated from OPA/Rego to pure Claude Code
+  `PreToolUse` hooks.** The old path (`spec.policies[].rego_ref` pointing
+  at `.rego` files + `scripts/oma/validate.sh` shelling out to an `opa`
+  binary, fail-open when `opa` was absent) is gone. Each plugin's
+  `policies[].enforce` block now compiles into
+  `plugins/<name>/hooks/harness-rules.json` plus a managed `PreToolUse`
+  entry in `hooks/hooks.json` that runs the bundled `hooks/enforce.py`
+  (copied from `tools/oma_harness/enforce.py`), blocking matching tool
+  calls before they run — fail-closed per rule, no external policy
+  engine, no `opa` dependency.
+- `oma doctor --enterprise` probe #6 renamed `policies-rego` →
+  `policies-enforce`; it now verifies every `policies[].enforce.deny_if`
+  regex compiles instead of resolving `.rego` files.
+- `oma validate` is JSON-Schema-only; it no longer evaluates policy.
+  `tools/oma_compile/compile.py` swaps `_verify_rego_refs()` for
+  `_verify_policy_regexes()` and emits the harness hook artifacts.
+- Removed `policies/examples/*.rego` and `tests/harness/test_opa_stub.py`.
 
 ### Fixed
 - **Self-improving loop honesty.** The landing page and docs implied OMA

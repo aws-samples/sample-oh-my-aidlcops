@@ -1,0 +1,52 @@
+{
+  "$generated_by": "oma-compile; edit the plugin's .oma.yaml policies block instead",
+  "rules": [
+    {
+      "id": "deny-eks-mutating-kubectl",
+      "deny_if": {
+        "command_matches": "kubectl\\s+(apply|create|delete|edit|patch|replace|scale|autoscale|set|rollout|expose|run|exec|annotate|label|taint|cordon|drain|uncordon)\\b"
+      },
+      "tool": "Bash",
+      "decision": "deny",
+      "reason": "Harness: mutating/interactive kubectl is blocked. Provision via an approved Deployment + the platform-bootstrap workflow, or have the operator run it directly."
+    },
+    {
+      "id": "deny-eks-mcp-write",
+      "deny_if": {
+        "input_field": {
+          "path": "command",
+          "matches": "eks.*--allow-write|--allow-sensitive-data-access"
+        }
+      },
+      "decision": "deny",
+      "reason": "Harness: EKS MCP write access is disabled by default. Enable --allow-write explicitly and audit the change before re-running."
+    },
+    {
+      "id": "deny-secret-file-write",
+      "deny_if": {
+        "file_path_matches": "(^|/)\\.env(\\.|$)|(^|/)secrets?/|\\.pem$|(^|/)kubeconfig$"
+      },
+      "tool": "Write",
+      "decision": "deny",
+      "reason": "Harness: writing secret-bearing files is blocked. Use a secrets manager (e.g. External Secrets, SSM) instead of committing secrets."
+    },
+    {
+      "id": "deny-secret-file-edit",
+      "deny_if": {
+        "file_path_matches": "(^|/)\\.env(\\.|$)|(^|/)secrets?/|\\.pem$|(^|/)kubeconfig$"
+      },
+      "tool": "Edit",
+      "decision": "deny",
+      "reason": "Harness: editing secret-bearing files is blocked. Use a secrets manager (e.g. External Secrets, SSM) instead of committing secrets."
+    },
+    {
+      "id": "deny-secret-file-shell-redirect",
+      "deny_if": {
+        "command_matches": "(>>?|tee\\b|dd\\b|cp\\b|mv\\b)[^|;&]*(\\.env(\\.|\\b)|secrets?/|\\.pem\\b|kubeconfig\\b)"
+      },
+      "tool": "Bash",
+      "decision": "deny",
+      "reason": "Harness: writing secret-bearing files via the shell is blocked. Use a secrets manager (e.g. External Secrets, SSM) instead of committing secrets."
+    }
+  ]
+}

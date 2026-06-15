@@ -526,6 +526,23 @@ export default function HomeLanding(): React.ReactElement {
     <div className={styles.wrapper}>
       {/* HERO */}
       <section className={styles.hero}>
+        <div className={styles.previewBadge} role="note">
+          <span className={styles.previewBadgeLabel}>
+            <Translate id="landing.hero.preview_badge" description="Tech preview badge label">
+              Tech Preview
+            </Translate>
+          </span>
+          <span className={styles.previewBadgeText}>
+            <Translate id="landing.hero.preview_text" description="Tech preview description text">
+              v0.4.0-preview.1 — schemas &amp; DSL may change before GA. See the
+            </Translate>{' '}
+            <Link to={useBaseUrl('/docs/support-policy')}>
+              <Translate id="landing.hero.support_policy_link" description="Support policy link text">
+                support policy
+              </Translate>
+            </Link>.
+          </span>
+        </div>
         <div className={styles.heroGrid}>
           <div className={styles.heroCopy}>
             <div className={styles.eyebrow}>
@@ -533,23 +550,6 @@ export default function HomeLanding(): React.ReactElement {
               <Translate id="landing.hero.eyebrow" description="Hero eyebrow text">
                 aws-samples · AIDLC × AgenticOps
               </Translate>
-            </div>
-            <div className={styles.previewBadge} role="note">
-              <span className={styles.previewBadgeLabel}>
-                <Translate id="landing.hero.preview_badge" description="Tech preview badge label">
-                  Tech Preview
-                </Translate>
-              </span>
-              <span className={styles.previewBadgeText}>
-                <Translate id="landing.hero.preview_text" description="Tech preview description text">
-                  v0.4.0-preview.1 — schemas &amp; DSL may change before GA. See the
-                </Translate>{' '}
-                <Link to={useBaseUrl('/docs/support-policy')}>
-                  <Translate id="landing.hero.support_policy_link" description="Support policy link text">
-                    support policy
-                  </Translate>
-                </Link>.
-              </span>
             </div>
             <h1 className={styles.heroTitle}>
               <Translate id="landing.hero.title_line1" description="Hero main title line 1">

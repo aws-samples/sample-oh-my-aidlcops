@@ -21,7 +21,11 @@ dependencies = [
 [project.optional-dependencies]
 dev = [
     "pytest>=7.4,<9",
+    # Consumed by the AIOps-skills unit tests (tests/test_aiops_skills.py):
+    # baseline / anomaly math is verified with numpy.
     "numpy>=1.26,<3",
+    # Consumed by tests/test_promql_validation.py: 3rd-stage PromQL syntax
+    # validation of the queries embedded in plugins/agenticops skills.
     "promql-parser>=0.4,<1",
 ]
 

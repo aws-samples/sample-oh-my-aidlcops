@@ -3,7 +3,7 @@
 # Smoke tests for OMA enterprise flags. Exercises `oma doctor --enterprise`,
 # `oma compile --strict-enterprise`, and `oma validate` in a clean checkout.
 # These probes catch breakage in the entity compiler, strict-mode gates, or
-# OPA policy loading before they reach production.
+# harness policy enforcement (PreToolUse hook compilation) before production.
 
 setup() {
     OMA_REPO_ROOT="$(cd "$BATS_TEST_DIRNAME/../.." && pwd)"

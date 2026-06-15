@@ -140,18 +140,20 @@
 }
 
 .previewBadge {
-  display: inline-flex;
+  display: flex;
   align-items: center;
   gap: 0.6rem;
-  padding: 0.55rem 0.85rem;
+  padding: 0.6rem 1.1rem;
   border-radius: 12px;
   background: linear-gradient(90deg, rgba(255, 176, 46, 0.12), rgba(255, 115, 0, 0.08));
   border: 1px solid rgba(255, 115, 0, 0.28);
   color: #7a3a00;
   font-size: 0.82rem;
   line-height: 1.4;
-  margin: 0 0 1.3rem;
-  max-width: 560px;
+  /* Full-width bar above the hero grid, sharing the same 1200px content rail. */
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto 2.5rem;
 }
 
 .previewBadge a {

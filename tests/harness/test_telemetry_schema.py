@@ -85,48 +85,58 @@ def test_telemetry_metrics_interval_too_small(tmp_path):
         compile_plugin(_write(tmp_path, dsl), write=False)
 
 
-def test_policies_valid_ref_accepted(tmp_path):
+def test_policies_valid_enforce_accepted(tmp_path):
     dsl = {
         **_base(),
         "policies": [
             {
-                "id": "require-approval",
-                "rego_ref": "policies/examples/deployment-approval.rego",
+                "id": "deny-eks-mutating-kubectl",
                 "severity": "blocking",
                 "phase": ["construction"],
+                "enforce": {
+                    "tool": "Bash",
+                    "deny_if": {"command_matches": r"kubectl\s+(apply|delete)"},
+                    "decision": "deny",
+                    "reason": "EKS writes require an approved Deployment.",
+                },
             }
         ],
     }
     compile_plugin(_write(tmp_path, dsl), write=False)
 
 
-def test_policies_missing_rego_file_rejected(tmp_path):
+def test_policies_missing_deny_if_rejected(tmp_path):
+    # enforce without deny_if violates the schema (deny_if is required).
     dsl = {
         **_base(),
         "policies": [
             {
                 "id": "ghost",
-                "rego_ref": "policies/nope/does-not-exist.rego",
                 "severity": "blocking",
                 "phase": ["construction"],
+                "enforce": {"tool": "Bash"},
             }
         ],
     }
-    with pytest.raises(CompileError, match="missing file"):
+    with pytest.raises(CompileError):
         compile_plugin(_write(tmp_path, dsl), write=False)
 
 
-def test_policies_non_rego_path_rejected(tmp_path):
+def test_policies_invalid_regex_rejected(tmp_path):
+    # A malformed regex must fail the build, not silently disable enforcement.
     dsl = {
         **_base(),
         "policies": [
             {
-                "id": "bad-ext",
-                "rego_ref": "README.md",
-                "severity": "warning",
+                "id": "bad-regex",
+                "severity": "blocking",
                 "phase": ["operations"],
+                "enforce": {
+                    "tool": "Bash",
+                    "deny_if": {"command_matches": "(unclosed"},
+                },
             }
         ],
     }
-    with pytest.raises(CompileError, match=r"\.rego\$"):
+    with pytest.raises(CompileError, match="invalid regex"):
         compile_plugin(_write(tmp_path, dsl), write=False)

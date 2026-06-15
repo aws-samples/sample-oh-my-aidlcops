@@ -47,9 +47,10 @@ today — and, honestly, where it does not yet.
 | **Timeout** | prevent infinite loops | Harness DSL `timeout` field | ⚠️ partial (declared in DSL; runtime enforcement evolving) |
 | **Circuit Breaker** | halt after repeated failures | — | 🔭 roadmap |
 
-The DSL v2 `policies` block (OPA/Rego) and `telemetry` block (OpenTelemetry
-Collector) are the extension points where the partial/roadmap patterns will land
-without breaking `version: 1` plugins.
+The DSL v2 `policies` block (compiled into pure Claude Code `PreToolUse`
+enforcement — no OPA/Rego, no external policy engine) and `telemetry` block
+(OpenTelemetry Collector) are the extension points where the partial/roadmap
+patterns will land without breaking `version: 1` plugins.
 
 ## Harness across the three AIDLC stages
 

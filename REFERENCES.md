@@ -60,7 +60,7 @@ quick-access list for humans.
 | <a id="json-schema-2020-12"></a>JSON Schema Draft 2020-12 | https://json-schema.org/draft/2020-12/schema | `schemas/ontology/{spec,adr}.schema.json`, `schemas/common/approval-chain.schema.json`, `schemas/audit/event.schema.json` |
 | <a id="opentelemetry-semconv"></a>OpenTelemetry Semantic Conventions | https://opentelemetry.io/docs/specs/semconv/ | `Incident.trace_id`, `Incident.span_id`, DSL v2 `spec.telemetry.traces/metrics/logs` |
 | <a id="oci-image-spec"></a>OCI Image Spec v1.1 | https://github.com/opencontainers/image-spec/blob/main/spec.md | `Deployment.artifact.digest` sha256 pattern |
-| <a id="opa-rego"></a>OPA / Rego | https://www.openpolicyagent.org/docs/latest/ | `spec.policies[].rego_ref`; `scripts/oma/validate.sh` shell-out |
+| <a id="opa-rego"></a>OPA / Rego (removed) | https://www.openpolicyagent.org/docs/latest/ | Historical: the v0.4-preview `spec.policies[].rego_ref` + `validate.sh` `opa` shell-out, replaced by pure Claude Code `PreToolUse` enforcement (`policies[].enforce`). No runtime OPA dependency. |
 | <a id="cosign"></a>Sigstore cosign | https://docs.sigstore.dev/quickstart/quickstart-cosign/ | `Deployment.artifact.signing.cosign_bundle_uri` |
 | <a id="rfc-3339"></a>RFC 3339 (ISO 8601 profile) | https://datatracker.ietf.org/doc/html/rfc3339 | All `*_at` timestamp fields across ontology |
 | <a id="keep-a-changelog"></a>Keep a Changelog 1.1 | https://keepachangelog.com/en/1.1.0/ | `CHANGELOG.md` section shape |
@@ -124,7 +124,6 @@ quick-access list for humans.
 | <a id="simpleeval"></a>simpleeval | https://pypi.org/project/simpleeval/ | Sandboxed `Budget.rule_expression` evaluator |
 | <a id="docusaurus"></a>Docusaurus | https://docusaurus.io/ | `docs/` site generator |
 | <a id="lychee"></a>lycheeverse/lychee-action | https://github.com/lycheeverse/lychee-action | Link-check CI (see `.github/workflows/link-check.yml` and `.lycheeignore`) |
-| <a id="opa-tool"></a>OPA binary | https://www.openpolicyagent.org/docs/latest/#running-opa | `scripts/oma/validate.sh` policy evaluation shell-out |
 | <a id="mermaid"></a>Mermaid | https://mermaid.js.org/ | Legacy flow diagrams in docs (`theme-mermaid` plugin); retired for new diagrams per the diagram-authoring standard |
 | <a id="d2"></a>D2 | https://d2lang.com/ | REQUIRED tool for flow / sequence / state diagrams (`steering/workflows/diagram-authoring-standard.md`) |
 | <a id="diagrams"></a>mingrammer Diagrams | https://diagrams.mingrammer.com/ | REQUIRED tool for infrastructure / cloud architecture diagrams; renders AWS/K8s icon nodes from Python source |
