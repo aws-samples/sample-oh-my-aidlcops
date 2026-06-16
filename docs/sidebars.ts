@@ -29,6 +29,7 @@ const sidebars: SidebarsConfig = {
       items: [
         'ontology-engineering',
         'harness-engineering',
+        'knowledge-wiki',
       ],
     },
     {

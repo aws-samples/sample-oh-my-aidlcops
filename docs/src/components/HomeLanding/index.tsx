@@ -811,7 +811,7 @@ export default function HomeLanding(): React.ReactElement {
           <div className={styles.loopCopy}>
             <h2 className={styles.sectionTitleTight}>
               <Translate id="landing.loop.title" description="AIDLC loop section title">
-                The AIDLC loop, closed.
+                The loop that keeps shipping.
               </Translate>
             </h2>
             <p className={styles.loopLede}>

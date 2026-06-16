@@ -51,9 +51,15 @@ OMA realizes this as **8 JSON-Schema entities** (Draft 2020-12) in
 | `Deployment` | The validated Construction→Operations handoff document |
 | `Incident`, `Budget`, `Risk` | Operations-side facts that feed the Outer Loop |
 
-`oma validate <entity.yaml>` enforces schema + OPA policy on all 8 — the mechanical
+`oma validate <entity.yaml>` enforces the JSON Schema on all 8 — the mechanical
 "violation detection" the methodology calls for. See [Ontology](./ontology.md) for
 field-level detail.
+
+This validation is **post-hoc**: it catches a wrong artifact after it is
+written. The proposed [Knowledge Wiki](./knowledge-wiki.md) is the complementary
+*pre-generation* retrieval layer — it grounds an agent in what the domain
+already defines *before* it produces an entity, so drift is prevented at the
+source rather than caught at the handoff.
 
 ## The triple feedback loop — a living ontology
 

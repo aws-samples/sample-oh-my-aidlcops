@@ -340,7 +340,7 @@
     "description": "Integration section title"
   },
   "landing.loop.title": {
-    "message": "닫힌 AIDLC 루프.",
+    "message": "멈추지 않고 출시되는 루프.",
     "description": "AIDLC loop section title"
   },
   "landing.loop.lede_before_em": {
