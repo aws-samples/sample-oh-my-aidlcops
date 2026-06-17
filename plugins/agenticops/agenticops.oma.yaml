@@ -24,7 +24,34 @@ metadata:
 mcp: {}
 agents: []
 
+# ---------------------------------------------------------------------------
+# Workflows (v2) — DAG-based execution plans validated at compile time.
+# ---------------------------------------------------------------------------
+workflows:
+  incident-pipeline:
+    description: "Autonomous incident detection → triage → diagnosis → remediation → verification loop."
+    steps:
+      - id: detect
+        skill_ref: anomaly-detection
+        on_failure: continue
+      - id: triage
+        skill_ref: incident-response
+        depends_on: [detect]
+      - id: diagnose
+        skill_ref: root-cause-analysis
+        depends_on: [triage]
+      - id: remediate
+        skill_ref: automated-remediation
+        depends_on: [diagnose]
+        on_failure: rollback
+      - id: verify
+        skill_ref: continuous-eval
+        depends_on: [remediate]
+        on_failure: continue
+
+# ---------------------------------------------------------------------------
 # Keyword triggers for Tier-0 routing.
+# ---------------------------------------------------------------------------
 triggers:
   - id: agenticops-mode
     keywords: ["agenticops", "ops-mode"]
@@ -36,3 +63,8 @@ triggers:
     context_required: []
     command: /oma:self-improving
     description: "Run the Langfuse-backed self-improving feedback loop to produce prompt/skill improvement PRs."
+  - id: incident-pipeline
+    keywords: ["incident-pipeline", "incident-response-pipeline"]
+    context_required: []
+    command: /oma:incident-pipeline
+    description: "Run the full incident pipeline: detect → triage → diagnose → remediate → verify."
