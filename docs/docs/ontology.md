@@ -106,9 +106,10 @@ user-editable input.
 
 These rules define *what is allowed* to change. They do not help an author know
 *what already exists* before proposing a change — which is where duplication and
-drift creep in. The proposed [Knowledge Wiki](./knowledge-wiki.md) is the
-retrieval layer that closes that gap: it makes prior definitions, decisions, and
-conventions searchable at the moment of authorship, so each schema edit is
-grounded in established intent rather than re-derived.
+drift creep in. The [Knowledge Wiki](./knowledge-wiki.md) is the retrieval layer
+that closes that gap (design accepted in `adr-0001`, Graphify-backed, build
+pending): it makes prior definitions, decisions, and conventions searchable at
+the moment of authorship, so each schema edit is grounded in established intent
+rather than re-derived.
 
 Full glossary: [ontology/glossary.md](https://github.com/aws-samples/sample-oh-my-aidlcops/blob/main/ontology/glossary.md).
