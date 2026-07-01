@@ -50,6 +50,48 @@ workflows:
         on_failure: continue
 
 # ---------------------------------------------------------------------------
+# Policies (v2) — shared secret-protection baseline (#59).
+# These three rules are the cross-cutting secret-file guardrails, identical to
+# the ones in ai-infra. They are duplicated into every plugin that ships so that
+# secret protection does NOT depend on ai-infra being installed — an agenticops-
+# only install (autonomous deploys / cost governance) still blocks secret writes.
+# The compiler emits hooks/{enforce.py,harness-rules.json,hooks.json} from this
+# block; do not hand-edit those. Infra-scoped rules (kubectl, EKS MCP) stay
+# ai-infra-only.
+# ---------------------------------------------------------------------------
+policies:
+  - id: deny-secret-file-write
+    severity: blocking
+    phase: [construction, operations]
+    description: "Block Write to secret-bearing files (.env, secrets/, *.pem, kubeconfig)."
+    enforce:
+      tool: Write
+      deny_if:
+        file_path_matches: "(^|/)\\.env(\\.|$)|(^|/)secrets?/|\\.pem$|(^|/)kubeconfig$"
+      decision: deny
+      reason: "Harness: writing secret-bearing files is blocked. Use a secrets manager (e.g. External Secrets, SSM) instead of committing secrets."
+  - id: deny-secret-file-edit
+    severity: blocking
+    phase: [construction, operations]
+    description: "Block Edit to secret-bearing files (closes the Write-only bypass)."
+    enforce:
+      tool: Edit
+      deny_if:
+        file_path_matches: "(^|/)\\.env(\\.|$)|(^|/)secrets?/|\\.pem$|(^|/)kubeconfig$"
+      decision: deny
+      reason: "Harness: editing secret-bearing files is blocked. Use a secrets manager (e.g. External Secrets, SSM) instead of committing secrets."
+  - id: deny-secret-file-shell-redirect
+    severity: blocking
+    phase: [construction, operations]
+    description: "Block shell redirection / tee into secret-bearing files (closes the Bash bypass)."
+    enforce:
+      tool: Bash
+      deny_if:
+        command_matches: "(>>?|tee\\b|dd\\b|cp\\b|mv\\b)[^|;&]*(\\.env(\\.|\\b)|secrets?/|\\.pem\\b|kubeconfig\\b)"
+      decision: deny
+      reason: "Harness: writing secret-bearing files via the shell is blocked. Use a secrets manager (e.g. External Secrets, SSM) instead of committing secrets."
+
+# ---------------------------------------------------------------------------
 # Keyword triggers for Tier-0 routing.
 # ---------------------------------------------------------------------------
 triggers:
