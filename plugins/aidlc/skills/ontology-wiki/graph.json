@@ -1,0 +1,41 @@
+{
+  "$generated_by": "build-time ontology corpus build (Graphify-shaped output; see adr-0001-graphify-knowledge-wiki). Regenerate via the corpus CI step on any schemas/ontology change — do not hand-edit.",
+  "schema_version": "1.0",
+  "source_corpus": [
+    "schemas/ontology/*.schema.json",
+    ".omao/plans/adr/*.json",
+    ".omao/plans/spec/*.json",
+    "docs/docs/*.md"
+  ],
+  "provenance_legend": {
+    "EXTRACTED": "Derived mechanically from a schema field (pattern/required/enum). High confidence.",
+    "INFERRED": "Derived from a field description naming another entity, not a machine pattern. Medium confidence.",
+    "AMBIGUOUS": "Free-string reference whose target entity is named in prose only. Verify before relying on it."
+  },
+  "nodes": [
+    {"id": "Spec", "kind": "entity", "schema": "schemas/ontology/spec.schema.json", "phase": "inception", "role": "Source of WHAT/WHEN — requirements intent", "required": ["id", "owner", "status"], "god_node": true},
+    {"id": "ADR", "kind": "entity", "schema": "schemas/ontology/adr.schema.json", "phase": "inception|construction", "role": "Architecture decisions; constrains Deployment via adr_refs", "required": ["id", "status", "title", "context", "decision"], "god_node": true},
+    {"id": "Agent", "kind": "entity", "schema": "schemas/ontology/agent.schema.json", "phase": "all", "role": "Actor with declared produce/consume contract", "required": ["id", "runtime"], "god_node": false},
+    {"id": "Skill", "kind": "entity", "schema": "schemas/ontology/skill.schema.json", "phase": "all", "role": "Actor capability bound to a harness", "required": ["id", "harness"], "god_node": false},
+    {"id": "Deployment", "kind": "entity", "schema": "schemas/ontology/deployment.schema.json", "phase": "construction|operations", "role": "Validated Construction->Operations handoff document", "required": ["id", "target", "artifact", "approval_state"], "god_node": true},
+    {"id": "Incident", "kind": "entity", "schema": "schemas/ontology/incident.schema.json", "phase": "operations", "role": "Operations fact feeding the Outer Loop", "required": ["id", "severity", "alarm_source", "approval_state"], "god_node": false},
+    {"id": "Budget", "kind": "entity", "schema": "schemas/ontology/budget.schema.json", "phase": "operations", "role": "Cost-governance fact feeding the Outer Loop", "required": ["id", "scope", "limit_usd", "period", "rule_expression", "action_on_breach"], "god_node": false},
+    {"id": "Risk", "kind": "entity", "schema": "schemas/ontology/risk.schema.json", "phase": "operations", "role": "Operations fact; OWASP/NIST-classified, gates Deployments", "required": ["id", "category", "likelihood", "impact"], "god_node": false}
+  ],
+  "edges": [
+    {"from": "ADR", "to": "ADR", "field": "supersedes", "rel": "supersedes", "provenance": "EXTRACTED", "confidence": 1.0, "pattern": "^adr-[0-9]{4}-[a-z0-9-]+$"},
+    {"from": "ADR", "to": "ADR", "field": "superseded_by", "rel": "superseded_by", "provenance": "EXTRACTED", "confidence": 1.0, "pattern": "^adr-[0-9]{4}-[a-z0-9-]+$"},
+    {"from": "ADR", "to": "Spec", "field": "related_specs", "rel": "related_to", "provenance": "EXTRACTED", "confidence": 1.0, "pattern": "^spec-[a-z0-9-]+$"},
+    {"from": "Spec", "to": "ADR", "field": "linked_adrs", "rel": "motivated_by", "provenance": "EXTRACTED", "confidence": 1.0, "pattern": "^adr-[0-9]{4}-[a-z0-9-]+$"},
+    {"from": "Spec", "to": "Spec", "field": "supersedes", "rel": "supersedes", "provenance": "EXTRACTED", "confidence": 1.0, "pattern": "^spec-[a-z0-9-]+$"},
+    {"from": "Deployment", "to": "Spec", "field": "spec_ref", "rel": "satisfies", "provenance": "INFERRED", "confidence": 0.8, "note": "free-string; description names the Spec artifact"},
+    {"from": "Deployment", "to": "ADR", "field": "adr_refs", "rel": "constrained_by", "provenance": "INFERRED", "confidence": 0.8, "note": "free-string; description names ADR identifiers"},
+    {"from": "Deployment", "to": "Agent", "field": "produced_by", "rel": "produced_by", "provenance": "INFERRED", "confidence": 0.7, "note": "Agent or Skill id; target entity ambiguous between the two"},
+    {"from": "Deployment", "to": "Skill", "field": "produced_by", "rel": "produced_by", "provenance": "AMBIGUOUS", "confidence": 0.5, "note": "produced_by may name a Skill instead of an Agent"},
+    {"from": "Incident", "to": "Deployment", "field": "deployment_ref", "rel": "affects", "provenance": "INFERRED", "confidence": 0.8, "note": "free-string; description says Deployment.id affected"},
+    {"from": "Risk", "to": "Deployment", "field": "deployment_refs", "rel": "applies_to", "provenance": "EXTRACTED", "confidence": 0.9, "pattern": "^[a-z][a-z0-9-]*$"},
+    {"from": "Risk", "to": "Skill", "field": "gate_ref", "rel": "blocks_gate", "provenance": "AMBIGUOUS", "confidence": 0.5, "note": "quality gate id; not bound to a single entity type"},
+    {"from": "Budget", "to": "Agent", "field": "scope_ref", "rel": "scoped_to", "provenance": "AMBIGUOUS", "confidence": 0.4, "note": "scope_ref may be an account id, Agent.id, Skill.id, or Deployment.id"}
+  ],
+  "stats": {"node_count": 8, "edge_count": 13, "god_nodes": ["Spec", "ADR", "Deployment"]}
+}

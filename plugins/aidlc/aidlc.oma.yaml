@@ -14,6 +14,25 @@
 # Contributes only skills and opt-in extensions for
 # awslabs/aidlc-workflows; ships no MCP servers or Kiro agent profiles
 # (phase orchestration happens through the /oma:* slash commands).
+#
+# Knowledge Wiki (adr-0001-graphify-knowledge-wiki):
+#   The `ontology-wiki` skill under skills/ is the pre-generation grounding
+#   layer. Its committed corpus (skills/ontology-wiki/{graph.json,
+#   GRAPH_REPORT.md, wiki/*.md}) ships via /plugin install and works with zero
+#   runtime dependency (2nd-tier retrieval). When the user opts in at
+#   `oma setup`, Graphify (MIT, `pip install graphifyy`) is configured as the
+#   RUNTIME query substrate via its --mcp stdio server (1st-tier retrieval).
+#
+#   Graphify is NOT declared in the mcp: block below on purpose: the DSL
+#   mcpServer.command enum is uvx|npx|pipx (awslabs uvx servers), and Graphify
+#   is a pip package with a `graphify --mcp` entrypoint. Wiring it here would
+#   force a schema/compiler change AND emit it into .mcp.json for ALL users,
+#   defeating the opt-in. Instead the oma setup step registers the graphify MCP
+#   server directly into the user's harness settings, and the intrusive
+#   `graphify claude install` (which ships its own PreToolUse hook) is never
+#   used — so OMA's harness stays the sole PreToolUse owner. See the
+#   ontology-wiki SKILL.md for the 3-tier retrieval + graceful-degradation
+#   contract.
 
 version: 2
 plugin: aidlc
@@ -41,3 +60,8 @@ triggers:
     context_required: ["feature", "story", "ticket"]
     command: /oma:aidlc-loop
     description: "Run a single-feature AIDLC Inception->Construction pass."
+  - id: ontology-wiki
+    keywords: ["ontology-wiki", "ground", "grounding"]
+    context_required: ["ontology", "entity", "schema"]
+    command: /oma:ontology-wiki
+    description: "Query the ontology knowledge wiki before authoring an entity (pre-generation grounding; Graphify-backed with graceful degradation)."

@@ -56,10 +56,11 @@ OMA realizes this as **8 JSON-Schema entities** (Draft 2020-12) in
 field-level detail.
 
 This validation is **post-hoc**: it catches a wrong artifact after it is
-written. The proposed [Knowledge Wiki](./knowledge-wiki.md) is the complementary
-*pre-generation* retrieval layer — it grounds an agent in what the domain
-already defines *before* it produces an entity, so drift is prevented at the
-source rather than caught at the handoff.
+written. The [Knowledge Wiki](./knowledge-wiki.md) is the complementary
+*pre-generation* retrieval layer (design accepted in `adr-0001`, Graphify-backed,
+build pending) — it grounds an agent in what the domain already defines *before*
+it produces an entity, so drift is prevented at the source rather than caught at
+the handoff.
 
 ## The triple feedback loop — a living ontology
 
