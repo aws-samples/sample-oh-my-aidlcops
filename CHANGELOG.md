@@ -159,6 +159,13 @@ breaking changes to non-stable surfaces as documented in
 - Removed `policies/examples/*.rego` and `tests/harness/test_opa_stub.py`.
 
 ### Fixed
+- **Plugin version skew (#58).** All four `plugins/*/.claude-plugin/plugin.json`
+  files declared `0.1.0` while `marketplace.json`, the release tag, and the docs
+  said `0.4.0-preview.1`. Claude Code resolves a plugin's version from
+  `plugin.json` first, so `/plugin list` showed `0.1.0` and `/plugin update`
+  keyed off the stale number. Bumped all four to `0.4.0-preview.1` and added
+  `tests/harness/test_plugin_version_sync.py` to fail CI on any future
+  plugin.json ↔ marketplace.json drift.
 - **Self-improving loop honesty.** The landing page and docs implied OMA
   turns Langfuse traces into improvement PRs out of the box. OMA ships the
   skills and the MCP contract, not the Langfuse runtime — docs (landing,

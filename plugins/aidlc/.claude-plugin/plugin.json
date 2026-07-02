@@ -2,7 +2,7 @@
   "$schema": "../../../schemas/plugin.schema.json",
   "name": "aidlc",
   "description": "AIDLC Phase 1 (Inception) + Phase 2 (Construction) opt-in extensions for awslabs/aidlc-workflows. Inception: workspace detection, requirements analysis, user stories, workflow planning. Construction: component design, code generation, TDD test strategy, risk discovery, quality gates. Contributes only skills and extension rules.",
-  "version": "0.1.0",
+  "version": "0.4.0-preview.1",
   "author": {
     "name": "aws-samples"
   },
