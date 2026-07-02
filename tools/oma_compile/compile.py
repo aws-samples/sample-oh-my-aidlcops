@@ -294,17 +294,50 @@ def _verify_hooks(dsl: dict, plugin_dir: Path, source: Path) -> None:
 # Marker so the compiler can re-own the PreToolUse entry it manages without
 # clobbering hand-authored hooks in the same hooks.json.
 HARNESS_HOOK_MARKER = "oma-harness-enforce"
+# Marker for the compiler-managed SessionStart entry (#60). Same re-own pattern
+# as the harness marker so hand-authored SessionStart hooks are preserved.
+SESSION_START_MARKER = "oma-session-start"
+
+# DSL hook events the compiler emits into hooks/hooks.json, mapped to the
+# Claude Code hook event name. PreToolUse is handled separately (it is derived
+# from policies:, not from a hooks: declaration).
+_EMITTABLE_HOOK_EVENTS = {"session-start": "SessionStart"}
 
 
-def _build_hooks_json(dsl: dict, existing: dict | None) -> dict | None:
-    """Merge the harness PreToolUse entry into a plugin's hooks/hooks.json.
+def _plugin_relative_hook_command(runs: str, source: Path) -> str:
+    """Build a ${CLAUDE_PLUGIN_ROOT}-anchored command for a hooks: runs path.
 
-    Returns the new hooks.json payload, or None when the plugin declares no
-    policies (in which case the compiler removes any stale managed entry).
-    Hand-authored entries (without the harness marker) are preserved.
+    The runs path MUST stay inside the plugin root — an installed plugin copy
+    cannot reach repo-root files (that is the #60 bug). A path that escapes the
+    plugin (contains '..') is rejected at compile time rather than silently
+    emitting a command that breaks after /plugin install.
     """
-    policies = dsl.get("policies") or []
+    norm = os.path.normpath(runs)
+    if norm.startswith("..") or os.path.isabs(norm):
+        raise CompileError(
+            f"{source}: hook runs path {runs!r} escapes the plugin root; "
+            "bundle the script under the plugin (e.g. hooks/<name>.sh) so "
+            "/plugin install ships it"
+        )
+    return f'bash "${{CLAUDE_PLUGIN_ROOT}}/{norm}"'
+
+
+def _build_hooks_json(dsl: dict, existing: dict | None, source: Path) -> dict | None:
+    """Merge the compiler-managed entries into a plugin's hooks/hooks.json.
+
+    Manages two entry kinds, both re-owned via an _oma marker so hand-authored
+    entries survive recompiles:
+      * PreToolUse — the harness enforcer, emitted when policies: is present.
+      * SessionStart — emitted when hooks.session-start.runs is declared (#60),
+        so ontology-state injection ships inside the plugin.
+
+    Returns the new payload, or None when nothing is managed and nothing was
+    hand-authored.
+    """
     payload = dict(existing or {})
+
+    # PreToolUse (harness enforcer) — derived from policies:.
+    policies = dsl.get("policies") or []
     pre = [
         e for e in (payload.get("PreToolUse") or [])
         if e.get("_oma") != HARNESS_HOOK_MARKER
@@ -322,13 +355,43 @@ def _build_hooks_json(dsl: dict, existing: dict | None) -> dict | None:
         payload["PreToolUse"] = pre
     else:
         payload.pop("PreToolUse", None)
+
+    # SessionStart (and any other emittable hooks:) — from the hooks: block.
+    hooks = dsl.get("hooks") or {}
+    for event, cc_event in _EMITTABLE_HOOK_EVENTS.items():
+        managed = [
+            e for e in (payload.get(cc_event) or [])
+            if e.get("_oma") != SESSION_START_MARKER
+        ]
+        spec = hooks.get(event) or {}
+        runs = spec.get("runs")
+        if runs:
+            entry = {
+                "_oma": SESSION_START_MARKER,
+                "hooks": [{
+                    "type": "command",
+                    "command": _plugin_relative_hook_command(runs, source),
+                }],
+            }
+            if spec.get("timeout_ms"):
+                entry["hooks"][0]["timeout"] = spec["timeout_ms"]
+            managed.append(entry)
+        if managed:
+            payload[cc_event] = managed
+        else:
+            payload.pop(cc_event, None)
+
     return payload or None
 
 
-def _emit_harness(dsl: dict, plugin_dir: Path, write: bool) -> list[Path]:
-    """Emit the bundled enforcer + ruleset + hooks.json for policy enforcement.
+def _emit_harness(dsl: dict, plugin_dir: Path, source: Path, write: bool) -> list[Path]:
+    """Emit the plugin-bundled hooks.json (+ enforcer/ruleset when policies:).
 
-    No policies → ensure no stale managed artifacts linger, emit nothing.
+    Two managed artifact families:
+      * policies: → hooks/{enforce.py, harness-rules.json} + a PreToolUse entry
+      * hooks.session-start: → a SessionStart entry (#60); the script itself is
+        hand-authored under the plugin and only referenced here.
+    Emits nothing (and clears stale artifacts) when neither is declared.
     """
     hooks_dir = plugin_dir / "hooks"
     rules_path = hooks_dir / "harness-rules.json"
@@ -339,12 +402,14 @@ def _emit_harness(dsl: dict, plugin_dir: Path, write: bool) -> list[Path]:
     existing_hooks = None
     if hooks_json_path.exists():
         existing_hooks = json.loads(hooks_json_path.read_text(encoding="utf-8"))
-    hooks_payload = _build_hooks_json(dsl, existing_hooks)
+    hooks_payload = _build_hooks_json(dsl, existing_hooks, source)
 
     policies = dsl.get("policies") or []
     if not write:
         if policies:
-            written += [rules_path, enforcer_path, hooks_json_path]
+            written += [rules_path, enforcer_path]
+        if hooks_payload is not None:
+            written.append(hooks_json_path)
         return written
 
     if policies:
@@ -365,7 +430,7 @@ def _emit_harness(dsl: dict, plugin_dir: Path, write: bool) -> list[Path]:
         _write_json(hooks_json_path, hooks_payload)
         written.append(hooks_json_path)
     elif hooks_json_path.exists():
-        # No policies and nothing else in hooks.json → remove the empty file.
+        # Nothing managed and nothing hand-authored left → remove empty file.
         hooks_json_path.unlink()
 
     return written
@@ -413,7 +478,7 @@ def compile_plugin(dsl_path: Path, write: bool = True) -> CompileResult:
             agent_path.parent.mkdir(parents=True, exist_ok=True)
             _write_json(agent_path, payload)
 
-    harness_paths = _emit_harness(dsl, plugin_dir, write=write)
+    harness_paths = _emit_harness(dsl, plugin_dir, dsl_path, write=write)
 
     return CompileResult(
         plugin=dsl["plugin"],

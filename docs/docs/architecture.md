@@ -184,6 +184,37 @@ Safety guarantees:
 - **JSON is emitted via `jq`, `python3`, or `python` (in that order)** — if none are present the hook exits 1. The hook never builds JSON via shell interpolation, so ontology files containing quotes, backslashes, or newlines remain safe ([session-start.sh:118-150](https://github.com/aws-samples/sample-oh-my-aidlcops/blob/main/hooks/session-start.sh#L118-L150)).
 - **Kill switches** — `OMA_DISABLE_TRIGGERS=1` or `OMA_DISABLE_ONTOLOGY=1` env vars ([session-start.sh:12,53](https://github.com/aws-samples/sample-oh-my-aidlcops/blob/main/hooks/session-start.sh#L12)).
 
+#### 1.3.1 Two SessionStart hooks — CLI/dev vs marketplace (#60)
+
+There are **two** SessionStart hooks, delivered by two different install paths.
+Knowing which one runs matters because only one of them ships through
+`/plugin install`.
+
+| Hook | Delivered by | Injects | Repo-root deps |
+|---|---|---|---|
+| `hooks/session-start.sh` (repo-root) | `scripts/install/claude.sh` → `~/.claude/settings.json#hooks.SessionStart` — i.e. `oma setup` / dev install | Tier-0 mode · project-memory · **ontology snapshot** · permissions-drift · command catalog | Yes (`scripts/lib/permissions.sh`) |
+| `plugins/{ai-infra,aidlc}/hooks/session-start-ontology.sh` | **`/plugin install`** (bundled in the plugin root) | **ontology snapshot only** | None — self-contained |
+
+The plugin-bundled hook exists because, per the Claude Code plugin spec,
+`/plugin install` ships only files inside the plugin root — the repo-root
+`hooks/session-start.sh` is **not** delivered by the marketplace path. Before
+this, a marketplace-only user got no ontology-state injection at all (#60). The
+bundled hook is emitted into each plugin's `hooks/hooks.json` `SessionStart`
+entry by `oma-compile` from the DSL `hooks.session-start.runs` declaration, and
+reads **only** `.omao/ontology/` so it works verbatim from an installed copy.
+Its `${CLAUDE_PLUGIN_ROOT}`-anchored command is validated at compile time to
+stay inside the plugin — a `../`-escaping path is a `CompileError`.
+
+The two hooks are complementary, not redundant: a full `oma setup` install runs
+the richer repo-root hook (which supersedes the ontology-only block); a
+marketplace-only install runs the bundled one. The `oma`-CLI conveniences the
+marketplace path still does **not** deliver — the ontology **schemas**
+(`schemas/ontology/`, used by `oma validate`) and the **seed templates**
+(`templates/ontology/`, rendered by `oma setup`) — remain CLI-only by design:
+they are consumed by the CLI, not read by an installed skill, and (post the
+`$ref` enum refactor) cannot be copied into a plugin without breaking their
+cross-file `$ref`s. Use `oma setup` / `git clone` when you need them.
+
 ### 1.4 UserPromptSubmit hook — keyword and budget checks per prompt
 
 Detail of the `SET → UPS → TRIG · ONT → AGENT` arrows.

@@ -1,0 +1,13 @@
+{
+  "SessionStart": [
+    {
+      "_oma": "oma-session-start",
+      "hooks": [
+        {
+          "type": "command",
+          "command": "bash \"${CLAUDE_PLUGIN_ROOT}/hooks/session-start-ontology.sh\""
+        }
+      ]
+    }
+  ]
+}

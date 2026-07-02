@@ -24,9 +24,9 @@ AGENT = REPO_ROOT / "plugins" / "ai-infra" / "kiro-agents" / "ai-infra.agent.jso
 def test_ai_infra_round_trip():
     """Compile the DSL in memory (write=False) and compare to committed files.
 
-    We purposely do not copy to tmp: the DSL references hook scripts via
-    relative paths (`../../hooks/session-start.sh`), and the compiler
-    verifies that those exist. Staying in-place preserves those refs.
+    We purposely do not copy to tmp: the DSL references a plugin-bundled hook
+    script (`hooks/session-start-ontology.sh`), and the compiler verifies that
+    it exists inside the plugin root. Staying in-place preserves that ref.
     """
     result = compile_plugin(DSL, write=False)
     # Re-invoke with write=True then compare; check_drift is the stronger guard

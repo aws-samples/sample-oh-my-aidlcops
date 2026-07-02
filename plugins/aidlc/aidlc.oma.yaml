@@ -25,6 +25,17 @@ metadata:
 mcp: {}
 agents: []
 
+# ---------------------------------------------------------------------------
+# Hooks — plugin-bundled, self-contained SessionStart (#60).
+# Injects active ontology state (.omao/ontology) at session start. Bundled
+# INSIDE the plugin so /plugin install ships it (the repo-root
+# hooks/session-start.sh is the richer CLI/dev-install variant). The compiler
+# emits the SessionStart entry into hooks/hooks.json from this declaration.
+# ---------------------------------------------------------------------------
+hooks:
+  session-start:
+    runs: hooks/session-start-ontology.sh
+
 triggers:
   - id: inception
     keywords: ["inception"]
