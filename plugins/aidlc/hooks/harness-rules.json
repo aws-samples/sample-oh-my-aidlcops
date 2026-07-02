@@ -1,0 +1,32 @@
+{
+  "$generated_by": "oma-compile; edit the plugin's .oma.yaml policies block instead",
+  "rules": [
+    {
+      "id": "deny-secret-file-write",
+      "deny_if": {
+        "file_path_matches": "(^|/)\\.env(\\.|$)|(^|/)secrets?/|\\.pem$|(^|/)kubeconfig$"
+      },
+      "tool": "Write",
+      "decision": "deny",
+      "reason": "Harness: writing secret-bearing files is blocked. Use a secrets manager (e.g. External Secrets, SSM) instead of committing secrets."
+    },
+    {
+      "id": "deny-secret-file-edit",
+      "deny_if": {
+        "file_path_matches": "(^|/)\\.env(\\.|$)|(^|/)secrets?/|\\.pem$|(^|/)kubeconfig$"
+      },
+      "tool": "Edit",
+      "decision": "deny",
+      "reason": "Harness: editing secret-bearing files is blocked. Use a secrets manager (e.g. External Secrets, SSM) instead of committing secrets."
+    },
+    {
+      "id": "deny-secret-file-shell-redirect",
+      "deny_if": {
+        "command_matches": "(>>?|tee\\b|dd\\b|cp\\b|mv\\b)[^|;&]*(\\.env(\\.|\\b)|secrets?/|\\.pem\\b|kubeconfig\\b)"
+      },
+      "tool": "Bash",
+      "decision": "deny",
+      "reason": "Harness: writing secret-bearing files via the shell is blocked. Use a secrets manager (e.g. External Secrets, SSM) instead of committing secrets."
+    }
+  ]
+}
