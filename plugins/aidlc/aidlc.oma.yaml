@@ -65,6 +65,16 @@ policies:
         command_matches: "(>>?|tee\\b|dd\\b|cp\\b|mv\\b)[^|;&]*(\\.env(\\.|\\b)|secrets?/|\\.pem\\b|kubeconfig\\b)"
       decision: deny
       reason: "Harness: writing secret-bearing files via the shell is blocked. Use a secrets manager (e.g. External Secrets, SSM) instead of committing secrets."
+# ---------------------------------------------------------------------------
+# Hooks — plugin-bundled, self-contained SessionStart (#60).
+# Injects active ontology state (.omao/ontology) at session start. Bundled
+# INSIDE the plugin so /plugin install ships it (the repo-root
+# hooks/session-start.sh is the richer CLI/dev-install variant). The compiler
+# emits the SessionStart entry into hooks/hooks.json from this declaration.
+# ---------------------------------------------------------------------------
+hooks:
+  session-start:
+    runs: hooks/session-start-ontology.sh
 
 triggers:
   - id: inception
