@@ -78,7 +78,23 @@ audit_log = root / ".omao" / "audit.jsonl"
 event_schema_path = root / "schemas" / "audit" / "event.schema.json"
 if audit_log.exists() and event_schema_path.exists():
     schema = json.loads(event_schema_path.read_text(encoding="utf-8"))
-    validator = Draft202012Validator(schema)
+    # event.schema.json $refs shared enums in schemas/common/ (#63);
+    # register them so validation resolves refs offline. Mirrors
+    # tools/oma_audit/append.py::_load_validator.
+    try:
+        import referencing
+        from referencing import jsonschema as ref_jsonschema
+
+        resources = []
+        for common in (root / "schemas" / "common").glob("*.schema.json"):
+            content = json.loads(common.read_text(encoding="utf-8"))
+            resource = ref_jsonschema.DRAFT202012.create_resource(content)
+            resources.append((content["$id"], resource))
+            resources.append((f"../common/{common.name}", resource))
+        registry = referencing.Registry().with_resources(resources)
+        validator = Draft202012Validator(schema, registry=registry)
+    except ImportError:
+        validator = Draft202012Validator(schema)
     for i, raw in enumerate(audit_log.read_text(encoding="utf-8").splitlines(), start=1):
         if not raw.strip():
             continue

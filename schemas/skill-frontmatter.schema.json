@@ -63,17 +63,17 @@
       "properties": {
         "produces": {
           "type": "array",
-          "items": { "$ref": "ontology/../common/enums.schema.json#/$defs/entityRef" },
+          "items": { "$ref": "common/enums.schema.json#/$defs/entityRef" },
           "uniqueItems": true
         },
         "consumes": {
           "type": "array",
-          "items": { "$ref": "ontology/../common/enums.schema.json#/$defs/entityRef" },
+          "items": { "$ref": "common/enums.schema.json#/$defs/entityRef" },
           "uniqueItems": true
         },
         "references": {
           "type": "array",
-          "items": { "$ref": "ontology/../common/enums.schema.json#/$defs/entityRef" },
+          "items": { "$ref": "common/enums.schema.json#/$defs/entityRef" },
           "uniqueItems": true
         }
       }

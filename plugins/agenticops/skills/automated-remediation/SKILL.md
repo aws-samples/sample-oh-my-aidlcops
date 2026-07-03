@@ -771,7 +771,7 @@ def update_effectiveness(runbook_name: str, success: bool):
 ### 기술 블로그
 
 - [Google SRE — Automating Away Toil](https://sre.google/sre-book/eliminating-toil/) — 자동화 원칙
-- [PagerDuty — Automated Diagnostics](https://www.pagerduty.com/platform/automation/diagnostics/) — 자동 진단 패턴
+- [PagerDuty — Automation](https://www.pagerduty.com/platform/automation/) — 자동 진단·복구 패턴
 
 ### 관련 문서 (내부)
 

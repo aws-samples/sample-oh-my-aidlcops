@@ -299,7 +299,7 @@ oma run-workflow agenticops incident-pipeline
 - [Amazon CloudWatch Anomaly Detection](https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/CloudWatch_Anomaly_Detection.html) — AWS 네이티브 이상 탐지
 - [Prometheus AlertManager](https://prometheus.io/docs/alerting/latest/alertmanager/) — 알람 라우팅
 - [Kubernetes Events API](https://kubernetes.io/docs/reference/kubernetes-api/cluster-resources/event-v1/) — 클러스터 이벤트
-- [AWS CloudTrail](https://docs.aws.amazon.com/cloudtrail/latest/userguide/) — 변경 이력 추적
+- [AWS CloudTrail](https://docs.aws.amazon.com/awscloudtrail/latest/userguide/cloudtrail-user-guide.html) — 변경 이력 추적
 - [Ragas Documentation](https://docs.ragas.io/) — RAG 평가 메트릭
 
 ### 기술 블로그

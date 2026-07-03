@@ -672,7 +672,7 @@ def update_rca_patterns(incident_id: str, rca_report: RCAReport):
 
 ### 공식 문서
 
-- [AWS CloudTrail](https://docs.aws.amazon.com/cloudtrail/latest/userguide/) — 변경 이력 추적
+- [AWS CloudTrail](https://docs.aws.amazon.com/awscloudtrail/latest/userguide/cloudtrail-user-guide.html) — 변경 이력 추적
 - [Amazon DevOps Guru](https://docs.aws.amazon.com/devops-guru/latest/userguide/) — ML 기반 이상 탐지 참고
 - [Kubernetes Events](https://kubernetes.io/docs/reference/kubernetes-api/cluster-resources/event-v1/) — 클러스터 이벤트
 - [AWS Health API](https://docs.aws.amazon.com/health/latest/APIReference/) — AWS 서비스 상태
@@ -680,7 +680,7 @@ def update_rca_patterns(incident_id: str, rca_report: RCAReport):
 ### 기술 블로그
 
 - [Google SRE — Effective Troubleshooting](https://sre.google/sre-book/effective-troubleshooting/) — 체계적 진단 방법론
-- [Meta — Root Cause Analysis at Scale](https://engineering.fb.com/2023/11/28/production-engineering/root-cause-analysis/) — 대규모 RCA 자동화
+- [Meta — Leveraging AI for efficient incident response](https://engineering.fb.com/2024/06/24/data-infrastructure/leveraging-ai-for-efficient-incident-response/) — AI 기반 대규모 RCA 자동화
 
 ### 관련 문서 (내부)
 

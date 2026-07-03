@@ -569,7 +569,7 @@ def generate_slo_report(service: str, period: str = "weekly") -> str:
 ### 기술 블로그
 
 - [Google — The Art of SLOs](https://sre.google/workbook/implementing-slos/) — SLO 구현 가이드
-- [Nobl9 — Error Budget Policies](https://www.nobl9.com/resources/error-budget-policies) — Error Budget 정책 패턴
+- [Google SRE Workbook — Error Budget Policy](https://sre.google/workbook/error-budget-policy/) — Error Budget 정책 패턴
 - [Sloth — SLO as Code](https://sloth.dev/) — SLO 코드화 도구
 
 ### 관련 문서 (내부)
