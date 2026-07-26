@@ -9,6 +9,13 @@ ontology:
   produces: [Deployment]
   consumes: [Spec, ADR]
   references: [Budget]
+loop-interface:
+  accepts-from:
+    - self-improving-loop.artifact
+    - continuous-eval.gate-signal
+  emits-to:
+    - continuous-eval.deployment-event
+  emits-signals: []
 ---
 
 ## When to Use

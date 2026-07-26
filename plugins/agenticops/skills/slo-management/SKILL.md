@@ -7,6 +7,13 @@ model: claude-sonnet-4-6
 allowed-tools: "Read,Grep,Bash,mcp__cloudwatch,mcp__prometheus"
 ontology:
   references: [Deployment, Budget, Incident]
+loop-interface:
+  accepts-from:
+    - automated-remediation.remediation-event
+    - predictive-scaling.scaling-event
+  emits-to: []
+  emits-signals:
+    - slo-management.breach
 ---
 
 ## When to Use

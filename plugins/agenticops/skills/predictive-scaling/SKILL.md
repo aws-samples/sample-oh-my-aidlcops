@@ -7,6 +7,13 @@ model: claude-sonnet-4-6
 allowed-tools: "Read,Grep,Bash,mcp__cloudwatch,mcp__prometheus,mcp__eks"
 ontology:
   references: [Deployment, Budget]
+loop-interface:
+  accepts-from:
+    - cost-governance.budget-context
+    - anomaly-detection.anomaly
+  emits-to:
+    - slo-management.scaling-event
+  emits-signals: []
 ---
 
 ## When to Use

@@ -77,6 +77,28 @@
           "uniqueItems": true
         }
       }
+    },
+    "loop-interface": {
+      "description": "Declares this skill's inputs and outputs for loop participation. Enables the compiler to validate that loop steps are properly connected.",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "accepts-from": {
+          "description": "Signals/artifacts this skill can accept as input from other skills. Format: 'skill-name.output-type'.",
+          "type": "array",
+          "items": { "type": "string", "pattern": "^[a-z][a-z0-9-]*\\.[a-z][a-z0-9-]*$" }
+        },
+        "emits-to": {
+          "description": "Artifacts this skill produces for consumption by downstream skills. Format: 'skill-name.input-type'.",
+          "type": "array",
+          "items": { "type": "string", "pattern": "^[a-z][a-z0-9-]*\\.[a-z][a-z0-9-]*$" }
+        },
+        "emits-signals": {
+          "description": "Event signals this skill can emit to trigger loops. Format: 'skill-name.signal-type'.",
+          "type": "array",
+          "items": { "type": "string", "pattern": "^[a-z][a-z0-9-]*\\.[a-z][a-z0-9-]*$" }
+        }
+      }
     }
   },
   "required": [

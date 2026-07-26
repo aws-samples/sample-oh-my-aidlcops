@@ -2,7 +2,7 @@
   "$id": "https://aws-samples.github.io/sample-oh-my-aidlcops/schemas/harness/dsl.schema.json",
   "$schema": "http://json-schema.org/draft-07/schema#",
   "title": "OMA Harness DSL (v1/v2)",
-  "description": "Single-source YAML surface for an OMA plugin. oma-compile reads this and emits .mcp.json and kiro-agents/<agent>.agent.json. Native runtimes (Claude Code marketplace, Kiro) consume the emitted files unchanged. v2 adds optional workflows (DAG), telemetry, policies, and metadata sections without touching the emission contract.",
+  "description": "Single-source YAML surface for an OMA plugin. oma-compile reads this and emits .mcp.json and kiro-agents/<agent>.agent.json. Native runtimes (Claude Code marketplace, Kiro) consume the emitted files unchanged. v2 adds optional workflows (DAG), telemetry, policies, metadata, and loops sections without touching the emission contract.",
   "type": "object",
   "additionalProperties": false,
   "required": ["version", "plugin"],
@@ -47,6 +47,11 @@
       "type": "array",
       "items": { "$ref": "#/definitions/policyRef" }
     },
+    "loops": {
+      "description": "(v2 only) Named feedback loops. Each loop defines a cyclic sequence of skill steps with cadence, event triggers, severity-based gating, and explicit feedback edges. The compiler validates step references and feedback edges but does not execute them; runtime orchestration is handled by the Loop Controller.",
+      "type": "object",
+      "additionalProperties": { "$ref": "#/definitions/loop" }
+    },
     "plugin": {
       "description": "Plugin id. Must match the directory name under plugins/.",
       "type": "string",
@@ -82,7 +87,8 @@
             { "required": ["metadata"] },
             { "required": ["workflows"] },
             { "required": ["telemetry"] },
-            { "required": ["policies"] }
+            { "required": ["policies"] },
+            { "required": ["loops"] }
           ]
         }
       }
@@ -382,6 +388,287 @@
           "description": "Human-readable one-liner surfaced to the agent when the trigger fires.",
           "type": "string",
           "maxLength": 200
+        }
+      }
+    },
+    "loop": {
+      "description": "(v2 only) A named feedback loop. Unlike a workflow (linear DAG), a loop defines cyclic execution with explicit feedback edges, cadence-based scheduling, event-driven triggers, severity-gated human approval, and layered termination logic. Follows the 4-layer stacking model: agent loop (skill internals) → verification loop (step-level retry) → event-driven loop (cadence/triggers) → hill-climbing loop (self-improving-loop).",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["steps", "feedback"],
+      "properties": {
+        "description": { "type": "string", "maxLength": 500 },
+        "mode": {
+          "description": "Loop execution mode. 'continuous' runs on cadence indefinitely (monitoring). 'event-driven' starts on trigger and exits when exit_when is satisfied (goal-oriented).",
+          "enum": ["continuous", "event-driven"],
+          "default": "continuous"
+        },
+        "cadence": {
+          "description": "Cron expression or duration (e.g. '1h', '6h', '1d') for periodic execution. Required for continuous mode. Omit for purely event-driven loops.",
+          "type": "string",
+          "maxLength": 64
+        },
+        "trigger_on": {
+          "description": "Event-based triggers that start the loop (event-driven mode) or force an immediate iteration (continuous mode).",
+          "type": "array",
+          "items": { "$ref": "#/definitions/loopTrigger" }
+        },
+        "exit_when": {
+          "description": "Normal termination conditions (verifier.passes). When ANY condition is met, the loop exits successfully. For continuous loops this pauses until next cadence tick; for event-driven loops this completes the loop run.",
+          "type": "array",
+          "items": { "$ref": "#/definitions/loopExitCondition" }
+        },
+        "max_iterations": {
+          "description": "Hard cap on consecutive iterations per run. Prevents infinite loops. After this many iterations without exit_when being satisfied, the loop escalates to human.",
+          "type": "integer",
+          "minimum": 1,
+          "default": 50
+        },
+        "budget": {
+          "description": "Resource budget for the loop. Exhaustion triggers escalation to human.",
+          "$ref": "#/definitions/loopBudget"
+        },
+        "no_progress_detection": {
+          "description": "Detects when the loop is stuck repeating the same state. Triggers escalation instead of burning resources.",
+          "$ref": "#/definitions/loopNoProgress"
+        },
+        "steps": {
+          "type": "array",
+          "minItems": 2,
+          "items": { "$ref": "#/definitions/loopStep" }
+        },
+        "feedback": {
+          "description": "Explicit feedback edges forming the cycle. Each entry is 'source_step_id -> target_step_id'.",
+          "type": "array",
+          "items": { "type": "string", "pattern": "^[a-z][a-z0-9-]*\\s*->\\s*[a-z][a-z0-9-]*$" },
+          "minItems": 1
+        },
+        "circuit_breaker": {
+          "description": "Safety mechanism to halt the loop after consecutive failures.",
+          "$ref": "#/definitions/loopCircuitBreaker"
+        },
+        "escalation": {
+          "description": "Where to hand off when the loop cannot make progress or exceeds budget.",
+          "$ref": "#/definitions/loopEscalation"
+        }
+      }
+    },
+    "loopStep": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "skill_ref"],
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9-]*$",
+          "maxLength": 64
+        },
+        "skill_ref": {
+          "description": "Skill id resolved at runtime by the harness.",
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9-]*$"
+        },
+        "depends_on": {
+          "description": "Step ids in the same loop that must complete before this step runs.",
+          "type": "array",
+          "items": { "type": "string", "pattern": "^[a-z][a-z0-9-]*$" },
+          "uniqueItems": true
+        },
+        "skip_remaining_if": {
+          "description": "Condition expression evaluated after this step completes. If true, all subsequent steps in this iteration are skipped and the loop returns to idle until next cadence/trigger. This is the Triage gate: 'no actionable items found, skip Modify and Verify'.",
+          "type": "string",
+          "maxLength": 200
+        },
+        "isolation": {
+          "description": "Execution isolation strategy for this step. 'worktree' runs in a separate git worktree (isolated branch). 'container' runs in a sandboxed container. 'none' runs in the main working directory.",
+          "enum": ["none", "worktree", "container"],
+          "default": "none"
+        },
+        "gate": {
+          "description": "Approval gate for this step. Determines whether the step auto-executes or requires human approval based on severity.",
+          "$ref": "#/definitions/loopGate"
+        },
+        "on_failure": {
+          "description": "How the loop should react if this step fails.",
+          "enum": ["halt", "skip", "retry"],
+          "default": "halt"
+        },
+        "max_retries": {
+          "description": "Max retry count when on_failure=retry.",
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 5,
+          "default": 3
+        },
+        "timeout": {
+          "description": "Max execution time for this step in seconds.",
+          "type": "integer",
+          "minimum": 30
+        }
+      }
+    },
+    "loopGate": {
+      "description": "Severity-based approval gate. Low-severity actions auto-execute; high-severity actions require human approval.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["type"],
+      "properties": {
+        "type": {
+          "description": "Gate type: 'auto' always proceeds, 'human-approval' always pauses, 'severity-based' decides based on the severity field of the upstream signal.",
+          "enum": ["auto", "human-approval", "severity-based"]
+        },
+        "auto_approve_below": {
+          "description": "For severity-based gates: severity levels at or below this threshold auto-approve. Valid values: low, medium, high, critical.",
+          "enum": ["low", "medium", "high", "critical"]
+        },
+        "timeout_minutes": {
+          "description": "How long to wait for human approval before timing out (default: loop halts on timeout).",
+          "type": "integer",
+          "minimum": 1,
+          "default": 60
+        },
+        "notify": {
+          "description": "Notification channels to alert when approval is needed.",
+          "type": "array",
+          "items": { "type": "string", "maxLength": 128 }
+        }
+      }
+    },
+    "loopTrigger": {
+      "description": "An event that can start a loop iteration outside the normal cadence.",
+      "type": "object",
+      "additionalProperties": false,
+      "minProperties": 1,
+      "properties": {
+        "slo_breach": {
+          "description": "SLO breach expression (e.g. 'faithfulness < 0.82', 'error_rate > 0.05').",
+          "type": "string",
+          "maxLength": 200
+        },
+        "alert": {
+          "description": "Alert source and severity (e.g. 'pagerduty.sev2', 'cloudwatch.alarm').",
+          "type": "string",
+          "maxLength": 128
+        },
+        "metric_threshold": {
+          "description": "Prometheus/CloudWatch metric threshold expression.",
+          "type": "string",
+          "maxLength": 200
+        },
+        "skill_signal": {
+          "description": "Signal emitted by another skill (e.g. 'continuous-eval.regression', 'cost-governance.anomaly').",
+          "type": "string",
+          "maxLength": 128
+        }
+      }
+    },
+    "loopCircuitBreaker": {
+      "description": "Halts the loop after repeated failures to prevent runaway execution.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["consecutive_failures"],
+      "properties": {
+        "consecutive_failures": {
+          "description": "Number of consecutive loop iteration failures before the circuit opens.",
+          "type": "integer",
+          "minimum": 1,
+          "default": 3
+        },
+        "cooldown_minutes": {
+          "description": "How long the loop stays halted before attempting to close the circuit.",
+          "type": "integer",
+          "minimum": 5,
+          "default": 60
+        },
+        "notify": {
+          "description": "Notification channels to alert when the circuit opens.",
+          "type": "array",
+          "items": { "type": "string", "maxLength": 128 }
+        }
+      }
+    },
+    "loopExitCondition": {
+      "description": "A condition that signals normal loop termination (verifier.passes). When satisfied, the loop exits successfully rather than continuing to iterate.",
+      "type": "object",
+      "additionalProperties": false,
+      "minProperties": 1,
+      "properties": {
+        "slo_restored": {
+          "description": "SLO restoration expression with duration (e.g. 'error_rate < 0.01 for 15m'). Exit when the condition holds for the specified duration.",
+          "type": "string",
+          "maxLength": 200
+        },
+        "goal_met": {
+          "description": "Goal-completion expression (e.g. 'all_tests_pass', 'deployment_100_percent'). Checked by the verifier step.",
+          "type": "string",
+          "maxLength": 200
+        },
+        "manual": {
+          "description": "Allow manual termination via /oma:loop-stop command.",
+          "type": "boolean"
+        }
+      }
+    },
+    "loopBudget": {
+      "description": "Resource budget for the loop. When any budget dimension is exhausted, the loop stops and escalates to human rather than continuing to burn resources.",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "max_token_spend": {
+          "description": "Maximum total tokens (input + output) the loop may consume per run.",
+          "type": "integer",
+          "minimum": 1000
+        },
+        "max_cost_usd": {
+          "description": "Maximum USD cost the loop may incur per run.",
+          "type": "number",
+          "minimum": 0.01
+        },
+        "max_wall_clock_minutes": {
+          "description": "Maximum wall-clock time in minutes for a single loop run.",
+          "type": "integer",
+          "minimum": 1
+        }
+      }
+    },
+    "loopNoProgress": {
+      "description": "Detects when the loop is stuck in a no-progress state (same error repeated, state unchanged). Triggers escalation instead of spinning indefinitely.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["repeated_state_count"],
+      "properties": {
+        "repeated_state_count": {
+          "description": "Number of consecutive iterations producing the same outcome (identical error, unchanged state hash) before declaring no-progress.",
+          "type": "integer",
+          "minimum": 2,
+          "default": 3
+        },
+        "action": {
+          "description": "What to do when no-progress is detected.",
+          "enum": ["escalate", "halt", "try_alternative"],
+          "default": "escalate"
+        }
+      }
+    },
+    "loopEscalation": {
+      "description": "Defines where and how to hand off when the loop cannot make progress, exceeds budget, or hits max_iterations.",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "notify": {
+          "description": "Notification channels for escalation.",
+          "type": "array",
+          "items": { "type": "string", "maxLength": 128 }
+        },
+        "create_issue": {
+          "description": "Automatically create a GitHub/GitLab issue with loop state and trace.",
+          "type": "boolean",
+          "default": false
+        },
+        "include_trace": {
+          "description": "Include the full iteration trace in the escalation message.",
+          "type": "boolean",
+          "default": true
         }
       }
     }

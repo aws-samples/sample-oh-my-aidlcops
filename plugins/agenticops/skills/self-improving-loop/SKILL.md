@@ -8,6 +8,12 @@ allowed-tools: "Read,Grep,Bash,mcp__cloudwatch,mcp__prometheus,mcp__langfuse__qu
 ontology:
   consumes: [Skill, Agent]
   references: [Deployment]
+loop-interface:
+  accepts-from:
+    - continuous-eval.report
+  emits-to:
+    - autopilot-deploy.artifact
+  emits-signals: []
 ---
 
 ## When to Use

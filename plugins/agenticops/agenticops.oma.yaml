@@ -1,13 +1,17 @@
-# OMA Harness DSL for the agenticops plugin (v0.5 DSL v2 migration).
+# OMA Harness DSL for the agenticops plugin (v0.5 DSL v2 + Loop Engineering).
 #
 # agenticops covers the AIDLC Operations phase: self-improving loops,
 # autonomous deploy, continuous evaluation, incident response, and cost
 # governance. The plugin ships no MCP servers of its own — it reuses the
 # ai-infra MCP catalogue and the hosted awslabs MCP runtime layer.
 #
-# This file exists so that oma-compile has a v2 manifest to validate and
-# so that `oma doctor --enterprise` (v0.5) does not warn about a missing
-# .oma.yaml. Skills remain authored as SKILL.md files under skills/.
+# Loop Engineering: Skills are organized into 3 feedback loops that run
+# autonomously at defined cadences. Each loop follows the pattern:
+#   Observe → Analyze → Act → Verify → (feedback) → Observe
+#
+# Severity-based gating: Act steps use severity-based gates where
+# low-severity actions auto-execute and high-severity actions require
+# human approval (Tier-0 model preserved).
 
 version: 2
 plugin: agenticops
@@ -16,6 +20,7 @@ metadata:
   labels:
     aidlc-phase: operations
     tier-0-surface: "true"
+    loop-engineering: "true"
 
 # No MCP servers or agents declared at this layer — see
 # plugins/ai-infra/ai-infra.oma.yaml for the shared MCP
@@ -24,7 +29,200 @@ metadata:
 mcp: {}
 agents: []
 
-# Keyword triggers for Tier-0 routing.
+# ─────────────────────────────────────────────────────────────────────
+# LOOPS — 3 autonomous feedback loops
+# ─────────────────────────────────────────────────────────────────────
+
+loops:
+  # ── Quality Loop ──────────────────────────────────────────────────
+  # Observes agent/skill quality via Ragas metrics and Langfuse traces,
+  # detects regression, proposes prompt/skill improvements, deploys via
+  # canary, then re-observes to confirm improvement.
+  quality-loop:
+    description: "Continuous quality improvement: observe traces → detect regression → propose fix → canary deploy → verify improvement"
+    mode: continuous
+    cadence: "1h"
+    trigger_on:
+      - slo_breach: "faithfulness < 0.82"
+      - slo_breach: "answer_relevance < 0.75"
+      - skill_signal: "continuous-eval.regression"
+    exit_when:
+      - manual: true
+    max_iterations: 20
+    budget:
+      max_cost_usd: 10.0
+      max_wall_clock_minutes: 90
+    no_progress_detection:
+      repeated_state_count: 3
+      action: escalate
+    steps:
+      - id: discover
+        skill_ref: continuous-eval
+        on_failure: halt
+        timeout: 600
+        skip_remaining_if: "no_regression_detected"
+      - id: triage
+        skill_ref: self-improving-loop
+        depends_on: [discover]
+        on_failure: halt
+        timeout: 900
+        skip_remaining_if: "no_actionable_proposal"
+      - id: modify
+        skill_ref: autopilot-deploy
+        depends_on: [triage]
+        isolation: worktree
+        gate:
+          type: severity-based
+          auto_approve_below: low
+          timeout_minutes: 120
+          notify: ["slack:#ops-approvals"]
+        on_failure: halt
+        timeout: 1800
+      - id: verify
+        skill_ref: continuous-eval
+        depends_on: [modify]
+        on_failure: halt
+        timeout: 600
+    feedback:
+      - "verify -> discover"
+    circuit_breaker:
+      consecutive_failures: 3
+      cooldown_minutes: 120
+      notify: ["slack:#ops-alerts"]
+    escalation:
+      notify: ["slack:#ops-alerts"]
+      create_issue: true
+      include_trace: true
+
+  # ── Incident Loop ─────────────────────────────────────────────────
+  # Detects anomalies, performs root-cause analysis, and executes
+  # automated remediation with severity-based human gating.
+  # Event-driven: starts on alert, exits when SLO is restored.
+  incident-loop:
+    description: "Incident response: detect anomaly → root-cause analysis → remediate → verify resolution"
+    mode: event-driven
+    trigger_on:
+      - alert: "pagerduty.sev1"
+      - alert: "pagerduty.sev2"
+      - alert: "cloudwatch.alarm"
+      - skill_signal: "anomaly-detection.anomaly"
+    exit_when:
+      - slo_restored: "error_rate < 0.01 for 15m"
+      - goal_met: "incident_resolved"
+      - manual: true
+    max_iterations: 10
+    budget:
+      max_cost_usd: 25.0
+      max_wall_clock_minutes: 60
+    no_progress_detection:
+      repeated_state_count: 2
+      action: escalate
+    steps:
+      - id: detect
+        skill_ref: anomaly-detection
+        on_failure: halt
+        timeout: 120
+        skip_remaining_if: "false_alarm_confirmed"
+      - id: diagnose
+        skill_ref: root-cause-analysis
+        depends_on: [detect]
+        on_failure: halt
+        timeout: 600
+      - id: remediate
+        skill_ref: automated-remediation
+        depends_on: [diagnose]
+        isolation: worktree
+        gate:
+          type: severity-based
+          auto_approve_below: medium
+          timeout_minutes: 30
+          notify: ["pagerduty:#on-call", "slack:#incidents"]
+        on_failure: retry
+        max_retries: 2
+        timeout: 900
+      - id: verify
+        skill_ref: slo-management
+        depends_on: [remediate]
+        on_failure: halt
+        timeout: 300
+    feedback:
+      - "verify -> detect"
+    circuit_breaker:
+      consecutive_failures: 2
+      cooldown_minutes: 30
+      notify: ["pagerduty:#on-call", "slack:#ops-alerts"]
+    escalation:
+      notify: ["pagerduty:#on-call", "slack:#incidents"]
+      create_issue: true
+      include_trace: true
+
+  # ── Cost Loop ─────────────────────────────────────────────────────
+  # Monitors cost/resource metrics, detects anomalies, predicts demand,
+  # and applies scaling actions with severity-based gating.
+  cost-loop:
+    description: "Cost optimization: monitor budgets → detect anomaly → predict demand → scale resources → verify savings"
+    mode: continuous
+    cadence: "6h"
+    trigger_on:
+      - metric_threshold: "daily_spend_usd > budget_limit * 0.8"
+      - skill_signal: "cost-governance.anomaly"
+      - alert: "cloudwatch.billing-alarm"
+    exit_when:
+      - manual: true
+    max_iterations: 10
+    budget:
+      max_cost_usd: 5.0
+      max_wall_clock_minutes: 45
+    no_progress_detection:
+      repeated_state_count: 3
+      action: halt
+    steps:
+      - id: discover
+        skill_ref: cost-governance
+        on_failure: halt
+        timeout: 300
+        skip_remaining_if: "no_budget_anomaly"
+      - id: triage
+        skill_ref: anomaly-detection
+        depends_on: [discover]
+        on_failure: skip
+        timeout: 300
+      - id: plan
+        skill_ref: predictive-scaling
+        depends_on: [triage]
+        on_failure: halt
+        timeout: 600
+      - id: modify
+        skill_ref: predictive-scaling
+        depends_on: [plan]
+        isolation: worktree
+        gate:
+          type: severity-based
+          auto_approve_below: low
+          timeout_minutes: 60
+          notify: ["slack:#cost-approvals"]
+        on_failure: halt
+        timeout: 900
+      - id: verify
+        skill_ref: slo-management
+        depends_on: [modify]
+        on_failure: halt
+        timeout: 300
+    feedback:
+      - "verify -> discover"
+    circuit_breaker:
+      consecutive_failures: 3
+      cooldown_minutes: 360
+      notify: ["slack:#ops-alerts"]
+    escalation:
+      notify: ["slack:#ops-alerts"]
+      create_issue: false
+      include_trace: true
+
+# ─────────────────────────────────────────────────────────────────────
+# TRIGGERS — Keyword triggers for Tier-0 routing
+# ─────────────────────────────────────────────────────────────────────
+
 triggers:
   - id: agenticops-mode
     keywords: ["agenticops", "ops-mode"]
@@ -36,3 +234,8 @@ triggers:
     context_required: []
     command: /oma:self-improving
     description: "Run the Langfuse-backed self-improving feedback loop to produce prompt/skill improvement PRs."
+  - id: loop-status
+    keywords: ["loop-status", "loop status"]
+    context_required: []
+    command: /oma:loop-status
+    description: "Show the current state of all feedback loops (quality, incident, cost)."

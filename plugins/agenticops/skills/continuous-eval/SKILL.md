@@ -7,6 +7,13 @@ model: claude-sonnet-4-6
 allowed-tools: "Read,Grep,Bash,mcp__cloudwatch,mcp__prometheus"
 ontology:
   references: [Deployment, Agent]
+loop-interface:
+  accepts-from: []
+  emits-to:
+    - self-improving-loop.report
+    - autopilot-deploy.gate-signal
+  emits-signals:
+    - continuous-eval.regression
 ---
 
 ## When to Use

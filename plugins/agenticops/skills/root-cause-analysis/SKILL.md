@@ -8,6 +8,12 @@ allowed-tools: "Read,Grep,Bash,mcp__cloudwatch,mcp__prometheus,mcp__eks"
 ontology:
   consumes: [Incident]
   references: [Deployment, Agent]
+loop-interface:
+  accepts-from:
+    - anomaly-detection.anomaly
+  emits-to:
+    - automated-remediation.rca
+  emits-signals: []
 ---
 
 ## When to Use

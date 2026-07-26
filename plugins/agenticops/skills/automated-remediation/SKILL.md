@@ -8,6 +8,12 @@ allowed-tools: "Read,Grep,Bash,mcp__cloudwatch,mcp__prometheus,mcp__eks"
 ontology:
   consumes: [Incident]
   references: [Deployment]
+loop-interface:
+  accepts-from:
+    - root-cause-analysis.rca
+  emits-to:
+    - slo-management.remediation-event
+  emits-signals: []
 ---
 
 ## When to Use
