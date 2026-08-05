@@ -53,7 +53,7 @@
       "required": ["entity_type", "entity_id"],
       "properties": {
         "entity_type": {
-          "enum": ["Agent", "Skill", "Deployment", "Incident", "Budget", "Risk", "Spec", "ADR"]
+          "$ref": "../common/enums.schema.json#/$defs/entityRef"
         },
         "entity_id": {
           "type": "string",
@@ -63,7 +63,7 @@
       }
     },
     "phase": {
-      "enum": ["inception", "construction", "operations"]
+      "$ref": "../common/enums.schema.json#/$defs/aidlcPhase"
     },
     "compliance": {
       "type": "object",

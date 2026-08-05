@@ -73,7 +73,7 @@
     },
     "approval_state": {
       "description": "Human-in-the-loop checkpoint state. AgenticOps only progresses on 'approved'.",
-      "enum": ["draft", "proposed", "approved", "rejected", "deployed", "rolled_back"]
+      "$ref": "../common/enums.schema.json#/$defs/approvalState"
     },
     "rollback_plan": {
       "description": "Path or inline description of how to roll back. Required before approval_state=approved in strict mode.",
@@ -81,7 +81,7 @@
     },
     "blast_radius": {
       "description": "What breaks if this deployment misbehaves. Used by incident-response skill.",
-      "enum": ["single-namespace", "single-cluster", "single-account", "cross-account", "cross-region"]
+      "$ref": "../common/enums.schema.json#/$defs/blastRadius"
     },
     "produced_by": {
       "description": "Agent or skill id that generated this deployment.",
@@ -97,20 +97,8 @@
       "items": { "type": "string" }
     },
     "approval_chain": {
-      "description": "Optional ordered list of approvals gating approval_state=approved. Shape defined in schemas/common/approval-chain.schema.json#/$defs/approvalChain. Under --strict-enterprise this array must be non-empty when approval_state=approved.",
-      "type": "array",
-      "minItems": 1,
-      "items": {
-        "type": "object",
-        "additionalProperties": false,
-        "required": ["approver", "approved_at", "reason"],
-        "properties": {
-          "approver": { "type": "string", "minLength": 1, "maxLength": 128 },
-          "approved_at": { "type": "string", "format": "date-time" },
-          "reason": { "type": "string", "minLength": 1, "maxLength": 1000 },
-          "role": { "type": "string", "maxLength": 64 }
-        }
-      }
+      "description": "Optional ordered list of approvals gating approval_state=approved. Under --strict-enterprise this array must be non-empty when approval_state=approved.",
+      "$ref": "../common/approval-chain.schema.json#/$defs/approvalChain"
     },
     "risk_exceptions": {
       "description": "Risk.id values whose gate_ref was explicitly waived for this deployment. Closes the Risk -> Deployment traceability gap.",

@@ -26,14 +26,14 @@
       "type": "string"
     },
     "blast_radius": {
-      "enum": ["single-namespace", "single-cluster", "single-account", "cross-account", "cross-region"]
+      "$ref": "../common/enums.schema.json#/$defs/blastRadius"
     },
     "proposed_fix": {
       "description": "Free-form description of the fix the agent wants to apply. Must be human-reviewable before execution.",
       "type": "string"
     },
     "approval_state": {
-      "enum": ["draft", "proposed", "approved", "rejected", "mitigated", "closed"]
+      "$ref": "../common/enums.schema.json#/$defs/incidentApprovalState"
     },
     "runbook_ref": {
       "description": "Path or URL to the runbook the agent consulted.",
@@ -45,20 +45,8 @@
       "items": { "type": "string" }
     },
     "approval_chain": {
-      "description": "Optional approvals for runbook overrides. Matches schemas/common/approval-chain.schema.json#/$defs/approvalChain.",
-      "type": "array",
-      "minItems": 1,
-      "items": {
-        "type": "object",
-        "additionalProperties": false,
-        "required": ["approver", "approved_at", "reason"],
-        "properties": {
-          "approver": { "type": "string", "minLength": 1, "maxLength": 128 },
-          "approved_at": { "type": "string", "format": "date-time" },
-          "reason": { "type": "string", "minLength": 1, "maxLength": 1000 },
-          "role": { "type": "string", "maxLength": 64 }
-        }
-      }
+      "description": "Optional approvals for runbook overrides.",
+      "$ref": "../common/approval-chain.schema.json#/$defs/approvalChain"
     },
     "trace_id": {
       "description": "Optional OpenTelemetry trace id (hex, 32 chars) linking the incident to distributed traces.",

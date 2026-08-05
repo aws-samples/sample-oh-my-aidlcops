@@ -8,8 +8,32 @@ import json
 import yaml
 import sys
 from pathlib import Path
-from jsonschema import validate, ValidationError, Draft7Validator
+from jsonschema import validate, ValidationError, Draft7Validator, RefResolver
 from typing import Dict, List, Tuple
+
+# skill-frontmatter.schema.json $refs shared enums in schemas/common/ (#63).
+# Populated in main() before any validation runs; resolved offline.
+REF_STORE: dict = {}
+
+def build_ref_store(schemas_dir: Path) -> dict:
+    """Register schemas/common/* under every alias a $ref may use."""
+    store: dict = {}
+    common_dir = schemas_dir / "common"
+    if not common_dir.is_dir():
+        return store
+    bases = (
+        "https://awslabs.github.io/agent-plugins/schemas/",
+        "https://aws-samples.github.io/sample-oh-my-aidlcops/schemas/",
+    )
+    for path in sorted(common_dir.glob("*.schema.json")):
+        with open(path, 'r', encoding='utf-8') as f:
+            content = json.load(f)
+        aliases = {content.get("$id"), f"common/{path.name}", f"../common/{path.name}"}
+        aliases.update(f"{base}common/{path.name}" for base in bases)
+        for alias in aliases:
+            if alias:
+                store[alias] = content
+    return store
 
 def load_schema(schema_path: Path) -> dict:
     """Load a JSON schema from file."""
@@ -44,8 +68,9 @@ def validate_file(file_path: Path, schema: dict, schema_name: str, is_frontmatte
             with open(file_path, 'r', encoding='utf-8') as f:
                 data = json.load(f)
 
-        # Validate against schema
-        validate(instance=data, schema=schema)
+        # Validate against schema (resolver serves schemas/common/* $refs)
+        resolver = RefResolver.from_schema(schema, store=REF_STORE)
+        Draft7Validator(schema, resolver=resolver).validate(data)
         return True, ""
 
     except ValidationError as e:
@@ -65,6 +90,8 @@ def validate_file(file_path: Path, schema: dict, schema_name: str, is_frontmatte
 def main():
     repo_root = Path(__file__).parent.parent.parent
     schemas_dir = repo_root / "schemas"
+    REF_STORE.clear()
+    REF_STORE.update(build_ref_store(schemas_dir))
 
     results = {
         "jsonschema_lib_installed": True,

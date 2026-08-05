@@ -159,6 +159,32 @@ breaking changes to non-stable surfaces as documented in
 - Removed `policies/examples/*.rego` and `tests/harness/test_opa_stub.py`.
 
 ### Fixed
+- **Plugin version skew (#58).** All four `plugins/*/.claude-plugin/plugin.json`
+  files declared `0.1.0` while `marketplace.json`, the release tag, and the docs
+  said `0.4.0-preview.1`. Claude Code resolves a plugin's version from
+  `plugin.json` first, so `/plugin list` showed `0.1.0` and `/plugin update`
+  keyed off the stale number. Bumped all four to `0.4.0-preview.1` and added
+  `tests/harness/test_plugin_version_sync.py` to fail CI on any future
+  plugin.json ↔ marketplace.json drift.
+- **CI schema validation broken by #63 enum extraction.** The shared-enum
+  refactor moved `entityRef`/`approvalState`/... into
+  `schemas/common/enums.schema.json`, but four validators still compiled
+  schemas without a local `$ref` store and failed with
+  `Unresolvable: ../common/enums.schema.json#/...`:
+  `scripts/dev/validate.py` (Validate Schemas workflow — every SKILL.md
+  reported FAIL), `scripts/oma/_seed.sh` (foundation workflow — setup
+  bats 7–9), `scripts/oma/doctor-enterprise.sh` probe #4, and
+  `scripts/dev/validate_strict.py`. All four now register
+  `schemas/common/*` in an offline resolver, mirroring
+  `tools/oma_compile/compile.py::_build_ref_store`. The redundant
+  `ontology/../common/...` ref spelling in
+  `schemas/skill-frontmatter.schema.json` is normalized to
+  `common/...`.
+- **Link Check red on main.** Replaced dead references (Nobl9 error-budget
+  page → Google SRE Workbook, PagerDuty diagnostics → automation landing,
+  truncated CloudTrail user-guide URL, Meta 2023 RCA post → 2024 incident
+  response post) and ignored hosts that 403/406 bot traffic
+  (iso.org, netflixtechblog.com, uber.com/blog) in `.lycheeignore`.
 - **Self-improving loop honesty.** The landing page and docs implied OMA
   turns Langfuse traces into improvement PRs out of the box. OMA ships the
   skills and the MCP contract, not the Langfuse runtime — docs (landing,

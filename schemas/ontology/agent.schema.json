@@ -40,12 +40,12 @@
       "properties": {
         "produces": {
           "type": "array",
-          "items": { "$ref": "#/definitions/entityRef" },
+          "items": { "$ref": "../common/enums.schema.json#/$defs/entityRef" },
           "uniqueItems": true
         },
         "consumes": {
           "type": "array",
-          "items": { "$ref": "#/definitions/entityRef" },
+          "items": { "$ref": "../common/enums.schema.json#/$defs/entityRef" },
           "uniqueItems": true
         }
       }
@@ -67,8 +67,8 @@
   },
   "definitions": {
     "entityRef": {
-      "description": "Reference to another ontology entity type.",
-      "enum": ["Agent", "Skill", "Deployment", "Incident", "Budget", "Risk", "Spec", "ADR"]
+      "description": "Deprecated local alias — prefer $ref to common/enums.schema.json#/$defs/entityRef. Kept for backward compatibility with external consumers that $ref agent.schema.json#/definitions/entityRef.",
+      "$ref": "../common/enums.schema.json#/$defs/entityRef"
     }
   }
 }

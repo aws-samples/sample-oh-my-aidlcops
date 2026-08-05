@@ -13,6 +13,7 @@ import pytest
 from jsonschema import Draft7Validator, RefResolver
 
 SCHEMA_DIR = Path(__file__).resolve().parents[2] / "schemas" / "ontology"
+COMMON_DIR = Path(__file__).resolve().parents[2] / "schemas" / "common"
 
 
 def _load(name: str) -> dict:
@@ -22,12 +23,19 @@ def _load(name: str) -> dict:
 
 def _validator(schema_name: str) -> Draft7Validator:
     schema = _load(schema_name)
-    # Resolve cross-schema $ref (skill -> agent) by mapping $id -> local content.
+    # Resolve cross-schema $ref by mapping $id -> local content.
     store = {}
     for other in SCHEMA_DIR.glob("*.schema.json"):
         content = json.loads(other.read_text(encoding="utf-8"))
         store[content["$id"]] = content
         store[other.name] = content  # allow relative "agent.schema.json" refs
+    # Include common schemas so ../common/enums.schema.json refs resolve.
+    for common in COMMON_DIR.glob("*.schema.json"):
+        content = json.loads(common.read_text(encoding="utf-8"))
+        store[content["$id"]] = content
+        store[common.name] = content
+        # Allow relative path resolution from ontology dir.
+        store[f"../common/{common.name}"] = content
     resolver = RefResolver.from_schema(schema, store=store)
     return Draft7Validator(schema, resolver=resolver)
 

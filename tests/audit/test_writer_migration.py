@@ -11,13 +11,27 @@ import pytest
 from jsonschema import Draft202012Validator, FormatChecker
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
+COMMON_DIR = REPO_ROOT / "schemas" / "common"
 SCHEMA = json.loads(
     (REPO_ROOT / "schemas" / "audit" / "event.schema.json").read_text(encoding="utf-8")
 )
 
 
 def _validator() -> Draft202012Validator:
-    return Draft202012Validator(SCHEMA, format_checker=FormatChecker())
+    try:
+        import referencing
+        from referencing import jsonschema as ref_jsonschema
+
+        resources = []
+        for common in COMMON_DIR.glob("*.schema.json"):
+            content = json.loads(common.read_text(encoding="utf-8"))
+            resource = ref_jsonschema.DRAFT202012.create_resource(content)
+            resources.append((content["$id"], resource))
+            resources.append((f"../common/{common.name}", resource))
+        registry = referencing.Registry().with_resources(resources)
+        return Draft202012Validator(SCHEMA, format_checker=FormatChecker(), registry=registry)
+    except ImportError:
+        return Draft202012Validator(SCHEMA, format_checker=FormatChecker())
 
 
 def test_component_design_migration_command(tmp_path):

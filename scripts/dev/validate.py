@@ -135,11 +135,47 @@ def load_schema(schema_path: Path) -> Dict[str, Any]:
     return load_json(schema_path)
 
 
+# skill-frontmatter.schema.json $refs into schemas/common/ (shared enums,
+# extracted in #63). The validator must resolve those refs from the local
+# checkout — the $id hosts are documentation URLs, not fetchable endpoints.
+_REF_STORE: Dict[str, Any] = {}
+
+# Base URIs a manifest schema's $id may carry; relative $refs resolve
+# against these, so shared schemas are registered under each.
+_REF_BASES = (
+    "https://awslabs.github.io/agent-plugins/schemas/",
+    "https://aws-samples.github.io/sample-oh-my-aidlcops/schemas/",
+)
+
+
+def build_ref_store(schemas_dir: Path) -> Dict[str, Any]:
+    store: Dict[str, Any] = {}
+    common_dir = schemas_dir / "common"
+    if not common_dir.is_dir():
+        return store
+    for path in sorted(common_dir.glob("*.schema.json")):
+        content = load_json(path)
+        aliases = {
+            content.get("$id"),
+            f"common/{path.name}",
+            f"../common/{path.name}",
+        }
+        aliases.update(f"{base}common/{path.name}" for base in _REF_BASES)
+        for alias in aliases:
+            if alias:
+                store[alias] = content
+    return store
+
+
 def validate_against(instance: Any, schema: Dict[str, Any]) -> List[str]:
     """Return a list of error strings. Empty list == valid."""
     if _HAS_JSONSCHEMA:
         try:
-            jsonschema.validate(instance=instance, schema=schema)
+            validator_cls = jsonschema.validators.validator_for(schema)
+            resolver = jsonschema.RefResolver.from_schema(
+                schema, store=_REF_STORE
+            )
+            validator_cls(schema, resolver=resolver).validate(instance)
             return []
         except jsonschema.ValidationError as exc:  # type: ignore[attr-defined]
             path = ".".join(str(p) for p in exc.absolute_path) or "<root>"
@@ -327,6 +363,9 @@ def main(argv: Optional[List[str]] = None) -> int:
     except FileNotFoundError as exc:
         print(f"error: {exc}", file=sys.stderr)
         return 2
+
+    _REF_STORE.clear()
+    _REF_STORE.update(build_ref_store(schemas_dir))
 
     if not _HAS_JSONSCHEMA:
         print("warning: jsonschema package not installed — falling back to "

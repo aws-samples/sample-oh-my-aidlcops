@@ -9,6 +9,7 @@ import pytest
 from jsonschema import Draft7Validator, RefResolver
 
 SCHEMA_DIR = Path(__file__).resolve().parents[2] / "schemas" / "ontology"
+COMMON_DIR = Path(__file__).resolve().parents[2] / "schemas" / "common"
 
 
 def _validator() -> Draft7Validator:
@@ -18,6 +19,11 @@ def _validator() -> Draft7Validator:
         content = json.loads(other.read_text(encoding="utf-8"))
         store[content["$id"]] = content
         store[other.name] = content
+    for common in COMMON_DIR.glob("*.schema.json"):
+        content = json.loads(common.read_text(encoding="utf-8"))
+        store[content["$id"]] = content
+        store[common.name] = content
+        store[f"../common/{common.name}"] = content
     return Draft7Validator(schema, resolver=RefResolver.from_schema(schema, store=store))
 
 

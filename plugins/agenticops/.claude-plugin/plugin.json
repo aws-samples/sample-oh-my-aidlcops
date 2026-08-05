@@ -2,7 +2,7 @@
   "$schema": "../../../schemas/plugin.schema.json",
   "name": "agenticops",
   "description": "AIDLC Operations phase automation — self-improving loops, autonomous deploys, continuous evaluation, incident response, and cost governance on AWS. Humans approve at checkpoints; agents execute diagnosis, proposal, and remediation between gates.",
-  "version": "0.1.0",
+  "version": "0.4.0-preview.1",
   "author": {
     "name": "aws-samples"
   },

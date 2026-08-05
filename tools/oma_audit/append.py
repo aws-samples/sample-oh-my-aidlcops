@@ -45,6 +45,7 @@ from jsonschema import Draft202012Validator, FormatChecker
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 AUDIT_SCHEMA_PATH = REPO_ROOT / "schemas" / "audit" / "event.schema.json"
+COMMON_SCHEMA_DIR = REPO_ROOT / "schemas" / "common"
 DEFAULT_AUDIT_LOG = Path(".omao") / "audit.jsonl"
 
 
@@ -54,7 +55,20 @@ class AuditValidationError(ValueError):
 
 def _load_validator() -> Draft202012Validator:
     schema = json.loads(AUDIT_SCHEMA_PATH.read_text(encoding="utf-8"))
-    return Draft202012Validator(schema, format_checker=FormatChecker())
+    try:
+        import referencing
+        from referencing import jsonschema as ref_jsonschema
+
+        resources = []
+        for common in COMMON_SCHEMA_DIR.glob("*.schema.json"):
+            content = json.loads(common.read_text(encoding="utf-8"))
+            resource = ref_jsonschema.DRAFT202012.create_resource(content)
+            resources.append((content["$id"], resource))
+            resources.append((f"../common/{common.name}", resource))
+        registry = referencing.Registry().with_resources(resources)
+        return Draft202012Validator(schema, format_checker=FormatChecker(), registry=registry)
+    except ImportError:
+        return Draft202012Validator(schema, format_checker=FormatChecker())
 
 
 def _iter_errors(event: dict[str, Any]) -> Iterable[str]:

@@ -1,0 +1,28 @@
+{
+  "$id": "https://aws-samples.github.io/sample-oh-my-aidlcops/schemas/common/enums.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "OMA Shared Enums",
+  "description": "Single source of truth for enumerations reused across ontology, harness, and audit schemas. All consumers $ref into this file to prevent drift.",
+  "$defs": {
+    "entityRef": {
+      "description": "Reference to an OMA ontology entity type.",
+      "enum": ["Agent", "Skill", "Deployment", "Incident", "Budget", "Risk", "Spec", "ADR"]
+    },
+    "blastRadius": {
+      "description": "How far damage spreads if a Deployment misbehaves or an Incident escalates. Values map to AWS constructs.",
+      "enum": ["single-namespace", "single-cluster", "single-account", "cross-account", "cross-region"]
+    },
+    "approvalState": {
+      "description": "Shared approval lifecycle used by Deployment. Agents write 'proposed'; humans write 'approved' or 'rejected'; the harness writes terminal states.",
+      "enum": ["draft", "proposed", "approved", "rejected", "deployed", "rolled_back"]
+    },
+    "incidentApprovalState": {
+      "description": "Approval lifecycle for Incident. Mirrors Deployment but with incident-specific terminal states.",
+      "enum": ["draft", "proposed", "approved", "rejected", "mitigated", "closed"]
+    },
+    "aidlcPhase": {
+      "description": "AIDLC lifecycle phase.",
+      "enum": ["inception", "construction", "operations"]
+    }
+  }
+}

@@ -11,6 +11,7 @@ from jsonschema import Draft7Validator, RefResolver
 REPO_ROOT = Path(__file__).resolve().parents[2]
 DSL_SCHEMA = REPO_ROOT / "schemas" / "harness" / "dsl.schema.json"
 ONTOLOGY_DIR = REPO_ROOT / "schemas" / "ontology"
+COMMON_DIR = REPO_ROOT / "schemas" / "common"
 
 
 def _validator() -> Draft7Validator:
@@ -20,6 +21,10 @@ def _validator() -> Draft7Validator:
         content = json.loads(other.read_text(encoding="utf-8"))
         store[content["$id"]] = content
         store["../ontology/" + other.name] = content
+    for common in COMMON_DIR.glob("*.schema.json"):
+        content = json.loads(common.read_text(encoding="utf-8"))
+        store[content["$id"]] = content
+        store["../common/" + common.name] = content
     resolver = RefResolver.from_schema(schema, store=store)
     return Draft7Validator(schema, resolver=resolver)
 

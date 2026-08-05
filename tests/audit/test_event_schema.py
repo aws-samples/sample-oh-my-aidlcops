@@ -8,17 +8,39 @@ from pathlib import Path
 import pytest
 from jsonschema import Draft202012Validator, FormatChecker
 
+REPO_ROOT = Path(__file__).resolve().parents[2]
+COMMON_DIR = REPO_ROOT / "schemas" / "common"
+
 SCHEMA = json.loads(
-    (Path(__file__).resolve().parents[2] / "schemas" / "audit" / "event.schema.json").read_text(
+    (REPO_ROOT / "schemas" / "audit" / "event.schema.json").read_text(
         encoding="utf-8"
     )
 )
 
 
+def _build_registry():
+    """Build a referencing.Registry so Draft202012Validator resolves $ref to common schemas."""
+    try:
+        import referencing
+        from referencing import jsonschema as ref_jsonschema
+    except ImportError:
+        return None
+
+    resources = []
+    for common in COMMON_DIR.glob("*.schema.json"):
+        content = json.loads(common.read_text(encoding="utf-8"))
+        resource = ref_jsonschema.DRAFT202012.create_resource(content)
+        resources.append((content["$id"], resource))
+        resources.append((f"../common/{common.name}", resource))
+    return referencing.Registry().with_resources(resources)
+
+
 def _validator() -> Draft202012Validator:
-    # Explicit format-checker so ``format: date-time`` is enforced. Without it,
-    # Draft202012Validator treats ``format`` as annotation-only.
-    return Draft202012Validator(SCHEMA, format_checker=FormatChecker())
+    registry = _build_registry()
+    kwargs = {"format_checker": FormatChecker()}
+    if registry is not None:
+        kwargs["registry"] = registry
+    return Draft202012Validator(SCHEMA, **kwargs)
 
 
 APPROVE_OK = {

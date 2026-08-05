@@ -36,18 +36,18 @@
       "properties": {
         "produces": {
           "type": "array",
-          "items": { "$ref": "agent.schema.json#/definitions/entityRef" },
+          "items": { "$ref": "../common/enums.schema.json#/$defs/entityRef" },
           "uniqueItems": true
         },
         "consumes": {
           "type": "array",
-          "items": { "$ref": "agent.schema.json#/definitions/entityRef" },
+          "items": { "$ref": "../common/enums.schema.json#/$defs/entityRef" },
           "uniqueItems": true
         },
         "references": {
           "description": "Entities this skill reads but does not produce (e.g., cost-governance references Budget).",
           "type": "array",
-          "items": { "$ref": "agent.schema.json#/definitions/entityRef" },
+          "items": { "$ref": "../common/enums.schema.json#/$defs/entityRef" },
           "uniqueItems": true
         }
       }

@@ -167,8 +167,13 @@ agents:
 # Hooks — declared-only. The shell scripts remain hand-authored.
 # ---------------------------------------------------------------------------
 hooks:
+  # Plugin-bundled, self-contained SessionStart hook (#60). Injects active
+  # ontology state (.omao/ontology). Bundled INSIDE the plugin so /plugin
+  # install ships it; the repo-root hooks/session-start.sh (Tier-0 mode +
+  # project-memory + permissions-drift) remains the richer CLI/dev-install
+  # variant registered by scripts/install/claude.sh.
   session-start:
-    runs: ../../hooks/session-start.sh
+    runs: hooks/session-start-ontology.sh
 
 # ---------------------------------------------------------------------------
 # Keyword triggers (merged into .omao/triggers.json by the compiler).

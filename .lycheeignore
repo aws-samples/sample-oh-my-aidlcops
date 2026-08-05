@@ -49,3 +49,15 @@ www\.sigstore\.dev/?
 # GitHub Actions' US egress, so the runner cannot connect even though
 # the page is alive from KR browsers. Informational compliance link.
 isms\.kisa\.or\.kr/.*
+
+# www.iso.org — returns 403 to non-browser user agents (bot protection).
+# Standard landing pages (29148, 42001, ISO 8601) are alive from browsers.
+www\.iso\.org/.*
+
+# netflixtechblog.com — Medium-hosted; Medium rate-limits/403s GitHub
+# Actions egress. The RAD outlier-detection post is alive from browsers.
+netflixtechblog\.com/.*
+
+# www.uber.com/blog — returns 406 to non-browser user agents (bot
+# protection). The forecasting introduction post is alive from browsers.
+www\.uber\.com/blog/.*

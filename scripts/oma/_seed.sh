@@ -36,7 +36,7 @@ seed_validate_ontology() {
 import json, sys
 from pathlib import Path
 try:
-    from jsonschema import Draft7Validator
+    from jsonschema import Draft7Validator, RefResolver
 except ImportError:
     print("[seed] python jsonschema missing; skip", file=sys.stderr)
     sys.exit(0)
@@ -49,13 +49,24 @@ targets = {
     "risks": schemas / "risk.schema.json",
     "incidents": schemas / "incident.schema.json",
 }
+# Ontology schemas $ref shared enums in schemas/common/ (#63); resolve
+# them from the checkout so validation never performs network I/O.
+common_dir = schemas.parent / "common"
+store = {}
+if common_dir.is_dir():
+    for cpath in sorted(common_dir.glob("*.schema.json")):
+        content = json.loads(cpath.read_text(encoding="utf-8"))
+        store[content["$id"]] = content
+        store[f"../common/{cpath.name}"] = content
 failed = 0
 for name, schema_path in targets.items():
     root = project / ".omao" / "ontology" / name
     if not root.exists():
         continue
     schema = json.loads(schema_path.read_text(encoding="utf-8"))
-    validator = Draft7Validator(schema)
+    validator = Draft7Validator(
+        schema, resolver=RefResolver.from_schema(schema, store=store)
+    )
     for path in root.glob("*.json"):
         doc = json.loads(path.read_text(encoding="utf-8"))
         errors = list(validator.iter_errors(doc))
