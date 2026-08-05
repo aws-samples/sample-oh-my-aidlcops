@@ -1,0 +1,55 @@
+{
+  "$id": "https://aws-samples.github.io/sample-oh-my-aidlcops/schemas/audit/tool-event.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "ToolAuditEvent",
+  "description": "One line of .omao/audit/tool-events.jsonl. A lightweight, tool-level audit record written by the agenticops PostToolUse hook (audit-posttooluse.sh) after every tool call. Distinct from event.schema.json, which records semantic ontology decisions (approve/deploy/gate-pass) against the 8 ontology entities. This record is self-contained (no $ref) so the hook can emit conforming lines with only jq or python3 at runtime — no jsonschema dependency inside the installed plugin.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["ts", "tool", "classification"],
+  "properties": {
+    "ts": {
+      "description": "ISO 8601 UTC timestamp of when the hook recorded the event (post tool execution).",
+      "type": "string",
+      "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}(\\.[0-9]+)?(Z|[+-][0-9]{2}:[0-9]{2})$"
+    },
+    "tool": {
+      "description": "Claude Code tool name (e.g. Bash, Write, Edit, Read).",
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 64
+    },
+    "classification": {
+      "description": "Whether the call was recognized as state-mutating. `mutating` calls also get an additionalContext feedback nudge; `benign` calls are recorded only.",
+      "enum": ["mutating", "benign"]
+    },
+    "matched_rule": {
+      "description": "Id of the mutating-pattern rule that classified this call, when classification=mutating.",
+      "type": "string",
+      "maxLength": 64
+    },
+    "command_excerpt": {
+      "description": "First bytes of the Bash command (truncated). Recorded for Bash calls; may be omitted for other tools.",
+      "type": "string",
+      "maxLength": 512
+    },
+    "file_path": {
+      "description": "Target path for file tools (Write/Edit/Read/NotebookEdit).",
+      "type": "string",
+      "maxLength": 1024
+    },
+    "session_id": {
+      "description": "Claude Code session id from the hook payload, when present.",
+      "type": "string",
+      "maxLength": 128
+    },
+    "cwd": {
+      "description": "Working directory reported by the hook payload, when present.",
+      "type": "string",
+      "maxLength": 1024
+    },
+    "feedback_emitted": {
+      "description": "True when the hook returned an additionalContext nudge for this call.",
+      "type": "boolean"
+    }
+  }
+}

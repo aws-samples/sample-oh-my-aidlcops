@@ -68,7 +68,7 @@
       "additionalProperties": { "$ref": "#/definitions/mcpServer" }
     },
     "hooks": {
-      "description": "Harness hooks keyed by event name. The compiler emits a plugin-bundled hooks/hooks.json entry for each recognized event: session-start (ontology-state injection), stop and stop-failure (turn-end phase-gate enforcement via the bundled stop-gate.sh). Each runs path must stay inside the plugin root. PreToolUse is not declared here — it is derived from the policies: block.",
+      "description": "Harness hooks keyed by event name. The compiler emits a plugin-bundled hooks/hooks.json entry for each recognized event: session-start (ontology-state injection) and post-tool-use (tool-call auditing via the bundled audit-posttooluse.sh). Each runs path must stay inside the plugin root. PreToolUse is not declared here — it is derived from the policies: block.",
       "type": "object",
       "additionalProperties": { "$ref": "#/definitions/hook" }
     },

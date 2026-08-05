@@ -223,6 +223,27 @@ loops:
 # TRIGGERS — Keyword triggers for Tier-0 routing
 # ─────────────────────────────────────────────────────────────────────
 
+# ---------------------------------------------------------------------------
+# Hooks — plugin-bundled, self-contained.
+#   post-tool-use: after every tool call, audit-posttooluse.sh appends a
+#     tool-level record to .omao/audit/tool-events.jsonl (conforming to
+#     schemas/audit/tool-event.schema.json) and, for state-changing calls
+#     (mutating kubectl / aws / terraform / helm / fs, Write, Edit), returns an
+#     additionalContext nudge to record the semantic event and check gates.
+#     Makes the audit trail a property of the harness, not of the agent
+#     remembering to call the audit-trail skill. PostToolUse cannot block, so
+#     this is feedback; the PreToolUse enforcer above is the hard backstop.
+#     Kill switch: OMA_DISABLE_AUDIT=1.
+# The compiler emits the PostToolUse entry into hooks/hooks.json from this
+# declaration; do not hand-edit that entry.
+# ---------------------------------------------------------------------------
+hooks:
+  post-tool-use:
+    runs: hooks/audit-posttooluse.sh
+
+# ---------------------------------------------------------------------------
+# Keyword triggers for Tier-0 routing.
+# ---------------------------------------------------------------------------
 triggers:
   - id: agenticops-mode
     keywords: ["agenticops", "ops-mode"]

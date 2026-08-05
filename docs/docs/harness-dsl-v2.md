@@ -137,51 +137,48 @@ The `hooks:` block declares plugin-bundled hooks the compiler emits into
 `hooks/hooks.json`. Each key is an event; `runs` is a script path that must stay
 inside the plugin root (so `/plugin install` ships it — a `../`-escaping path is
 a compile error). `PreToolUse` is **not** declared here; it is derived from the
-`policies:` block above.
+`policies:` block above, and coexists with a hooks-declared `PostToolUse` (each
+re-owns only its own `_oma`-marked entry).
 
 | Event | Emitted as | Bundled script | Purpose |
 |-------|-----------|----------------|---------|
 | `session-start` | `SessionStart` | `session-start-ontology.sh` | Inject active ontology state (Budgets, Incidents, Deployments) at session start |
-| `stop` | `Stop` | `stop-gate.sh` | Turn-end phase-gate enforcement — block the turn from ending while a gate is blocked |
-| `stop-failure` | `StopFailure` | `stop-gate.sh` | Remind about blocked gates on a failed turn (never blocks) |
+| `post-tool-use` | `PostToolUse` | `audit-posttooluse.sh` | Audit every tool call; nudge on state-changing calls |
 
 ```yaml
 hooks:
-  session-start:
-    runs: hooks/session-start-ontology.sh
-  stop:
-    runs: hooks/stop-gate.sh
-  stop-failure:
-    runs: hooks/stop-gate.sh
+  post-tool-use:
+    runs: hooks/audit-posttooluse.sh
 ```
 
-### Phase-gate enforcement (`stop` / `stop-failure`)
+### Tool-call auditing (`post-tool-use`)
 
-The `quality-gates` skill writes a per-phase verdict to
-`.omao/state/gates/<phase>.json` (`status: passed|blocked`,
-`next_phase_allowed`, `blockers`, waiver reconciliation). `stop-gate.sh` is the
-**enforcement half**: it does not re-derive the verdict, it trusts the recorded
-one. When any gate is blocked (`status == "blocked"` or
-`next_phase_allowed == false`):
+`audit-posttooluse.sh` runs after every tool call and does two things:
 
-- **`Stop`** returns `{"decision": "block", "reason": ...}` so the turn cannot
-  end — the agent that authored the work cannot silently skip its own gate
-  (the self-grading failure mode).
-- **`StopFailure`** never blocks (that would trap a failing session in a loop);
-  it surfaces a `systemMessage` reminder only.
+- **Audit (all tools)** — appends one JSON-L line per call to
+  `.omao/audit/tool-events.jsonl`, conforming to
+  [`schemas/audit/tool-event.schema.json`](https://github.com/aws-samples/sample-oh-my-aidlcops/blob/main/schemas/audit/tool-event.schema.json).
+  This makes the audit trail a property of the harness rather than of the agent
+  remembering to invoke the `audit-trail` skill. The tool-event schema is
+  self-contained (no `$ref`) so the hook emits conforming lines with just `jq`
+  (or `python3`) — no `jsonschema` dependency inside the installed plugin.
+- **Feedback (state-changing calls only)** — for mutating patterns (mutating
+  `kubectl`, `aws` delete/put/update/…, `terraform apply|destroy`, `helm`
+  install/upgrade/…, `rm|mv|cp|…`, `git push|reset|…`, `Write`, `Edit`), returns
+  a non-blocking `additionalContext` nudge to record the semantic ontology event
+  and check that no phase gate is blocked. `PostToolUse` runs *after* the tool,
+  so it cannot block — the `PreToolUse` enforcer (from `policies:`) is the hard
+  backstop; this is feedback.
 
-Controls:
+Kill switch: `OMA_DISABLE_AUDIT=1`. Like the other bundled hooks the script is
+self-contained (writes only under `.omao/`, no repo-root dependency) and
+requires a real JSON encoder so attacker-influenced tool inputs cannot corrupt
+the JSON-L line or the emitted payload.
 
-- `OMA_GATE_MODE=warn` — downgrade the `Stop` block to a non-blocking
-  `systemMessage`.
-- `OMA_DISABLE_GATES=1` — kill switch; the hook always passes through.
-- Reentry guard — Claude Code sets `stop_hook_active: true` when it re-runs the
-  Stop hook after a prior block; the hook passes through in that case to avoid a
-  deadlock.
-
-Like `session-start-ontology.sh`, the script is self-contained (reads only
-`.omao/state/gates/`, no repo-root dependency) and requires a real JSON encoder
-(`jq`, then `python3`) so user-editable gate files cannot inject keys.
+This tool-level log is distinct from `.omao/audit.jsonl`
+([`event.schema.json`](https://github.com/aws-samples/sample-oh-my-aidlcops/blob/main/schemas/audit/event.schema.json)),
+which records semantic ontology decisions (`approve`/`deploy`/`gate-pass`)
+against the eight ontology entities via `tools.oma_audit.append`.
 
 ## Backward compatibility guarantees
 

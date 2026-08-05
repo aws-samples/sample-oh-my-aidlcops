@@ -94,13 +94,19 @@ OMA reflects this in its review lane: distinct reviewer roles (security, quality
 code) run as separate agents, and `continuous-eval` re-checks deployed behavior
 against regression datasets rather than trusting the generating agent's own tests.
 
-The `Stop` hook (`stop-gate.sh`) closes a subtler gap: even with independent
-reviewers, the *generating* agent decides when a turn is done. When
-`quality-gates` records a blocked verdict in `.omao/state/gates/<phase>.json`,
-the Stop hook blocks the turn from ending at the harness level — so the agent
-that authored the work cannot silently declare victory past its own gate.
-`OMA_GATE_MODE=warn` downgrades this to a reminder; `OMA_DISABLE_GATES=1`
-disables it. See [Harness DSL v2 → Phase-gate enforcement](./harness-dsl-v2.md#phase-gate-enforcement-stop--stop-failure).
+## Audit as a harness property, not an agent chore
+
+An audit trail the agent has to *remember* to write is not a control — the runs
+that most need recording are exactly the ones a runaway agent skips. The
+`agenticops` plugin bundles a `PostToolUse` hook (`audit-posttooluse.sh`) that
+records **every** tool call to `.omao/audit/tool-events.jsonl` at the harness
+level, and returns a non-blocking nudge on state-changing calls (mutating
+`kubectl`/`aws`/`terraform`/`helm`, `Write`, `Edit`, …) to record the semantic
+ontology event and re-check gates. Because it fires from the harness, the log
+exists whether or not the agent invokes the `audit-trail` skill. `PostToolUse`
+cannot block (the tool already ran), so this complements — never replaces — the
+`PreToolUse` policy enforcer. Kill switch: `OMA_DISABLE_AUDIT=1`. See
+[Harness DSL v2 → Tool-call auditing](./harness-dsl-v2.md#tool-call-auditing-post-tool-use).
 
 ## How the two axes close the loop
 
