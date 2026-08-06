@@ -38,9 +38,10 @@ OMA 는 **엔터프라이즈 운영 자동화를 위한 오픈 툴셋**으로 �
    하네스로 제약된 엔터프라이즈급 운영 자동화를 기본값으로 얻습니다 — 직접
    조립하는 맞춤형 플랫폼이 아니라.
 
-## `main` 의 신규 기능 (미릴리스)
+## v0.5 의 신규 기능
 
-`v0.4.0-preview.1` 이후 `main` 에는 하네스·grounding 표면이 확장되었습니다.
+`v0.5.0-preview.1` 은 v0.4 의 신뢰성 2축 기반 위에서 하네스·grounding 표면을
+확장한 릴리스입니다.
 
 - **4개 플러그인 전체에 secret-protection 베이스라인** — secret 파일
   write / edit / shell-redirect 를 막는 3개 공통 deny 규칙이 모든 플러그인의
@@ -71,7 +72,8 @@ OMA 는 **엔터프라이즈 운영 자동화를 위한 오픈 툴셋**으로 �
   [2-레이어 설치 모델](https://aws-samples.github.io/sample-oh-my-aidlcops/docs/architecture)
   (user-global capability / project-local policy)과 single-edit-point 맵.
 
-상세 내역은 [CHANGELOG.md](./CHANGELOG.md) 의 `[Unreleased]` 섹션에 있습니다.
+전체 내역은 [CHANGELOG.md](./CHANGELOG.md) 와
+[릴리스 페이지](https://aws-samples.github.io/sample-oh-my-aidlcops/releases) 에 있습니다.
 
 ## v0.4 의 신규 기능
 
@@ -173,7 +175,7 @@ OMA는 OMC의 Tier-0 패턴을 계승합니다. 한 번 호출하면 체크포�
 온톨로지를 렌더한 뒤 플러그인 설치와 `oma doctor` 까지 한 번에 수행합니다.
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/aws-samples/sample-oh-my-aidlcops/v0.4.0-preview.1/install.sh | bash
+curl -fsSL https://raw.githubusercontent.com/aws-samples/sample-oh-my-aidlcops/v0.5.0-preview.1/install.sh | bash
 cd my-project
 oma setup
 oma doctor
@@ -183,7 +185,7 @@ oma doctor
 어떻게 강제되는가) 은 [Easy Button 문서](https://aws-samples.github.io/sample-oh-my-aidlcops/docs/easy-button)
 를 참조하세요.
 
-> **Tech Preview 고지** — `v0.4.0-preview.1` 은 `profile.yaml` v1, ontology
+> **Tech Preview 고지** — `v0.5.0-preview.1` 은 `profile.yaml` v1, ontology
 > 8 개 엔티티, Harness DSL v2 를 stable 로 간주합니다. CLI UX 일부와 doctor
 > 리포트 구조는 GA 이전에 변경될 수 있습니다. [Support Policy](https://aws-samples.github.io/sample-oh-my-aidlcops/docs/support-policy) 를
 > 확인하세요.
@@ -383,7 +385,7 @@ MIT No Attribution (MIT-0). [LICENSE](./LICENSE) 참조.
 
 ## 기여
 
-OMA 는 Tech Preview (`v0.4.0-preview.1`) 단계입니다. 4 가지 working
+OMA 는 Tech Preview (`v0.5.0-preview.1`) 단계입니다. 4 가지 working
 agreement (영문 전용 artifact, AI attribution 금지, CLAUDE.md 로컬 유지,
 작업 단위 커밋) 와 PR/브랜치 네이밍 가이드는
 [CONTRIBUTING.md](./CONTRIBUTING.md) 에, Amazon Open Source Code of

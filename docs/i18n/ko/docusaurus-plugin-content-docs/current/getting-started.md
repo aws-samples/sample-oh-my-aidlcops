@@ -33,7 +33,7 @@ OMA 에는 **세 개의 서로 다른 설치 스크립트**가 있고 각각 역
 
 ```bash
 # OMA CLI 설치 (AgenticOps 쓸 계획이면)
-curl -fsSL https://raw.githubusercontent.com/aws-samples/sample-oh-my-aidlcops/v0.4.0-preview.1/install.sh | bash
+curl -fsSL https://raw.githubusercontent.com/aws-samples/sample-oh-my-aidlcops/v0.5.0-preview.1/install.sh | bash
 cd my-project
 oma setup      # .omao/profile.yaml + 씨드 온톨로지 생성
 oma doctor     # 환경 점검
@@ -99,10 +99,10 @@ EOF
 `/plugin list` 결과에 4 개 플러그인이 전부 `enabled` 로 보이면 성공입니다.
 
 ```text
-ai-infra       v0.4.0-preview.1  enabled
-agenticops     v0.4.0-preview.1  enabled
-aidlc          v0.4.0-preview.1  enabled
-modernization  v0.4.0-preview.1  enabled
+ai-infra       v0.5.0-preview.1  enabled
+agenticops     v0.5.0-preview.1  enabled
+aidlc          v0.5.0-preview.1  enabled
+modernization  v0.5.0-preview.1  enabled
 ```
 
 :::caution `bash scripts/install/claude.sh` 단독 실행은 동작하지 않습니다

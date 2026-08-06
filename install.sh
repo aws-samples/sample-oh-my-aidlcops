@@ -17,7 +17,7 @@
 
 set -euo pipefail
 
-OMA_VERSION="${OMA_VERSION:-v0.2.0-preview.1}"
+OMA_VERSION="${OMA_VERSION:-v0.5.0-preview.1}"
 OMA_HOME="${OMA_HOME:-$HOME/.oma}"
 OMA_BIN_DIR="${OMA_BIN_DIR:-$HOME/.local/bin}"
 OMA_SOURCE="${OMA_SOURCE:-tarball}"

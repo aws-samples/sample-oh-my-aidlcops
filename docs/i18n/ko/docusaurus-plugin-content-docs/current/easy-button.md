@@ -7,7 +7,7 @@ sidebar_position: 1.5
 # Easy Button — 3-command install
 
 :::caution Tech Preview
-`oma setup` / `oma doctor` 은 **Tech Preview** 입니다 (`v0.4.0-preview.1`).
+`oma setup` / `oma doctor` 은 **Tech Preview** 입니다 (`v0.5.0-preview.1`).
 `profile.yaml` v1 만 stable 로 간주하며, 나머지 표면은 GA 전까지 변경될 수
 있습니다. 상세는 [Support Policy](./support-policy.md) 를 참조하세요.
 :::
@@ -17,7 +17,7 @@ OMA 는 "AIDLC × AgenticOps 이지버튼" 을 목표로 합니다. 설치부터
 
 ```bash
 # 1. 원격 설치 — 릴리스 tarball 다운로드 후 ~/.oma 에 설치, ~/.local/bin/oma 심링크
-curl -fsSL https://raw.githubusercontent.com/aws-samples/sample-oh-my-aidlcops/v0.4.0-preview.1/install.sh | bash
+curl -fsSL https://raw.githubusercontent.com/aws-samples/sample-oh-my-aidlcops/v0.5.0-preview.1/install.sh | bash
 
 # 2. 프로젝트 디렉터리에서 세팅 — 프로파일 생성, 씨드 온톨로지, 플러그인 설치
 cd my-project

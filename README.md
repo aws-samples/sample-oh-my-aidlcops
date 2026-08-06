@@ -38,9 +38,10 @@ The trajectory:
    automation that is auditable, policy-gated, and harness-constrained by
    default — not a bespoke platform you assemble yourself.
 
-## What's new on `main` (unreleased)
+## What's new in v0.5
 
-Since `v0.4.0-preview.1`, `main` has grown the harness and grounding surfaces:
+Release `v0.5.0-preview.1` grows the harness and grounding surfaces on top
+of the v0.4 dual-axis foundation:
 
 - **Secret-protection baseline in all four plugins** — three cross-cutting
   deny rules (secret-file write / edit / shell-redirect) now compile into
@@ -72,7 +73,8 @@ Since `v0.4.0-preview.1`, `main` has grown the harness and grounding surfaces:
   [two-layer install model](https://aws-samples.github.io/sample-oh-my-aidlcops/docs/architecture)
   (user-global capability, project-local policy) with a single-edit-point map.
 
-Details in the `[Unreleased]` section of [CHANGELOG.md](./CHANGELOG.md).
+Full details in [CHANGELOG.md](./CHANGELOG.md) and on the
+[Releases page](https://aws-samples.github.io/sample-oh-my-aidlcops/releases).
 
 ## What's new in v0.4
 
@@ -188,7 +190,7 @@ seeds the ontology, installs the plugins, and runs `oma doctor` to confirm
 the environment.
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/aws-samples/sample-oh-my-aidlcops/v0.4.0-preview.1/install.sh | bash
+curl -fsSL https://raw.githubusercontent.com/aws-samples/sample-oh-my-aidlcops/v0.5.0-preview.1/install.sh | bash
 cd my-project
 oma setup
 oma doctor
@@ -198,7 +200,7 @@ See the [Easy Button docs](https://aws-samples.github.io/sample-oh-my-aidlcops/d
 for what `oma setup` writes, how the 13 doctor probes work, and how the
 ontology + harness DSL get enforced at runtime.
 
-> **Tech Preview notice** — `v0.4.0-preview.1` treats `profile.yaml` v1, the 8
+> **Tech Preview notice** — `v0.5.0-preview.1` treats `profile.yaml` v1, the 8
 > ontology schemas, and Harness DSL v2 as stable. Everything else (CLI UX, doctor
 > report shape) may evolve before GA. See [Support Policy](https://aws-samples.github.io/sample-oh-my-aidlcops/docs/support-policy).
 
@@ -418,7 +420,7 @@ MIT No Attribution (MIT-0). See [LICENSE](./LICENSE).
 
 ## Contributing
 
-OMA is in Tech Preview (`v0.4.0-preview.1`). See [CONTRIBUTING.md](./CONTRIBUTING.md)
+OMA is in Tech Preview (`v0.5.0-preview.1`). See [CONTRIBUTING.md](./CONTRIBUTING.md)
 for the working agreement (English-only artifacts, no AI attribution, commit
 per unit of work) plus the PR/branch-naming guidelines, and
 [CODE_OF_CONDUCT.md](./CODE_OF_CONDUCT.md) for the Amazon Open Source Code of

@@ -33,7 +33,7 @@ required**, and `oma setup` is only needed **when you plan to use AgenticOps**.
 
 ```bash
 # Install the OMA CLI (only if you plan to use AgenticOps)
-curl -fsSL https://raw.githubusercontent.com/aws-samples/sample-oh-my-aidlcops/v0.4.0-preview.1/install.sh | bash
+curl -fsSL https://raw.githubusercontent.com/aws-samples/sample-oh-my-aidlcops/v0.5.0-preview.1/install.sh | bash
 cd my-project
 oma setup      # writes .omao/profile.yaml + seed ontology
 oma doctor     # environment probes
@@ -101,10 +101,10 @@ EOF
 `/plugin list` should show all four as `enabled`:
 
 ```text
-ai-infra       v0.4.0-preview.1  enabled
-agenticops     v0.4.0-preview.1  enabled
-aidlc          v0.4.0-preview.1  enabled
-modernization  v0.4.0-preview.1  enabled
+ai-infra       v0.5.0-preview.1  enabled
+agenticops     v0.5.0-preview.1  enabled
+aidlc          v0.5.0-preview.1  enabled
+modernization  v0.5.0-preview.1  enabled
 ```
 
 :::caution `bash scripts/install/claude.sh` alone does NOT work

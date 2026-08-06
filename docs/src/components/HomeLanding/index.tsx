@@ -534,7 +534,7 @@ export default function HomeLanding(): React.ReactElement {
           </span>
           <span className={styles.previewBadgeText}>
             <Translate id="landing.hero.preview_text" description="Tech preview description text">
-              v0.4.0-preview.1 — schemas &amp; DSL may change before GA. See the
+              v0.5.0-preview.1 — schemas &amp; DSL may change before GA. See the
             </Translate>{' '}
             <Link to={useBaseUrl('/docs/support-policy')}>
               <Translate id="landing.hero.support_policy_link" description="Support policy link text">

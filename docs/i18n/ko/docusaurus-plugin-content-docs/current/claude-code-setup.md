@@ -53,10 +53,10 @@ EOF
 
 ```bash
 > /plugin list
-# ai-infra       0.4.0-preview.1   enabled
-# agenticops     0.4.0-preview.1   enabled
-# aidlc          0.4.0-preview.1   enabled
-# modernization  0.4.0-preview.1   enabled
+# ai-infra       0.5.0-preview.1   enabled
+# agenticops     0.5.0-preview.1   enabled
+# aidlc          0.5.0-preview.1   enabled
+# modernization  0.5.0-preview.1   enabled
 ```
 
 이 경로는 Claude Code 가 내부적으로 `~/.claude/installed_plugins.json` 을
