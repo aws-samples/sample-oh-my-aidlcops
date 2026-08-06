@@ -38,6 +38,41 @@ OMA 는 **엔터프라이즈 운영 자동화를 위한 오픈 툴셋**으로 �
    하네스로 제약된 엔터프라이즈급 운영 자동화를 기본값으로 얻습니다 — 직접
    조립하는 맞춤형 플랫폼이 아니라.
 
+## `main` 의 신규 기능 (미릴리스)
+
+`v0.4.0-preview.1` 이후 `main` 에는 하네스·grounding 표면이 확장되었습니다.
+
+- **4개 플러그인 전체에 secret-protection 베이스라인** — secret 파일
+  write / edit / shell-redirect 를 막는 3개 공통 deny 규칙이 모든 플러그인의
+  `PreToolUse` 훅으로 컴파일됩니다. `ai-infra` 없이 agenticops 또는 aidlc 만
+  설치해도 하드 집행이 적용됩니다.
+- **플러그인에 런타임 훅 동봉** — SessionStart 훅이 `/plugin install` 만으로
+  프로젝트 온톨로지 상태를 컨텍스트에 주입하고, `aidlc` 의 Stop 훅
+  (`stop-gate.sh`)이 턴 종료 시 AIDLC 페이즈 게이트를 강제하며, agenticops 의
+  `PostToolUse` 훅이 상태 변경 도구 호출을 `.omao/audit/tool-events.jsonl` 에
+  기록합니다.
+- **권한 템플릿** — `templates/permissions/{common,sandbox,staging,prod}.yaml`
+  이 환경별 deny 규칙을 설치 시점에 Claude Code `settings.json` 과 Kiro agent
+  프로필로 반영합니다. 프로젝트 단위 `.omao/permissions.yaml` 오버레이,
+  `oma permissions show|path` 서브커맨드, drift 감지 훅, 13번째 doctor probe 를
+  포함합니다.
+- **Loop Engineering** — 하네스 DSL 의 선택적 `loops:` 섹션이 per-call 하네스
+  위에서 자율 피드백 사이클(discovery → triage → modify → verify)을 기술합니다.
+  [Loop Engineering 문서](https://aws-samples.github.io/sample-oh-my-aidlcops/docs/loop-engineering) 참조.
+- **Knowledge Wiki (설계 확정, 빌드 미출시)** — `adr-0001` 이 Graphify 기반
+  생성 전(pre-generation) grounding 레이어 설계를 기록합니다. `aidlc` 플러그인의
+  `ontology-wiki` 스킬이 새 산출물 작성 *전에* 기존 엔티티 정의·enum·ADR 결정
+  이유를 질의합니다.
+  [Knowledge Wiki 문서](https://aws-samples.github.io/sample-oh-my-aidlcops/docs/knowledge-wiki) 참조.
+- **AgenticOps 신규 스킬 5종** — `anomaly-detection`, `root-cause-analysis`,
+  `automated-remediation`, `slo-management`, `predictive-scaling`.
+  `steering/workflows/incident-pipeline.md` 워크플로우로 연결됩니다.
+- **Architecture 페이지** —
+  [2-레이어 설치 모델](https://aws-samples.github.io/sample-oh-my-aidlcops/docs/architecture)
+  (user-global capability / project-local policy)과 single-edit-point 맵.
+
+상세 내역은 [CHANGELOG.md](./CHANGELOG.md) 의 `[Unreleased]` 섹션에 있습니다.
+
 ## v0.4 의 신규 기능
 
 `v0.4.0-preview.1` 은 v0.3 의 엔터프라이즈 온톨로지·하네스 표면 위에서 프로젝트를
@@ -111,7 +146,7 @@ AI 주도 개발이 반복적으로 실패하는 세 가지 패턴을 지목하�
 |---|---|---|
 | **`ai-infra`** | EKS 위 Agentic AI Platform 구축·운영 | `agentic-eks-bootstrap`, `vllm-serving-setup`, `inference-gateway-routing`, `langfuse-observability`, `gpu-resource-management`, `ai-gateway-guardrails` |
 | **`agenticops`** | 에이전트 기반 운영 자동화 | `self-improving-loop`, `autopilot-deploy`, `incident-response`, `continuous-eval`, `cost-governance`, `audit-trail`, `anomaly-detection`, `root-cause-analysis`, `automated-remediation`, `slo-management`, `predictive-scaling` |
-| **`aidlc`** | AIDLC Phase 1(Inception) + Phase 2(Construction) 확장 | `requirements-analysis`, `user-stories`, `workflow-planning`, `component-design`, `code-generation`, `test-strategy`, `risk-discovery`, `quality-gates` |
+| **`aidlc`** | AIDLC Phase 1(Inception) + Phase 2(Construction) 확장 | `requirements-analysis`, `user-stories`, `workflow-planning`, `component-design`, `code-generation`, `test-strategy`, `risk-discovery`, `quality-gates`, `ontology-wiki` |
 | **`modernization`** | 레거시 워크로드 AWS 이전 (6R 전략) | `workload-assessment`, `modernization-strategy`, `to-be-architecture`, `containerization`, `cutover-planning` |
 
 ## Tier-0 워크플로우
@@ -144,7 +179,7 @@ oma setup
 oma doctor
 ```
 
-상세 동작 (무엇을 기록하는가, 12 probe 의 의미, 런타임에서 온톨로지·DSL 이
+상세 동작 (무엇을 기록하는가, 13 probe 의 의미, 런타임에서 온톨로지·DSL 이
 어떻게 강제되는가) 은 [Easy Button 문서](https://aws-samples.github.io/sample-oh-my-aidlcops/docs/easy-button)
 를 참조하세요.
 

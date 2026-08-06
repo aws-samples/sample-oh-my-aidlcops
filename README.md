@@ -38,6 +38,42 @@ The trajectory:
    automation that is auditable, policy-gated, and harness-constrained by
    default — not a bespoke platform you assemble yourself.
 
+## What's new on `main` (unreleased)
+
+Since `v0.4.0-preview.1`, `main` has grown the harness and grounding surfaces:
+
+- **Secret-protection baseline in all four plugins** — three cross-cutting
+  deny rules (secret-file write / edit / shell-redirect) now compile into
+  every plugin's `PreToolUse` hook, so an agenticops- or aidlc-only install
+  gets hard enforcement without `ai-infra`.
+- **Runtime hooks shipped with the plugins** — SessionStart injects the
+  project's ontology status into context on `/plugin install` alone; the
+  `aidlc` Stop hook (`stop-gate.sh`) enforces AIDLC phase gates at turn-end;
+  an agenticops `PostToolUse` hook audits every state-changing tool call to
+  `.omao/audit/tool-events.jsonl`.
+- **Permission templates** — `templates/permissions/{common,sandbox,staging,prod}.yaml`
+  resolve per-environment deny rules into Claude Code `settings.json` and
+  Kiro agent profiles at install time, with a project-level
+  `.omao/permissions.yaml` overlay, an `oma permissions show|path`
+  subcommand, drift-detection hooks, and a 13th doctor probe.
+- **Loop Engineering** — an optional `loops:` section in the harness DSL
+  describes autonomous feedback cycles (discovery → triage → modify → verify)
+  on top of the per-call harness. See the
+  [Loop Engineering docs](https://aws-samples.github.io/sample-oh-my-aidlcops/docs/loop-engineering).
+- **Knowledge Wiki (design accepted, build pending)** — `adr-0001` records a
+  Graphify-backed pre-generation grounding layer; the `aidlc` plugin ships an
+  `ontology-wiki` skill that queries existing entity definitions, enums, and
+  ADR rationale *before* an agent writes a new artifact. See the
+  [Knowledge Wiki docs](https://aws-samples.github.io/sample-oh-my-aidlcops/docs/knowledge-wiki).
+- **Five new AgenticOps skills** — `anomaly-detection`, `root-cause-analysis`,
+  `automated-remediation`, `slo-management`, `predictive-scaling`, wired
+  together by the `steering/workflows/incident-pipeline.md` workflow.
+- **Architecture page** — the
+  [two-layer install model](https://aws-samples.github.io/sample-oh-my-aidlcops/docs/architecture)
+  (user-global capability, project-local policy) with a single-edit-point map.
+
+Details in the `[Unreleased]` section of [CHANGELOG.md](./CHANGELOG.md).
+
 ## What's new in v0.4
 
 Release `v0.4.0-preview.1` repositions the project around the reliability
@@ -123,7 +159,7 @@ ontology document and every agent action runs inside a harness.
 |---|---|---|
 | **`ai-infra`** | Build & run the Agentic AI Platform on EKS | `agentic-eks-bootstrap`, `vllm-serving-setup`, `inference-gateway-routing`, `langfuse-observability`, `gpu-resource-management`, `ai-gateway-guardrails` |
 | **`agenticops`** | Operate it with agents | `self-improving-loop`, `autopilot-deploy`, `incident-response`, `continuous-eval`, `cost-governance`, `audit-trail`, `anomaly-detection`, `root-cause-analysis`, `automated-remediation`, `slo-management`, `predictive-scaling` |
-| **`aidlc`** | AIDLC Phase 1 (Inception) + Phase 2 (Construction) extensions | `requirements-analysis`, `user-stories`, `workflow-planning`, `component-design`, `code-generation`, `test-strategy`, `risk-discovery`, `quality-gates` |
+| **`aidlc`** | AIDLC Phase 1 (Inception) + Phase 2 (Construction) extensions | `requirements-analysis`, `user-stories`, `workflow-planning`, `component-design`, `code-generation`, `test-strategy`, `risk-discovery`, `quality-gates`, `ontology-wiki` |
 | **`modernization`** | Legacy workload modernization to AWS (6R strategy) | `workload-assessment`, `modernization-strategy`, `to-be-architecture`, `containerization`, `cutover-planning` |
 
 ## Tier-0 workflows
@@ -159,7 +195,7 @@ oma doctor
 ```
 
 See the [Easy Button docs](https://aws-samples.github.io/sample-oh-my-aidlcops/docs/easy-button)
-for what `oma setup` writes, how the 12 doctor probes work, and how the
+for what `oma setup` writes, how the 13 doctor probes work, and how the
 ontology + harness DSL get enforced at runtime.
 
 > **Tech Preview notice** — `v0.4.0-preview.1` treats `profile.yaml` v1, the 8
