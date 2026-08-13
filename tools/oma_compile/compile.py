@@ -627,6 +627,65 @@ ERR_RISK_MISSING_CLASSIFICATION = (
 )
 
 
+def _check_harness_drift(dsl: dict, plugin_dir: Path, dsl_path: Path) -> list[str]:
+    """Compare the harness-managed artifacts (hooks.json, harness-rules.json,
+    enforce.py) to what a recompile would emit.
+
+    Mirrors the exact read/unwrap/merge steps _emit_harness uses when writing,
+    so a stale or hand-edited artifact (e.g. missing the top-level "hooks" key,
+    or a compiler-managed entry left over after its DSL declaration was
+    removed) is reported as drift instead of silently passing — this is the
+    gap that let hooks.json ship without its "hooks" wrapper undetected.
+    """
+    drift: list[str] = []
+    hooks_dir = plugin_dir / "hooks"
+    hooks_json_path = hooks_dir / "hooks.json"
+    rules_path = hooks_dir / "harness-rules.json"
+    enforcer_path = hooks_dir / "enforce.py"
+
+    raw_existing = None
+    existing_hooks = None
+    if hooks_json_path.exists():
+        raw_existing = json.loads(hooks_json_path.read_text(encoding="utf-8"))
+        if isinstance(raw_existing, dict) and "hooks" in raw_existing:
+            existing_hooks = raw_existing["hooks"]
+        else:
+            existing_hooks = raw_existing
+    expected_payload = _build_hooks_json(dsl, existing_hooks, dsl_path)
+
+    if expected_payload is not None:
+        expected_wrapped = {"hooks": expected_payload}
+        if raw_existing != expected_wrapped:
+            if hooks_json_path.exists():
+                drift.append(f"{hooks_json_path}: drift against {dsl_path}")
+            else:
+                drift.append(f"{hooks_json_path}: missing; compile has not been run")
+    elif hooks_json_path.exists():
+        drift.append(
+            f"{hooks_json_path}: stale (nothing managed or hand-authored); "
+            f"compile has not been run"
+        )
+
+    policies = dsl.get("policies") or []
+    if policies:
+        expected_rules = _build_harness_rules(dsl)
+        if rules_path.exists():
+            existing_rules = json.loads(rules_path.read_text(encoding="utf-8"))
+            if existing_rules != expected_rules:
+                drift.append(f"{rules_path}: drift against {dsl_path}")
+        else:
+            drift.append(f"{rules_path}: missing; compile has not been run")
+
+        expected_enforcer = HARNESS_ENFORCER_SRC.read_text(encoding="utf-8")
+        if enforcer_path.exists():
+            if enforcer_path.read_text(encoding="utf-8") != expected_enforcer:
+                drift.append(f"{enforcer_path}: drift against {HARNESS_ENFORCER_SRC}")
+        else:
+            drift.append(f"{enforcer_path}: missing; compile has not been run")
+
+    return drift
+
+
 def check_drift(plugin_files: Iterable[Path]) -> list[str]:
     """Compare what the compiler would emit to what is on disk.
 
@@ -654,4 +713,5 @@ def check_drift(plugin_files: Iterable[Path]) -> list[str]:
                     drift.append(f"{target}: drift against {dsl_path}")
             else:
                 drift.append(f"{target}: missing; compile has not been run")
+        drift.extend(_check_harness_drift(dsl, dsl_path.parent, dsl_path))
     return drift
