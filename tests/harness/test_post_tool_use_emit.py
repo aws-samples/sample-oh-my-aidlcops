@@ -49,7 +49,7 @@ def test_post_tool_use_entry_emitted(tmp_path):
     compile_plugin(dsl_path, write=True)
     hooks_json = json.loads(
         (dsl_path.parent / "hooks" / "hooks.json").read_text(encoding="utf-8")
-    )
+    )["hooks"]
     assert hooks_json["PostToolUse"][0]["_oma"] == POST_TOOL_USE_MARKER
     assert hooks_json["PostToolUse"][0]["hooks"][0]["command"] == (
         'bash "${CLAUDE_PLUGIN_ROOT}/hooks/audit-posttooluse.sh"'

@@ -300,6 +300,11 @@ SESSION_START_MARKER = "oma-session-start"
 # Marker for the compiler-managed PostToolUse audit entry. Its own marker keeps
 # re-own scoped per event so hand-authored PostToolUse hooks survive recompiles.
 POST_TOOL_USE_MARKER = "oma-audit-posttooluse"
+# Markers for the compiler-managed Stop / StopFailure entries (phase-gate
+# enforcement). Each event carries its own marker so re-own stays scoped per
+# event and hand-authored entries in any of these groups survive recompiles.
+STOP_MARKER = "oma-stop-gate"
+STOP_FAILURE_MARKER = "oma-stop-failure-gate"
 
 # DSL hook events the compiler emits into hooks/hooks.json, mapped to the
 # (Claude Code hook event name, re-own marker) it manages. PreToolUse is handled
@@ -307,6 +312,8 @@ POST_TOOL_USE_MARKER = "oma-audit-posttooluse"
 _EMITTABLE_HOOK_EVENTS = {
     "session-start": ("SessionStart", SESSION_START_MARKER),
     "post-tool-use": ("PostToolUse", POST_TOOL_USE_MARKER),
+    "stop": ("Stop", STOP_MARKER),
+    "stop-failure": ("StopFailure", STOP_FAILURE_MARKER),
 }
 
 
@@ -334,9 +341,10 @@ def _build_hooks_json(dsl: dict, existing: dict | None, source: Path) -> dict | 
     Manages two entry kinds, both re-owned via an _oma marker so hand-authored
     entries survive recompiles:
       * PreToolUse — the harness enforcer, emitted when policies: is present.
-      * SessionStart / PostToolUse — emitted when the matching hooks.<event>.runs
-        is declared, so ontology-state injection (#60, SessionStart) and
-        tool-call auditing (PostToolUse) ship inside the plugin.
+      * SessionStart / PostToolUse / Stop / StopFailure — emitted when the
+        matching hooks.<event>.runs is declared, so ontology-state injection
+        (#60, SessionStart), tool-call auditing (PostToolUse), and phase-gate
+        enforcement (Stop/StopFailure) ship inside the plugin.
 
     Returns the new payload, or None when nothing is managed and nothing was
     hand-authored.
@@ -363,9 +371,9 @@ def _build_hooks_json(dsl: dict, existing: dict | None, source: Path) -> dict | 
     else:
         payload.pop("PreToolUse", None)
 
-    # SessionStart / PostToolUse (and any other emittable hooks:) — from the
-    # hooks: block. Each event re-owns only its own marked entry, so
-    # hand-authored entries in the same group survive recompiles.
+    # SessionStart / PostToolUse / Stop / StopFailure (and any other emittable
+    # hooks:) — from the hooks: block. Each event re-owns only its own marked
+    # entry, so hand-authored entries in the same group survive recompiles.
     hooks = dsl.get("hooks") or {}
     for event, (cc_event, marker) in _EMITTABLE_HOOK_EVENTS.items():
         managed = [

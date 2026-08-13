@@ -53,7 +53,7 @@ def test_stop_and_stop_failure_entries_emitted(tmp_path):
     compile_plugin(dsl_path, write=True)
     hooks_json = json.loads(
         (dsl_path.parent / "hooks" / "hooks.json").read_text(encoding="utf-8")
-    )
+    )["hooks"]
     assert hooks_json["Stop"][0]["_oma"] == STOP_MARKER
     assert hooks_json["StopFailure"][0]["_oma"] == STOP_FAILURE_MARKER
     expected_cmd = 'bash "${CLAUDE_PLUGIN_ROOT}/hooks/stop-gate.sh"'
@@ -68,7 +68,7 @@ def test_stop_only_does_not_emit_stop_failure(tmp_path):
     compile_plugin(dsl_path, write=True)
     hooks_json = json.loads(
         (dsl_path.parent / "hooks" / "hooks.json").read_text(encoding="utf-8")
-    )
+    )["hooks"]
     assert "Stop" in hooks_json
     assert "StopFailure" not in hooks_json
 
