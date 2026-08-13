@@ -1,47 +1,49 @@
 {
-  "SessionStart": [
-    {
-      "_oma": "oma-session-start",
-      "hooks": [
-        {
-          "type": "command",
-          "command": "bash \"${CLAUDE_PLUGIN_ROOT}/hooks/session-start-ontology.sh\""
-        }
-      ]
-    }
-  ],
-  "PreToolUse": [
-    {
-      "_oma": "oma-harness-enforce",
-      "matcher": "Bash|Edit|Write",
-      "hooks": [
-        {
-          "type": "command",
-          "command": "python3 \"${CLAUDE_PLUGIN_ROOT}/hooks/enforce.py\""
-        }
-      ]
-    }
-  ],
-  "Stop": [
-    {
-      "_oma": "oma-stop-gate",
-      "hooks": [
-        {
-          "type": "command",
-          "command": "bash \"${CLAUDE_PLUGIN_ROOT}/hooks/stop-gate.sh\""
-        }
-      ]
-    }
-  ],
-  "StopFailure": [
-    {
-      "_oma": "oma-stop-failure-gate",
-      "hooks": [
-        {
-          "type": "command",
-          "command": "bash \"${CLAUDE_PLUGIN_ROOT}/hooks/stop-gate.sh\""
-        }
-      ]
-    }
-  ]
+  "hooks": {
+    "SessionStart": [
+      {
+        "_oma": "oma-session-start",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash \"${CLAUDE_PLUGIN_ROOT}/hooks/session-start-ontology.sh\""
+          }
+        ]
+      }
+    ],
+    "PreToolUse": [
+      {
+        "_oma": "oma-harness-enforce",
+        "matcher": "Bash|Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 \"${CLAUDE_PLUGIN_ROOT}/hooks/enforce.py\""
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "_oma": "oma-stop-gate",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash \"${CLAUDE_PLUGIN_ROOT}/hooks/stop-gate.sh\""
+          }
+        ]
+      }
+    ],
+    "StopFailure": [
+      {
+        "_oma": "oma-stop-failure-gate",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash \"${CLAUDE_PLUGIN_ROOT}/hooks/stop-gate.sh\""
+          }
+        ]
+      }
+    ]
+  }
 }
