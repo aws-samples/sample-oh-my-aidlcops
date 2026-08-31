@@ -80,6 +80,11 @@ class CompileResult:
     agent_json_paths: list[Path]
     triggers: list[dict]
     harness_paths: list[Path] = field(default_factory=list)
+    # What this compile computed as the expected hooks.json event map / policy
+    # ruleset (or None when neither is managed). check_drift() reuses these
+    # instead of re-deriving them by hand.
+    expected_hooks_json: dict | None = None
+    expected_harness_rules: dict | None = None
 
 
 def _load_schema() -> dict:
@@ -300,6 +305,11 @@ SESSION_START_MARKER = "oma-session-start"
 # Marker for the compiler-managed PostToolUse audit entry. Its own marker keeps
 # re-own scoped per event so hand-authored PostToolUse hooks survive recompiles.
 POST_TOOL_USE_MARKER = "oma-audit-posttooluse"
+# Markers for the compiler-managed Stop / StopFailure entries (phase-gate
+# enforcement). Each event carries its own marker so re-own stays scoped per
+# event and hand-authored entries in any of these groups survive recompiles.
+STOP_MARKER = "oma-stop-gate"
+STOP_FAILURE_MARKER = "oma-stop-failure-gate"
 
 # DSL hook events the compiler emits into hooks/hooks.json, mapped to the
 # (Claude Code hook event name, re-own marker) it manages. PreToolUse is handled
@@ -307,6 +317,8 @@ POST_TOOL_USE_MARKER = "oma-audit-posttooluse"
 _EMITTABLE_HOOK_EVENTS = {
     "session-start": ("SessionStart", SESSION_START_MARKER),
     "post-tool-use": ("PostToolUse", POST_TOOL_USE_MARKER),
+    "stop": ("Stop", STOP_MARKER),
+    "stop-failure": ("StopFailure", STOP_FAILURE_MARKER),
 }
 
 
@@ -328,15 +340,45 @@ def _plugin_relative_hook_command(runs: str, source: Path) -> str:
     return f'bash "${{CLAUDE_PLUGIN_ROOT}}/{norm}"'
 
 
+def _read_existing_hooks(hooks_json_path: Path) -> tuple[dict | None, dict | None, str | None]:
+    """Read + unwrap a plugin's hooks/hooks.json.
+
+    Returns (raw, unwrapped, error):
+      * raw       — exactly what's on disk, still wrapped under "hooks" if present.
+      * unwrapped — the inner event->entries map _build_hooks_json operates on.
+      * error     — set (and the other two None) when the file can't be parsed
+                    as the expected shape, so callers report clean drift/compile
+                    errors instead of crashing on a malformed or wrong-shaped file.
+
+    Shared by _emit_harness (write path) and _check_harness_drift (read-only
+    --check path) so the two can never drift apart on how they read the file.
+    """
+    if not hooks_json_path.exists():
+        return None, None, None
+    try:
+        raw = json.loads(hooks_json_path.read_text(encoding="utf-8"))
+    except json.JSONDecodeError as exc:
+        return None, None, f"invalid JSON ({exc})"
+    if not isinstance(raw, dict):
+        return None, None, f"expected a JSON object, got {type(raw).__name__}"
+    if "hooks" in raw:
+        unwrapped = raw["hooks"]
+        if not isinstance(unwrapped, dict):
+            return None, None, f"'hooks' key must be an object, got {type(unwrapped).__name__}"
+        return raw, unwrapped, None
+    return raw, raw, None
+
+
 def _build_hooks_json(dsl: dict, existing: dict | None, source: Path) -> dict | None:
     """Merge the compiler-managed entries into a plugin's hooks/hooks.json.
 
     Manages two entry kinds, both re-owned via an _oma marker so hand-authored
     entries survive recompiles:
       * PreToolUse — the harness enforcer, emitted when policies: is present.
-      * SessionStart / PostToolUse — emitted when the matching hooks.<event>.runs
-        is declared, so ontology-state injection (#60, SessionStart) and
-        tool-call auditing (PostToolUse) ship inside the plugin.
+      * SessionStart / PostToolUse / Stop / StopFailure — emitted when the
+        matching hooks.<event>.runs is declared, so ontology-state injection
+        (#60, SessionStart), tool-call auditing (PostToolUse), and phase-gate
+        enforcement (Stop/StopFailure) ship inside the plugin.
 
     Returns the new payload, or None when nothing is managed and nothing was
     hand-authored.
@@ -363,9 +405,9 @@ def _build_hooks_json(dsl: dict, existing: dict | None, source: Path) -> dict | 
     else:
         payload.pop("PreToolUse", None)
 
-    # SessionStart / PostToolUse (and any other emittable hooks:) — from the
-    # hooks: block. Each event re-owns only its own marked entry, so
-    # hand-authored entries in the same group survive recompiles.
+    # SessionStart / PostToolUse / Stop / StopFailure (and any other emittable
+    # hooks:) — from the hooks: block. Each event re-owns only its own marked
+    # entry, so hand-authored entries in the same group survive recompiles.
     hooks = dsl.get("hooks") or {}
     for event, (cc_event, marker) in _EMITTABLE_HOOK_EVENTS.items():
         managed = [
@@ -393,14 +435,24 @@ def _build_hooks_json(dsl: dict, existing: dict | None, source: Path) -> dict | 
     return payload or None
 
 
-def _emit_harness(dsl: dict, plugin_dir: Path, source: Path, write: bool) -> list[Path]:
+def _emit_harness(
+    dsl: dict, plugin_dir: Path, source: Path, write: bool
+) -> tuple[list[Path], dict | None, dict | None]:
     """Emit the plugin-bundled hooks.json (+ enforcer/ruleset when policies:).
 
     Two managed artifact families:
       * policies: → hooks/{enforce.py, harness-rules.json} + a PreToolUse entry
-      * hooks.session-start: → a SessionStart entry (#60); the script itself is
-        hand-authored under the plugin and only referenced here.
-    Emits nothing (and clears stale artifacts) when neither is declared.
+      * hooks.<event>.runs: → a managed entry per _EMITTABLE_HOOK_EVENTS; the
+        script itself is hand-authored under the plugin and only referenced here.
+    Emits nothing when neither is declared, and — in write mode — clears every
+    stale artifact left behind: hooks.json when nothing is managed or
+    hand-authored, and harness-rules.json/enforce.py once policies: is removed
+    (an install must not keep enforcing, or merely appear to enforce, rules
+    that no longer exist in the DSL).
+
+    Returns (written_paths, expected_hooks_json, expected_harness_rules) — the
+    two payloads this call computed (in both write modes), so check_drift()
+    can compare against them directly instead of re-deriving them by hand.
     """
     hooks_dir = plugin_dir / "hooks"
     rules_path = hooks_dir / "harness-rules.json"
@@ -408,25 +460,28 @@ def _emit_harness(dsl: dict, plugin_dir: Path, source: Path, write: bool) -> lis
     hooks_json_path = hooks_dir / "hooks.json"
     written: list[Path] = []
 
-    existing_hooks = None
-    if hooks_json_path.exists():
-        raw_existing = json.loads(hooks_json_path.read_text(encoding="utf-8"))
-        # Claude Code plugin hooks.json wraps event maps under a top-level
-        # "hooks" key (same shape as settings.json). Unwrap it so the marker-based
-        # re-own logic in _build_hooks_json operates on the event map directly.
-        if isinstance(raw_existing, dict) and "hooks" in raw_existing:
-            existing_hooks = raw_existing["hooks"]
-        else:
-            existing_hooks = raw_existing
+    _, existing_hooks, error = _read_existing_hooks(hooks_json_path)
+    if error is not None:
+        if write:
+            # An actual compile refuses to silently discard/guess at an
+            # unreadable file — surface it and let the operator fix or
+            # delete it. --check (write=False) must not raise here: a
+            # corrupted hooks.json in one plugin must not abort drift
+            # reporting for every other plugin, so it falls through and is
+            # reported as drift below instead.
+            raise CompileError(f"{hooks_json_path}: {error}; fix or delete it and recompile")
+        existing_hooks = None
     hooks_payload = _build_hooks_json(dsl, existing_hooks, source)
 
     policies = dsl.get("policies") or []
+    expected_rules = _build_harness_rules(dsl) if policies else None
+
     if not write:
         if policies:
             written += [rules_path, enforcer_path]
         if hooks_payload is not None:
             written.append(hooks_json_path)
-        return written
+        return written, hooks_payload, expected_rules
 
     if policies:
         if not HARNESS_ENFORCER_SRC.exists():
@@ -434,12 +489,20 @@ def _emit_harness(dsl: dict, plugin_dir: Path, source: Path, write: bool) -> lis
                 f"harness enforcer missing at {HARNESS_ENFORCER_SRC}; cannot bundle into plugin"
             )
         hooks_dir.mkdir(parents=True, exist_ok=True)
-        _write_json(rules_path, _build_harness_rules(dsl))
+        _write_json(rules_path, expected_rules)
         enforcer_path.write_text(
             HARNESS_ENFORCER_SRC.read_text(encoding="utf-8"), encoding="utf-8"
         )
         os.chmod(enforcer_path, 0o755)
         written += [rules_path, enforcer_path]
+    else:
+        # policies: removed (or never declared) — these are artifacts from a
+        # past compile; leaving them in place would ship a stale, inert
+        # enforcer that looks active but is never wired into hooks.json.
+        if rules_path.exists():
+            rules_path.unlink()
+        if enforcer_path.exists():
+            enforcer_path.unlink()
 
     if hooks_payload is not None:
         hooks_dir.mkdir(parents=True, exist_ok=True)
@@ -451,7 +514,7 @@ def _emit_harness(dsl: dict, plugin_dir: Path, source: Path, write: bool) -> lis
         # Nothing managed and nothing hand-authored left → remove empty file.
         hooks_json_path.unlink()
 
-    return written
+    return written, hooks_payload, expected_rules
 
 
 def compile_plugin(dsl_path: Path, write: bool = True) -> CompileResult:
@@ -496,7 +559,9 @@ def compile_plugin(dsl_path: Path, write: bool = True) -> CompileResult:
             agent_path.parent.mkdir(parents=True, exist_ok=True)
             _write_json(agent_path, payload)
 
-    harness_paths = _emit_harness(dsl, plugin_dir, dsl_path, write=write)
+    harness_paths, expected_hooks_json, expected_harness_rules = _emit_harness(
+        dsl, plugin_dir, dsl_path, write=write
+    )
 
     return CompileResult(
         plugin=dsl["plugin"],
@@ -504,6 +569,8 @@ def compile_plugin(dsl_path: Path, write: bool = True) -> CompileResult:
         agent_json_paths=agent_json_paths,
         triggers=triggers,
         harness_paths=harness_paths,
+        expected_hooks_json=expected_hooks_json,
+        expected_harness_rules=expected_harness_rules,
     )
 
 
@@ -619,6 +686,141 @@ ERR_RISK_MISSING_CLASSIFICATION = (
 )
 
 
+def _find_unmarked_managed_duplicates(
+    dsl: dict, existing_hooks: dict, dsl_path: Path
+) -> list[str]:
+    """Flag a managed event whose marked entry is missing but an unmarked
+    entry with identical content is present — i.e. the _oma marker was lost
+    (e.g. a bad merge that duplicated an entry without carrying the marker
+    over), rather than genuinely removed.
+
+    The merge-based comparison in _check_harness_drift re-owns an entry only
+    when its marker still matches, so once the marker is gone the entry looks
+    like unrelated hand-authored content and gets silently folded into
+    "expected" — the merge then matches the corrupted file byte-for-byte and
+    drift goes unreported. This checks disk content against the marker-free
+    canonical output (computed with existing=None, so nothing on disk can
+    bless itself) to catch that specific corruption.
+
+    Deliberately narrow: an unmarked entry that coexists *alongside* a
+    correctly marked one is left alone — that's the documented hand-authored
+    survival case (see test_hand_authored_stop_preserved), and it is
+    indistinguishable from marker loss by content alone. Only the "marker is
+    missing entirely" case is unambiguous.
+    """
+    canonical = _build_hooks_json(dsl, None, dsl_path) or {}
+    managed_markers = dict(_EMITTABLE_HOOK_EVENTS.values())
+    managed_markers["PreToolUse"] = HARNESS_HOOK_MARKER
+
+    findings: list[str] = []
+    for cc_event, marker in managed_markers.items():
+        expected_entries = [
+            {k: v for k, v in entry.items() if k != "_oma"}
+            for entry in canonical.get(cc_event, [])
+        ]
+        if not expected_entries:
+            continue
+        on_disk = existing_hooks.get(cc_event) or []
+        if any(e.get("_oma") == marker for e in on_disk):
+            continue
+        for entry in on_disk:
+            stripped = {k: v for k, v in entry.items() if k != "_oma"}
+            if stripped in expected_entries:
+                findings.append(
+                    f"{dsl_path.parent / 'hooks' / 'hooks.json'}: a {cc_event} "
+                    f"entry matches the compiler-managed output but is missing "
+                    f"its _oma={marker!r} marker (possible bad merge / marker "
+                    f"loss — delete the duplicate or restore the marker; a "
+                    f"plain recompile will not fix this since the entry reads "
+                    f"as hand-authored without the marker)"
+                )
+    return findings
+
+
+def _check_harness_drift(
+    dsl: dict, plugin_dir: Path, dsl_path: Path, result: CompileResult
+) -> list[str]:
+    """Compare the harness-managed artifacts (hooks.json, harness-rules.json,
+    enforce.py) to what a recompile would emit.
+
+    Reuses `result.expected_hooks_json` / `result.expected_harness_rules` —
+    the same payloads `compile_plugin(write=False)` already computed for this
+    dsl_path — instead of re-deriving them, so a stale or hand-edited artifact
+    (e.g. missing the top-level "hooks" key, or a compiler-managed entry left
+    over after its DSL declaration was removed) is reported as drift instead
+    of silently passing. Also flags entries that lost their _oma marker
+    (_find_unmarked_managed_duplicates) and rules/enforcer files orphaned by
+    removing a plugin's policies: block — both of those are corruption classes
+    the plain merge-comparison below cannot see on its own.
+    """
+    drift: list[str] = []
+    hooks_dir = plugin_dir / "hooks"
+    hooks_json_path = hooks_dir / "hooks.json"
+    rules_path = hooks_dir / "harness-rules.json"
+    enforcer_path = hooks_dir / "enforce.py"
+
+    raw_existing, existing_hooks, error = _read_existing_hooks(hooks_json_path)
+    if error is not None:
+        drift.append(f"{hooks_json_path}: {error}; recompile to fix")
+    else:
+        expected_payload = result.expected_hooks_json
+        if expected_payload is not None:
+            expected_wrapped = {"hooks": expected_payload}
+            if raw_existing != expected_wrapped:
+                if hooks_json_path.exists():
+                    drift.append(f"{hooks_json_path}: drift against {dsl_path}")
+                else:
+                    drift.append(f"{hooks_json_path}: missing; compile has not been run")
+        elif hooks_json_path.exists():
+            drift.append(
+                f"{hooks_json_path}: orphaned (nothing managed or hand-authored "
+                f"here anymore); a recompile would remove it"
+            )
+        if existing_hooks:
+            drift.extend(_find_unmarked_managed_duplicates(dsl, existing_hooks, dsl_path))
+
+    policies = dsl.get("policies") or []
+    if policies:
+        expected_rules = result.expected_harness_rules
+        if rules_path.exists():
+            try:
+                existing_rules = json.loads(rules_path.read_text(encoding="utf-8"))
+            except json.JSONDecodeError as exc:
+                drift.append(f"{rules_path}: invalid JSON ({exc}); recompile to fix")
+            else:
+                if existing_rules != expected_rules:
+                    drift.append(f"{rules_path}: drift against {dsl_path}")
+        else:
+            drift.append(f"{rules_path}: missing; compile has not been run")
+
+        if not HARNESS_ENFORCER_SRC.exists():
+            raise CompileError(
+                f"harness enforcer missing at {HARNESS_ENFORCER_SRC}; cannot check drift"
+            )
+        expected_enforcer = HARNESS_ENFORCER_SRC.read_text(encoding="utf-8")
+        if enforcer_path.exists():
+            if enforcer_path.read_text(encoding="utf-8") != expected_enforcer:
+                drift.append(f"{enforcer_path}: drift against {HARNESS_ENFORCER_SRC}")
+        else:
+            drift.append(f"{enforcer_path}: missing; compile has not been run")
+    else:
+        # policies: was removed (or never declared) — rules_path/enforcer_path
+        # are artifacts from a past compile and must not be left behind
+        # silently: an install would still ship a stale, inert enforcer.
+        if rules_path.exists():
+            drift.append(
+                f"{rules_path}: orphaned (no policies: in {dsl_path}); "
+                f"a recompile would remove it"
+            )
+        if enforcer_path.exists():
+            drift.append(
+                f"{enforcer_path}: orphaned (no policies: in {dsl_path}); "
+                f"a recompile would remove it"
+            )
+
+    return drift
+
+
 def check_drift(plugin_files: Iterable[Path]) -> list[str]:
     """Compare what the compiler would emit to what is on disk.
 
@@ -646,4 +848,12 @@ def check_drift(plugin_files: Iterable[Path]) -> list[str]:
                     drift.append(f"{target}: drift against {dsl_path}")
             else:
                 drift.append(f"{target}: missing; compile has not been run")
+        try:
+            drift.extend(_check_harness_drift(dsl, dsl_path.parent, dsl_path, result))
+        except (CompileError, OSError) as exc:
+            # A corrupted or unreadable harness artifact in one plugin (e.g.
+            # a permissions error, or the repo's canonical enforcer template
+            # missing) must not blind --check to every other plugin — report
+            # it as drift for this plugin and keep going.
+            drift.append(f"{dsl_path}: harness drift check failed ({exc})")
     return drift

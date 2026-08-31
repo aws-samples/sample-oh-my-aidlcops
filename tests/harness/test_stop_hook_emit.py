@@ -14,7 +14,6 @@ import json
 from pathlib import Path
 
 import pytest
-import yaml
 
 from tools.oma_compile.compile import (
     STOP_FAILURE_MARKER,
@@ -24,16 +23,11 @@ from tools.oma_compile.compile import (
     compile_plugin,
 )
 
+from .conftest import write_plugin
+
 
 def _write_plugin(root: Path, dsl: dict) -> Path:
-    plugin_dir = root / "plugins" / dsl["plugin"]
-    (plugin_dir / "hooks").mkdir(parents=True, exist_ok=True)
-    (plugin_dir / "hooks" / "stop-gate.sh").write_text(
-        "#!/usr/bin/env bash\n", encoding="utf-8"
-    )
-    out = plugin_dir / f"{dsl['plugin']}.oma.yaml"
-    out.write_text(yaml.safe_dump(dsl, sort_keys=False), encoding="utf-8")
-    return out
+    return write_plugin(root, dsl, scripts={"hooks/stop-gate.sh": "#!/usr/bin/env bash\n"})
 
 
 BASE_DSL = {
@@ -53,7 +47,7 @@ def test_stop_and_stop_failure_entries_emitted(tmp_path):
     compile_plugin(dsl_path, write=True)
     hooks_json = json.loads(
         (dsl_path.parent / "hooks" / "hooks.json").read_text(encoding="utf-8")
-    )
+    )["hooks"]
     assert hooks_json["Stop"][0]["_oma"] == STOP_MARKER
     assert hooks_json["StopFailure"][0]["_oma"] == STOP_FAILURE_MARKER
     expected_cmd = 'bash "${CLAUDE_PLUGIN_ROOT}/hooks/stop-gate.sh"'
@@ -68,7 +62,7 @@ def test_stop_only_does_not_emit_stop_failure(tmp_path):
     compile_plugin(dsl_path, write=True)
     hooks_json = json.loads(
         (dsl_path.parent / "hooks" / "hooks.json").read_text(encoding="utf-8")
-    )
+    )["hooks"]
     assert "Stop" in hooks_json
     assert "StopFailure" not in hooks_json
 
