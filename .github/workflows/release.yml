@@ -52,14 +52,21 @@ jobs:
       - uses: actions/checkout@v5
       - name: Resolve version
         id: ver
+        env:
+          # Pass event context through env vars instead of inline ${{ }}
+          # interpolation so user-controlled input can't inject shell code.
+          EVENT_NAME: ${{ github.event_name }}
+          INPUT_VERSION: ${{ github.event.inputs.version }}
         run: |
-          if [ "${{ github.event_name }}" = "workflow_dispatch" ] && [ -n "${{ github.event.inputs.version }}" ]; then
-            echo "tag=${{ github.event.inputs.version }}" >> "$GITHUB_OUTPUT"
+          if [ "$EVENT_NAME" = "workflow_dispatch" ] && [ -n "$INPUT_VERSION" ]; then
+            echo "tag=$INPUT_VERSION" >> "$GITHUB_OUTPUT"
           else
             echo "tag=${GITHUB_REF#refs/tags/}" >> "$GITHUB_OUTPUT"
           fi
       - name: Build tarball
-        run: bash scripts/dev/make-tarball.sh --version "${{ steps.ver.outputs.tag }}"
+        env:
+          RELEASE_TAG: ${{ steps.ver.outputs.tag }}
+        run: bash scripts/dev/make-tarball.sh --version "$RELEASE_TAG"
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
@@ -82,9 +89,14 @@ jobs:
           fetch-depth: 0
       - name: Resolve version
         id: ver
+        env:
+          # Pass event context through env vars instead of inline ${{ }}
+          # interpolation so user-controlled input can't inject shell code.
+          EVENT_NAME: ${{ github.event_name }}
+          INPUT_VERSION: ${{ github.event.inputs.version }}
         run: |
-          if [ "${{ github.event_name }}" = "workflow_dispatch" ] && [ -n "${{ github.event.inputs.version }}" ]; then
-            echo "tag=${{ github.event.inputs.version }}" >> "$GITHUB_OUTPUT"
+          if [ "$EVENT_NAME" = "workflow_dispatch" ] && [ -n "$INPUT_VERSION" ]; then
+            echo "tag=$INPUT_VERSION" >> "$GITHUB_OUTPUT"
           else
             echo "tag=${GITHUB_REF#refs/tags/}" >> "$GITHUB_OUTPUT"
           fi
@@ -174,40 +186,45 @@ jobs:
         if: github.event_name != 'workflow_dispatch' || github.event.inputs.dry_run != 'true'
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          RELEASE_TAG: ${{ steps.ver.outputs.tag }}
         run: |
-          gh release delete "${{ steps.ver.outputs.tag }}" --yes --cleanup-tag 2>/dev/null || true
+          gh release delete "$RELEASE_TAG" --yes --cleanup-tag 2>/dev/null || true
 
       - name: Re-push tag at current commit
         if: github.event_name != 'workflow_dispatch' || github.event.inputs.dry_run != 'true'
+        env:
+          RELEASE_TAG: ${{ steps.ver.outputs.tag }}
         run: |
-          git tag -f "${{ steps.ver.outputs.tag }}"
-          git push origin "${{ steps.ver.outputs.tag }}" --force
+          git tag -f "$RELEASE_TAG"
+          git push origin "$RELEASE_TAG" --force
 
       - name: Create GitHub Release
         if: github.event_name != 'workflow_dispatch' || github.event.inputs.dry_run != 'true'
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          RELEASE_TAG: ${{ steps.ver.outputs.tag }}
         run: |
           is_prerelease=""
-          case "${{ steps.ver.outputs.tag }}" in
+          case "$RELEASE_TAG" in
               *preview*|*rc*) is_prerelease="--prerelease" ;;
           esac
-          gh release create "${{ steps.ver.outputs.tag }}" \
-              --title "OMA ${{ steps.ver.outputs.tag }}" \
+          gh release create "$RELEASE_TAG" \
+              --title "OMA $RELEASE_TAG" \
               --notes-file body.md \
               $is_prerelease \
-              "dist/oh-my-aidlcops-${{ steps.ver.outputs.tag }}.tar.gz" \
-              "dist/oh-my-aidlcops-${{ steps.ver.outputs.tag }}.tar.gz.sha256"
+              "dist/oh-my-aidlcops-$RELEASE_TAG.tar.gz" \
+              "dist/oh-my-aidlcops-$RELEASE_TAG.tar.gz.sha256"
 
       - name: Trigger docs-build so /releases refreshes
         if: github.event_name != 'workflow_dispatch' || github.event.inputs.dry_run != 'true'
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          RELEASE_TAG: ${{ steps.ver.outputs.tag }}
         run: |
           # Belt-and-suspenders: docs-build.yml already subscribes to
           # `release: published`, but GitHub sometimes fires that event
           # before Pages picks up the new repo state. Explicitly
           # dispatching the workflow guarantees the /releases page
           # regenerates with the new tag even when the event path lags.
-          echo "Dispatching docs-build.yml on main for ${{ steps.ver.outputs.tag }}"
+          echo "Dispatching docs-build.yml on main for $RELEASE_TAG"
           gh workflow run docs --repo "$GITHUB_REPOSITORY" --ref main
