@@ -115,3 +115,20 @@ def test_v1_rejects_workflows_key():
     payload = {**MINIMAL_OK, "workflows": {"p": {"steps": [{"id": "s"}]}}}
     errs = list(_validator().iter_errors(payload))
     assert errs, "v1 must reject the v2-only workflows key"
+
+
+@pytest.mark.parametrize("event", ["session-start", "post-tool-use", "stop", "stop-failure"])
+def test_recognized_hook_events_accepted(event):
+    payload = {**MINIMAL_OK, "hooks": {event: {"runs": "hooks/x.sh"}}}
+    errs = list(_validator().iter_errors(payload))
+    assert errs == [], [e.message for e in errs]
+
+
+@pytest.mark.parametrize("event", ["stop_failure", "on-stop", "Stop", "pre-tool-use"])
+def test_typo_d_hook_event_rejected(event):
+    """A typo'd or wrong-cased event key must fail validation instead of
+    silently compiling to a no-op (the compiler only recognizes the exact
+    keys in _EMITTABLE_HOOK_EVENTS; anything else is never emitted)."""
+    payload = {**MINIMAL_OK, "hooks": {event: {"runs": "hooks/x.sh"}}}
+    errs = list(_validator().iter_errors(payload))
+    assert errs, f"{event!r} is not a recognized hook event and must be rejected"
