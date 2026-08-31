@@ -10,7 +10,48 @@ breaking changes to non-stable surfaces as documented in
 
 ## [Unreleased]
 
+## [0.5.0-preview.1] — 2026-08-06
+
 ### Added
+- **Secret-protection baseline in all four plugins.** The three
+  cross-cutting secret-file rules (deny-secret-file-write/edit/
+  shell-redirect) are extracted into a shared baseline and added to the
+  `policies:` block of agenticops, aidlc, and modernization. The
+  compiler emits `hooks/{enforce.py,harness-rules.json,hooks.json}`
+  into each plugin, so an install without `ai-infra` still gets hard
+  enforcement. Infra-scoped rules (kubectl, EKS MCP write) remain
+  ai-infra-only. (#66)
+- **SessionStart ontology injection ships with the plugins.**
+  `plugins/{ai-infra,aidlc}/hooks/session-start-ontology.sh` is
+  registered via each plugin's `hooks.json`, so `/plugin install` alone
+  injects the project's `.omao/` ontology status into session context —
+  no manual settings.json wiring. (#67)
+- **AIDLC phase gates enforced at turn-end.** `plugins/aidlc/hooks/stop-gate.sh`
+  runs on the Stop hook and blocks ending a turn while a phase gate is
+  OPEN. (#72)
+- **Tool-call audit trail.** An agenticops `PostToolUse` hook
+  (`audit-posttooluse.sh`) records every state-changing tool call to
+  `.omao/audit/tool-events.jsonl`, validated by the new
+  `schemas/audit/tool-event.schema.json`. (#73)
+- **Loop engineering.** The harness DSL gains an optional `loops:`
+  section describing autonomous feedback cycles (discovery → triage →
+  modify → verify) on top of per-call policies, documented in
+  `docs/docs/loop-engineering.md`. (#78)
+- **Knowledge Wiki grounding layer (design accepted, build pending).**
+  `adr-0001-graphify-knowledge-wiki` records a Graphify-backed
+  pre-generation retrieval layer; the `aidlc` plugin ships an
+  `ontology-wiki` skill plus committed corpus (`graph.json`, wiki
+  pages) that grounds entity authoring in existing definitions, enums,
+  and ADR rationale before generation. Docs page added (en/ko). (#68, #53)
+- **Five new AgenticOps skills** — `anomaly-detection`,
+  `root-cause-analysis`, `automated-remediation`, `slo-management`,
+  `predictive-scaling` — wired together by the
+  `steering/workflows/incident-pipeline.md` workflow, with
+  `tests/test_aiops_skills.py` and PromQL validation coverage. (#30, #57)
+- **Architecture docs page.** `docs/docs/architecture.md` maps the
+  two-layer install model (user-global capability, project-local
+  policy), the Claude Code vs Kiro policy-pull paths, and a
+  single-edit-point map. (#48)
 - **Reliability dual-axis docs.** Two methodology-grounded pages —
   `docs/docs/ontology-engineering.md` (correctness axis: typed world
   model, Inner/Middle/Outer triple feedback loop, AgenticOps as the
@@ -543,7 +584,8 @@ breaking changes to non-stable surfaces as documented in
   langfuse-observability, simpleeval-based cost-governance expressions.
 - MIT-0 license, AWS-samples destination.
 
-[Unreleased]: https://github.com/aws-samples/sample-oh-my-aidlcops/compare/v0.4.0-preview.1...HEAD
+[Unreleased]: https://github.com/aws-samples/sample-oh-my-aidlcops/compare/v0.5.0-preview.1...HEAD
+[0.5.0-preview.1]: https://github.com/aws-samples/sample-oh-my-aidlcops/releases/tag/v0.5.0-preview.1
 [0.4.0-preview.1]: https://github.com/aws-samples/sample-oh-my-aidlcops/releases/tag/v0.4.0-preview.1
 [0.3.0-preview.1]: https://github.com/aws-samples/sample-oh-my-aidlcops/releases/tag/v0.3.0-preview.1
 [0.2.0-preview.1]: https://github.com/aws-samples/sample-oh-my-aidlcops/releases/tag/v0.2.0-preview.1

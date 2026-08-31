@@ -6,7 +6,7 @@ sidebar_position: 50
 
 # Support Policy — Tech Preview
 
-OMA `v0.4.0-preview.1` 은 **Tech Preview** 릴리스입니다. 프로덕션 SLA 를 제공하지
+OMA `v0.5.0-preview.1` 은 **Tech Preview** 릴리스입니다. 프로덕션 SLA 를 제공하지
 않으며, 아래 기준에 따라 지원 범위를 확정합니다.
 
 ## 안정성 계약
