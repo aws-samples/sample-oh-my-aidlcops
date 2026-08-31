@@ -14,7 +14,6 @@ import json
 from pathlib import Path
 
 import pytest
-import yaml
 
 from tools.oma_compile.compile import (
     STOP_FAILURE_MARKER,
@@ -24,16 +23,11 @@ from tools.oma_compile.compile import (
     compile_plugin,
 )
 
+from .conftest import write_plugin
+
 
 def _write_plugin(root: Path, dsl: dict) -> Path:
-    plugin_dir = root / "plugins" / dsl["plugin"]
-    (plugin_dir / "hooks").mkdir(parents=True, exist_ok=True)
-    (plugin_dir / "hooks" / "stop-gate.sh").write_text(
-        "#!/usr/bin/env bash\n", encoding="utf-8"
-    )
-    out = plugin_dir / f"{dsl['plugin']}.oma.yaml"
-    out.write_text(yaml.safe_dump(dsl, sort_keys=False), encoding="utf-8")
-    return out
+    return write_plugin(root, dsl, scripts={"hooks/stop-gate.sh": "#!/usr/bin/env bash\n"})
 
 
 BASE_DSL = {

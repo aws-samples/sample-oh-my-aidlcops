@@ -13,7 +13,6 @@ import json
 from pathlib import Path
 
 import pytest
-import yaml
 
 from tools.oma_compile.compile import (
     HARNESS_HOOK_MARKER,
@@ -23,16 +22,13 @@ from tools.oma_compile.compile import (
     compile_plugin,
 )
 
+from .conftest import write_plugin
+
 
 def _write_plugin(root: Path, dsl: dict) -> Path:
-    plugin_dir = root / "plugins" / dsl["plugin"]
-    (plugin_dir / "hooks").mkdir(parents=True, exist_ok=True)
-    (plugin_dir / "hooks" / "audit-posttooluse.sh").write_text(
-        "#!/usr/bin/env bash\n", encoding="utf-8"
+    return write_plugin(
+        root, dsl, scripts={"hooks/audit-posttooluse.sh": "#!/usr/bin/env bash\n"}
     )
-    out = plugin_dir / f"{dsl['plugin']}.oma.yaml"
-    out.write_text(yaml.safe_dump(dsl, sort_keys=False), encoding="utf-8")
-    return out
 
 
 BASE_DSL = {
