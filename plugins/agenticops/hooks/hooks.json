@@ -1,25 +1,27 @@
 {
-  "PreToolUse": [
-    {
-      "_oma": "oma-harness-enforce",
-      "matcher": "Bash|Edit|Write",
-      "hooks": [
-        {
-          "type": "command",
-          "command": "python3 \"${CLAUDE_PLUGIN_ROOT}/hooks/enforce.py\""
-        }
-      ]
-    }
-  ],
-  "PostToolUse": [
-    {
-      "_oma": "oma-audit-posttooluse",
-      "hooks": [
-        {
-          "type": "command",
-          "command": "bash \"${CLAUDE_PLUGIN_ROOT}/hooks/audit-posttooluse.sh\""
-        }
-      ]
-    }
-  ]
+  "hooks": {
+    "PostToolUse": [
+      {
+        "_oma": "oma-audit-posttooluse",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash \"${CLAUDE_PLUGIN_ROOT}/hooks/audit-posttooluse.sh\""
+          }
+        ]
+      }
+    ],
+    "PreToolUse": [
+      {
+        "_oma": "oma-harness-enforce",
+        "matcher": "Bash|Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 \"${CLAUDE_PLUGIN_ROOT}/hooks/enforce.py\""
+          }
+        ]
+      }
+    ]
+  }
 }

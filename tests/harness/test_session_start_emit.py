@@ -12,7 +12,6 @@ import json
 from pathlib import Path
 
 import pytest
-import yaml
 
 from tools.oma_compile.compile import (
     CompileError,
@@ -20,19 +19,16 @@ from tools.oma_compile.compile import (
     compile_plugin,
 )
 
+from .conftest import write_plugin
+
 SESSION_START_MARKER = "oma-session-start"
 
 
 def _write_plugin(root: Path, dsl: dict, hook_body: str | None = None) -> Path:
-    plugin_dir = root / "plugins" / dsl["plugin"]
-    (plugin_dir / "hooks").mkdir(parents=True, exist_ok=True)
+    scripts = None
     if hook_body is not None:
-        (plugin_dir / "hooks" / "session-start-ontology.sh").write_text(
-            hook_body, encoding="utf-8"
-        )
-    out = plugin_dir / f"{dsl['plugin']}.oma.yaml"
-    out.write_text(yaml.safe_dump(dsl, sort_keys=False), encoding="utf-8")
-    return out
+        scripts = {"hooks/session-start-ontology.sh": hook_body}
+    return write_plugin(root, dsl, scripts=scripts)
 
 
 BASE_DSL = {

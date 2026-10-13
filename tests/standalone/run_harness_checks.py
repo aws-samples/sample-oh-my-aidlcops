@@ -243,6 +243,93 @@ def test_e2e_us005() -> None:
           (proc.stdout + proc.stderr)[:300])
 
 
+def test_harness_drift_us006() -> None:
+    """Standalone-runner coverage for the check_drift() regressions covered by
+    tests/harness/test_harness_drift.py under pytest. This runner is the only
+    evidence available in a no-pytest dev environment (see module docstring),
+    so a regression in _check_harness_drift must be visible here too, not
+    only in the pytest-only suite."""
+    import yaml as _yaml
+
+    from tools.oma_compile.compile import CompileError, check_drift, compile_plugin
+
+    def _write_plugin(root: Path, dsl: dict, scripts: dict | None = None) -> Path:
+        plugin_dir = root / "plugins" / dsl["plugin"]
+        (plugin_dir / "hooks").mkdir(parents=True, exist_ok=True)
+        for rel_path, body in (scripts or {}).items():
+            (plugin_dir / rel_path).write_text(body, encoding="utf-8")
+        out = plugin_dir / f"{dsl['plugin']}.oma.yaml"
+        out.write_text(_yaml.safe_dump(dsl, sort_keys=False), encoding="utf-8")
+        return out
+
+    base_dsl = {
+        "version": 2,
+        "plugin": "standalone-check-plugin",
+        "mcp": {},
+        "agents": [],
+        "hooks": {"session-start": {"runs": "hooks/session-start.sh"}},
+    }
+    policy_dsl = {
+        "version": 2,
+        "plugin": "standalone-check-policy-plugin",
+        "mcp": {},
+        "agents": [],
+        "policies": [{
+            "id": "deny-secret-file-write",
+            "severity": "blocking",
+            "phase": ["construction"],
+            "description": "test",
+            "enforce": {
+                "tool": "Write",
+                "deny_if": {"file_path_matches": "\\.env$"},
+                "decision": "deny",
+                "reason": "test",
+            },
+        }],
+    }
+
+    with tempfile.TemporaryDirectory() as td:
+        root = Path(td)
+
+        # Freshly compiled -> clean.
+        dsl_path = _write_plugin(root, base_dsl, {"hooks/session-start.sh": "#!/usr/bin/env bash\n"})
+        compile_plugin(dsl_path, write=True)
+        check("US-006 freshly compiled hooks.json has no drift", check_drift([dsl_path]) == [])
+
+        # Unwrapped hooks.json (the exact shipped #87 bug) is flagged.
+        hooks_json_path = dsl_path.parent / "hooks" / "hooks.json"
+        wrapped = json.loads(hooks_json_path.read_text(encoding="utf-8"))
+        hooks_json_path.write_text(json.dumps(wrapped["hooks"]), encoding="utf-8")
+        drift = check_drift([dsl_path])
+        check("US-006 unwrapped hooks.json flagged", any("hooks.json" in d for d in drift), str(drift))
+
+        # Malformed hooks.json is reported, not crashed.
+        hooks_json_path.write_text("{ not valid json", encoding="utf-8")
+        try:
+            drift = check_drift([dsl_path])
+            check("US-006 malformed hooks.json reported not crashed",
+                  any("invalid JSON" in d for d in drift), str(drift))
+        except Exception as exc:  # noqa: BLE001
+            check("US-006 malformed hooks.json reported not crashed", False, repr(exc))
+
+        # Orphaned harness-rules.json/enforce.py after policies: removal are
+        # flagged by check_drift and actually cleared by a recompile.
+        policy_dsl_path = _write_plugin(root, policy_dsl)
+        compile_plugin(policy_dsl_path, write=True)
+        rules_path = policy_dsl_path.parent / "hooks" / "harness-rules.json"
+        enforcer_path = policy_dsl_path.parent / "hooks" / "enforce.py"
+        dsl_without_policies = {k: v for k, v in policy_dsl.items() if k != "policies"}
+        policy_dsl_path.write_text(_yaml.safe_dump(dsl_without_policies, sort_keys=False), encoding="utf-8")
+        drift = check_drift([policy_dsl_path])
+        check("US-006 orphaned harness-rules.json flagged",
+              any("harness-rules.json" in d and "orphaned" in d for d in drift), str(drift))
+        check("US-006 orphaned enforce.py flagged",
+              any("enforce.py" in d and "orphaned" in d for d in drift), str(drift))
+        compile_plugin(policy_dsl_path, write=True)
+        check("US-006 recompile clears orphaned rules/enforcer",
+              not rules_path.exists() and not enforcer_path.exists())
+
+
 def test_hardening() -> None:
     """Post-review hardening: bypass closures + fail-closed on corrupt ruleset.
     Runs against the compiled ai-infra ruleset via _decide_via_plugin."""
@@ -279,6 +366,7 @@ def main() -> int:
     test_compile_us003()
     test_opa_purge_us004()
     test_e2e_us005()
+    test_harness_drift_us006()
     test_hardening()
     failed = [n for ok, n in _results if not ok]
     print(f"\n{len(_results) - len(failed)}/{len(_results)} checks passed")

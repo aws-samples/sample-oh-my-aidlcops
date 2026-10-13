@@ -4,9 +4,16 @@ name: foundation
 #   - JSON Schemas under schemas/ontology/ round-trip against fixtures
 #   - Harness DSL schema rejects bad shapes
 #   - oma-compile is idempotent, rejects floating versions and undeclared MCP refs
-#   - Committed .mcp.json / kiro-agents/*.agent.json files do not drift from
-#     their *.oma.yaml sources (skipped silently until M2 introduces the first
+#   - Committed .mcp.json / kiro-agents/*.agent.json / hooks/hooks.json /
+#     hooks/harness-rules.json / hooks/enforce.py do not drift from their
+#     *.oma.yaml sources (skipped silently until M2 introduces the first
 #     *.oma.yaml under plugins/)
+#
+# The generated-artifact paths below are listed explicitly (not just
+# plugins/**/*.oma.yaml) so a hand-edit to one of them — e.g. stripping the
+# top-level "hooks" wrapper, the exact shipped bug oma-compile --check now
+# catches — still triggers this job instead of merging without ever running
+# the drift check that would have caught it.
 
 on:
   push:
@@ -15,8 +22,14 @@ on:
       - 'schemas/**'
       - 'ontology/**'
       - 'tools/oma_compile/**'
+      - 'tools/oma_harness/**'
       - 'tests/**'
       - 'plugins/**/*.oma.yaml'
+      - 'plugins/**/.mcp.json'
+      - 'plugins/**/kiro-agents/*.agent.json'
+      - 'plugins/**/hooks/hooks.json'
+      - 'plugins/**/hooks/harness-rules.json'
+      - 'plugins/**/hooks/enforce.py'
       - 'pyproject.toml'
       - '.github/workflows/oma-foundation.yml'
   pull_request:
@@ -24,8 +37,14 @@ on:
       - 'schemas/**'
       - 'ontology/**'
       - 'tools/oma_compile/**'
+      - 'tools/oma_harness/**'
       - 'tests/**'
       - 'plugins/**/*.oma.yaml'
+      - 'plugins/**/.mcp.json'
+      - 'plugins/**/kiro-agents/*.agent.json'
+      - 'plugins/**/hooks/hooks.json'
+      - 'plugins/**/hooks/harness-rules.json'
+      - 'plugins/**/hooks/enforce.py'
       - 'pyproject.toml'
       - '.github/workflows/oma-foundation.yml'
   workflow_dispatch: {}
