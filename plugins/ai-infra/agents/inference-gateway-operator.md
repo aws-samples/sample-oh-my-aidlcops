@@ -22,7 +22,7 @@ tools: Read,Write,Edit,Bash,Grep,Glob,mcp__eks,mcp__aws-documentation,mcp__prome
 
 ```
 Q1. 여러 LLM 프로바이더를 통합해야 하는가?
-  YES → Bifrost (Rust 기반, 50x faster than LiteLLM) 우선, Python 플러그인 필요 시 LiteLLM
+  YES → Bifrost (Go-based) 우선, Python 플러그인 필요 시 LiteLLM
   NO  → kgateway 단독 + vLLM OpenAI 호환 엔드포인트 직결
 
 Q2. 요청 복잡도가 다양하게 분포하는가?
@@ -113,6 +113,6 @@ spec:
 - Inference Gateway 배포 가이드 (community resource) — Helm, HTTPRoute, OTel
 - [kgateway 공식 문서](https://kgateway.dev/docs/) — GatewayClass / HTTPRoute 레퍼런스
 - [Kubernetes Gateway API](https://gateway-api.sigs.k8s.io/) — 표준 스펙
-- [Bifrost GitHub](https://github.com/maximhq/bifrost) — Rust 기반 LLM Gateway
+- [Bifrost GitHub](https://github.com/maximhq/bifrost) — Go-based LLM Gateway
 - [LiteLLM 공식 문서](https://docs.litellm.ai/) — 100+ provider 지원
 - 플러그인 내부: `references/inference-gateway-cascade-pattern.md`
