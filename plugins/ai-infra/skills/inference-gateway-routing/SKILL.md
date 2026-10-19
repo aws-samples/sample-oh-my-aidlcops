@@ -1,6 +1,6 @@
 ---
 name: inference-gateway-routing
-description: "Configure kgateway v2.0+ as L1 and Bifrost v1.x or LiteLLM v1.60+ as L2 for a 2-Tier Inference Gateway on EKS. Apply Cascade Routing (Haiku→Sonnet→Opus fallback), Semantic Router (intent-based model pick), and HTTPRoute with OTel trace propagation to Langfuse."
+description: "Configure kgateway v2.0+ as L1 and Bifrost v2.x or LiteLLM v1.60+ as L2 for a 2-Tier Inference Gateway on EKS. Apply Cascade Routing (Haiku→Sonnet→Opus fallback), Semantic Router (intent-based model pick), and HTTPRoute with OTel trace propagation to Langfuse."
 argument-hint: "[routing pattern, providers, target cost/SLO]"
 user-invocable: true
 model: claude-sonnet-4-6
@@ -64,16 +64,18 @@ spec:
           - name: llm-tls-cert
 ```
 
-### Step 4. Bifrost v1.x (L2) 배포
+### Step 4. Bifrost v2.x (L2) 배포
 ```bash
-helm install bifrost maximhq/bifrost \
+helm repo add bifrost https://maximhq.github.io/bifrost/helm-charts
+helm repo update
+# --version pins the chart; image.tag (the gateway release) is required by the chart.
+# Provider keys from Secrets, the Bedrock region and the semantic cache plugin go in
+# bifrost-values.yaml: https://docs.getbifrost.ai/deployment-guides/helm
+helm install bifrost bifrost/bifrost \
   --namespace inference \
-  --version 1.0.0 \
-  --set providers.openai.apiKeyFrom=secret/openai \
-  --set providers.anthropic.apiKeyFrom=secret/anthropic \
-  --set providers.bedrock.region=ap-northeast-2 \
-  --set cascade.enabled=true \
-  --set semanticCache.enabled=true
+  --version 2.1.44 \
+  --set image.tag=v2.3.0 \
+  -f bifrost-values.yaml
 ```
 
 ### Step 5. Cascade 또는 Semantic Router 정책 정의

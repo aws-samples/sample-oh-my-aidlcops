@@ -12,7 +12,7 @@ tools: Read,Write,Edit,Bash,Grep,Glob,mcp__eks,mcp__aws-documentation,mcp__prome
 ## Core Capabilities
 
 1. **kgateway v2.0+ 설치** — GatewayClass, Gateway, HTTPRoute 리소스 생성 (Kubernetes Gateway API 표준)
-2. **Bifrost v1.x / LiteLLM v1.60+ 배포** — 100+ LLM 프로바이더 통합 L2 게이트웨이
+2. **Bifrost v2.x / LiteLLM v1.60+ 배포** — 100+ LLM 프로바이더 통합 L2 게이트웨이
 3. **Cascade Routing** — 요청 복잡도 분석 후 Haiku → Sonnet → Opus 순으로 fallback, 비용 최적화
 4. **Semantic Router** — 임베딩 기반 의도 분류로 도메인별 모델 자동 선택 (예: code → Qwen3-Coder, reasoning → DeepSeek-V3)
 5. **mTLS / rate limiting / retry** — kgateway 수준의 보안·안정성 정책
@@ -56,9 +56,11 @@ kubectl apply -f gateway.yaml
 kubectl apply -f httproute-llm.yaml
 
 # Bifrost 배포 (L2)
-helm install bifrost maximhq/bifrost \
+helm repo add bifrost https://maximhq.github.io/bifrost/helm-charts
+helm install bifrost bifrost/bifrost \
   --namespace inference \
-  --version 1.0.0 \
+  --version 2.1.44 \
+  --set image.tag=v2.3.0 \
   -f bifrost-values.yaml
 
 # 라우팅 확인

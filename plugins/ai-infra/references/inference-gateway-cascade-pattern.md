@@ -30,7 +30,7 @@ LLM 플랫폼은 다양한 모델(경량 / 중형 / 대형) 과 다수 프로바
 | 계층 | 역할 | 구현체 |
 |------|------|--------|
 | L1 Ingress | 네트워크 트래픽, TLS, mTLS, Rate Limit | kgateway v2.0+ (Kubernetes Gateway API) |
-| L2-A Inference | 모델 선택, Cascade, Semantic Cache | Bifrost v1.x / LiteLLM v1.60+ |
+| L2-A Inference | 모델 선택, Cascade, Semantic Cache | Bifrost v2.x / LiteLLM v1.60+ |
 | L2-B Data Plane | MCP/A2A 세션, Tool 라우팅 | agentgateway |
 
 관심사 분리의 핵심 원칙:
