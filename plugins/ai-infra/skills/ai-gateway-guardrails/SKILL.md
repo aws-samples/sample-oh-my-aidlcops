@@ -49,6 +49,9 @@ User → Input Guard → Gateway Policy → Tool Allow-list → LLM → Output G
 ### Step 3. Bedrock Guardrails 연동 (매니지드)
 ```yaml
 # Bifrost 설정
+# Note: Bifrost guardrails, including the AWS Bedrock Guardrails integration, are a
+# Bifrost Enterprise feature, not part of the open-source gateway:
+# https://docs.getbifrost.ai/enterprise/guardrails
 providers:
   bedrock:
     region: ap-northeast-2
