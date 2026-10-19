@@ -12,7 +12,7 @@ tools: Read,Write,Edit,Bash,Grep,Glob,mcp__eks,mcp__aws-documentation,mcp__prome
 ## Core Capabilities
 
 1. **kgateway v2.0+ 설치** — GatewayClass, Gateway, HTTPRoute 리소스 생성 (Kubernetes Gateway API 표준)
-2. **Bifrost v1.x / LiteLLM v1.60+ 배포** — 100+ LLM 프로바이더 통합 L2 게이트웨이
+2. **Bifrost v2.x / LiteLLM v1.60+ 배포** — 100+ LLM 프로바이더 통합 L2 게이트웨이
 3. **Cascade Routing** — 요청 복잡도 분석 후 Haiku → Sonnet → Opus 순으로 fallback, 비용 최적화
 4. **Semantic Router** — 임베딩 기반 의도 분류로 도메인별 모델 자동 선택 (예: code → Qwen3-Coder, reasoning → DeepSeek-V3)
 5. **mTLS / rate limiting / retry** — kgateway 수준의 보안·안정성 정책
@@ -22,7 +22,7 @@ tools: Read,Write,Edit,Bash,Grep,Glob,mcp__eks,mcp__aws-documentation,mcp__prome
 
 ```
 Q1. 여러 LLM 프로바이더를 통합해야 하는가?
-  YES → Bifrost (Rust 기반, 50x faster than LiteLLM) 우선, Python 플러그인 필요 시 LiteLLM
+  YES → Bifrost (Go-based) 우선, Python 플러그인 필요 시 LiteLLM
   NO  → kgateway 단독 + vLLM OpenAI 호환 엔드포인트 직결
 
 Q2. 요청 복잡도가 다양하게 분포하는가?
@@ -56,9 +56,11 @@ kubectl apply -f gateway.yaml
 kubectl apply -f httproute-llm.yaml
 
 # Bifrost 배포 (L2)
-helm install bifrost maximhq/bifrost \
+helm repo add bifrost https://maximhq.github.io/bifrost/helm-charts
+helm install bifrost bifrost/bifrost \
   --namespace inference \
-  --version 1.0.0 \
+  --version 2.1.44 \
+  --set image.tag=v2.3.0 \
   -f bifrost-values.yaml
 
 # 라우팅 확인
@@ -111,6 +113,6 @@ spec:
 - Inference Gateway 배포 가이드 (community resource) — Helm, HTTPRoute, OTel
 - [kgateway 공식 문서](https://kgateway.dev/docs/) — GatewayClass / HTTPRoute 레퍼런스
 - [Kubernetes Gateway API](https://gateway-api.sigs.k8s.io/) — 표준 스펙
-- [Bifrost GitHub](https://github.com/maximhq/bifrost) — Rust 기반 LLM Gateway
+- [Bifrost GitHub](https://github.com/maximhq/bifrost) — Go-based LLM Gateway
 - [LiteLLM 공식 문서](https://docs.litellm.ai/) — 100+ provider 지원
 - 플러그인 내부: `references/inference-gateway-cascade-pattern.md`
